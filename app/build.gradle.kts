@@ -40,7 +40,13 @@ android {
 }
 
 dependencies {
-
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    val nav_version = "2.8.9"
+    // Jetpack Compose integration
+    implementation(libs.androidx.navigation.compose)
+    implementation("org.mozilla:rhino:1.7R4")
+    implementation("androidx.compose.runtime:runtime-livedata:1.7.8")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
