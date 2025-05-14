@@ -19,7 +19,7 @@ import com.example.synhub.tasks.views.Tasks
 fun Navigator(){
     val rememberScreen = rememberNavController()
     NavHost(navController = rememberScreen,
-        startDestination = "Request"){
+        startDestination = "RequestsAndValidations"){
         composable("Login") { Login(rememberScreen) }
         composable("Home") { Home(rememberScreen) }
         composable("AnalyticsAndReports") { AnalyticsAndReports(rememberScreen) }

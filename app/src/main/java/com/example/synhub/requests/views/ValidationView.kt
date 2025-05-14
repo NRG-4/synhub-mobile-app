@@ -43,8 +43,6 @@ import com.example.synhub.R
 fun ValidationView(nav: NavHostController) {
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .fillMaxHeight()
             .padding(30.dp)
             .padding(top = 90.dp),
     ) {
