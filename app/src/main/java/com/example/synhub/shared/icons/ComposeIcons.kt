@@ -781,3 +781,98 @@ public val logoutSVG: ImageVector
         }.build()
         return _logoutSVG!!
     }
+
+private var _keyboardSVG: ImageVector? = null
+public val keyboardSVG: ImageVector
+    get() {
+        if (_keyboardSVG != null) {
+            return _keyboardSVG!!
+        }
+        _keyboardSVG = ImageVector.Builder(
+            name = "Keyboard_alt",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(120f, 840f)
+                quadToRelative(-33f, 0f, -56.5f, -23.5f)
+                reflectiveQuadTo(40f, 760f)
+                verticalLineToRelative(-520f)
+                quadToRelative(0f, -33f, 23.5f, -56.5f)
+                reflectiveQuadTo(120f, 160f)
+                horizontalLineToRelative(720f)
+                quadToRelative(33f, 0f, 56.5f, 23.5f)
+                reflectiveQuadTo(920f, 240f)
+                verticalLineToRelative(520f)
+                quadToRelative(0f, 33f, -23.5f, 56.5f)
+                reflectiveQuadTo(840f, 840f)
+                close()
+                moveToRelative(0f, -80f)
+                horizontalLineToRelative(720f)
+                verticalLineToRelative(-520f)
+                horizontalLineTo(120f)
+                close()
+                moveToRelative(200f, -80f)
+                horizontalLineToRelative(320f)
+                verticalLineToRelative(-40f)
+                horizontalLineTo(320f)
+                close()
+                moveTo(200f, 560f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(160f, 0f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(160f, 0f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(160f, 0f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveTo(200f, 400f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(160f, 0f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(160f, 0f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(160f, 0f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveTo(120f, 760f)
+                verticalLineToRelative(-520f)
+                close()
+            }
+        }.build()
+        return _keyboardSVG!!
+    }

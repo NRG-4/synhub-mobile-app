@@ -69,7 +69,7 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
-            .padding(top = 80.dp),
+            .padding(top = 90.dp),
     ){
         Text(text = "hola")
     }
