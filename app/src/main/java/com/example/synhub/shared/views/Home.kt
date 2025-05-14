@@ -13,9 +13,11 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.synhub.shared.components.SlideMenu
+import com.example.synhub.shared.components.TopBar
 import kotlinx.coroutines.launch
 
 @Composable
@@ -36,6 +38,22 @@ fun Home(nav: NavHostController){
     ) {
         Scaffold (
             modifier = Modifier.fillMaxSize(),
+            containerColor = Color(0xFFFFFFFF),
+            topBar = {
+                TopBar(
+                    onOpenDrawer = {
+                        scope.launch {
+                            slideMenuState.apply {
+                                if(isClosed)
+                                    open()
+                                else
+                                    close()
+                            }
+                        }
+                    },
+                    "Principal"
+                )
+            },
         ){
                 innerPadding -> HomeScreen(modifier = Modifier.padding(innerPadding),
             nav)
@@ -49,7 +67,7 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
-            .padding(top = 30.dp),
+            .padding(top = 80.dp),
     ){
         Text(text = "hola")
     }
