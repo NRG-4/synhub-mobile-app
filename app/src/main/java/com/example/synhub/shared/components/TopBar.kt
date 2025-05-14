@@ -10,12 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import kotlinx.coroutines.Job
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    onOpenDrawer: (() -> Job)?, title: String, icon: ImageVector
+    function: () -> Unit, title: String, icon: ImageVector
 ){
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -29,9 +28,7 @@ fun TopBar(
         },
         navigationIcon = {
             IconButton( onClick = {
-                if (onOpenDrawer != null) {
-                    onOpenDrawer()
-                }
+                function()
             }) {
                 Icon(
                     imageVector = icon,

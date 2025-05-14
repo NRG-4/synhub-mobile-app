@@ -19,7 +19,9 @@ fun Group(nav: NavHostController) {
         containerColor = Color(0xFFFFFFFF),
         topBar = {
             TopBar(
-                null,
+                function = {
+                    nav.popBackStack()
+                },
                 "Grupos",
                 Icons.AutoMirrored.Filled.ArrowBack
             )

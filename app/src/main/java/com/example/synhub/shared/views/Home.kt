@@ -42,7 +42,7 @@ fun Home(nav: NavHostController){
             containerColor = Color(0xFFFFFFFF),
             topBar = {
                 TopBar(
-                    onOpenDrawer = {
+                    function = {
                         scope.launch {
                             slideMenuState.apply {
                                 if(isClosed)
