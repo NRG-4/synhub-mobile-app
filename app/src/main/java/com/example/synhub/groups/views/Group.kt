@@ -50,7 +50,7 @@ data class Integrante(
 )
 
 // Lista de ejemplo
-val integrantes = listOf(
+public val integrantes = listOf(
     Integrante(
         nombre = "Ana",
         tarea = Tarea(
