@@ -9,7 +9,9 @@ import com.example.synhub.groups.views.CreateGroup
 import com.example.synhub.groups.views.Group
 import com.example.synhub.groups.views.InviteMembers
 import com.example.synhub.groups.views.Members
-import com.example.synhub.requests.views.RequestsAndValidations
+import com.example.synhub.requests.views.RequestAndValidationList
+import com.example.synhub.requests.views.RequestView
+import com.example.synhub.requests.views.ValidationView
 import com.example.synhub.shared.views.Home
 import com.example.synhub.shared.views.Login
 import com.example.synhub.shared.views.Register
@@ -27,7 +29,12 @@ fun Navigator(){
         composable("AnalyticsAndReports") { AnalyticsAndReports(rememberScreen) }
         composable("Group") { Group(rememberScreen) }
         composable("Members") { Members(rememberScreen) }
-        composable("RequestsAndValidations") { RequestsAndValidations(rememberScreen) }
+
+        // Request and validation screens
+        composable("RequestsAndValidations") { RequestAndValidationList(rememberScreen) }
+        composable("Request") { RequestView(rememberScreen) }
+        composable("Validation") { ValidationView(rememberScreen) }
+
         composable("Tasks") { Tasks(rememberScreen) }
         composable("Register") { Register(rememberScreen) }
         composable("Group/CreateGroup") { CreateGroup(rememberScreen) }
