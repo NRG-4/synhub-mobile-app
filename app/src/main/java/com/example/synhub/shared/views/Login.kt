@@ -84,6 +84,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
 
         OutlinedTextField(
             value = txtUser,
+            singleLine = true,
             modifier = Modifier,
             label = { Text(text = "Insert User")},
             placeholder = { Text(text = "User")},
@@ -107,6 +108,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
 
         OutlinedTextField(
             value = txtPass,
+            singleLine = true,
             modifier = Modifier,
             label = { Text(text = "Insert Password")},
             placeholder = { Text(text = "password")},
@@ -118,10 +120,10 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Password
             ),
             colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xF3F3F3),
+                focusedContainerColor = Color(0xFFF3F3F3),
                 unfocusedContainerColor = Color.White,
                 cursorColor = Color.Cyan
             ),
@@ -149,7 +151,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier,
             onClick = {
-                nav.navigate("Home")
+                nav.navigate("Register")
             }
         ) {
             Text(

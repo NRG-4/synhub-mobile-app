@@ -134,3 +134,215 @@ public val lockSVG: ImageVector
         }.build()
         return _lockSVG!!
     }
+
+private var _abcSVG: ImageVector? = null
+public val abcSVG: ImageVector
+    get() {
+        if (_abcSVG != null) {
+            return _abcSVG!!
+        }
+        _abcSVG = ImageVector.Builder(
+            name = "Abc",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(680f, 600f)
+                quadToRelative(-17f, 0f, -28.5f, -11.5f)
+                reflectiveQuadTo(640f, 560f)
+                verticalLineToRelative(-160f)
+                quadToRelative(0f, -17f, 11.5f, -28.5f)
+                reflectiveQuadTo(680f, 360f)
+                horizontalLineToRelative(120f)
+                quadToRelative(17f, 0f, 28.5f, 11.5f)
+                reflectiveQuadTo(840f, 400f)
+                verticalLineToRelative(40f)
+                horizontalLineToRelative(-60f)
+                verticalLineToRelative(-20f)
+                horizontalLineToRelative(-80f)
+                verticalLineToRelative(120f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-20f)
+                horizontalLineToRelative(60f)
+                verticalLineToRelative(40f)
+                quadToRelative(0f, 17f, -11.5f, 28.5f)
+                reflectiveQuadTo(800f, 600f)
+                close()
+                moveToRelative(-300f, 0f)
+                verticalLineToRelative(-240f)
+                horizontalLineToRelative(160f)
+                quadToRelative(17f, 0f, 28.5f, 11.5f)
+                reflectiveQuadTo(580f, 400f)
+                verticalLineToRelative(40f)
+                quadToRelative(0f, 17f, -11.5f, 28.5f)
+                reflectiveQuadTo(540f, 480f)
+                quadToRelative(17f, 0f, 28.5f, 11.5f)
+                reflectiveQuadTo(580f, 520f)
+                verticalLineToRelative(40f)
+                quadToRelative(0f, 17f, -11.5f, 28.5f)
+                reflectiveQuadTo(540f, 600f)
+                close()
+                moveToRelative(60f, -150f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-30f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(0f, 90f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-30f)
+                horizontalLineToRelative(-80f)
+                close()
+                moveToRelative(-320f, 60f)
+                verticalLineToRelative(-200f)
+                quadToRelative(0f, -17f, 11.5f, -28.5f)
+                reflectiveQuadTo(160f, 360f)
+                horizontalLineToRelative(120f)
+                quadToRelative(17f, 0f, 28.5f, 11.5f)
+                reflectiveQuadTo(320f, 400f)
+                verticalLineToRelative(200f)
+                horizontalLineToRelative(-60f)
+                verticalLineToRelative(-60f)
+                horizontalLineToRelative(-80f)
+                verticalLineToRelative(60f)
+                close()
+                moveToRelative(60f, -120f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(-60f)
+                horizontalLineToRelative(-80f)
+                close()
+            }
+        }.build()
+        return _abcSVG!!
+    }
+
+private var _mailSVG: ImageVector? = null
+public val mailSVG: ImageVector
+    get() {
+        if (_mailSVG != null) {
+            return _mailSVG!!
+        }
+        _mailSVG = ImageVector.Builder(
+            name = "Mail",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(160f, 800f)
+                quadToRelative(-33f, 0f, -56.5f, -23.5f)
+                reflectiveQuadTo(80f, 720f)
+                verticalLineToRelative(-480f)
+                quadToRelative(0f, -33f, 23.5f, -56.5f)
+                reflectiveQuadTo(160f, 160f)
+                horizontalLineToRelative(640f)
+                quadToRelative(33f, 0f, 56.5f, 23.5f)
+                reflectiveQuadTo(880f, 240f)
+                verticalLineToRelative(480f)
+                quadToRelative(0f, 33f, -23.5f, 56.5f)
+                reflectiveQuadTo(800f, 800f)
+                close()
+                moveToRelative(320f, -280f)
+                lineTo(160f, 320f)
+                verticalLineToRelative(400f)
+                horizontalLineToRelative(640f)
+                verticalLineToRelative(-400f)
+                close()
+                moveToRelative(0f, -80f)
+                lineToRelative(320f, -200f)
+                horizontalLineTo(160f)
+                close()
+                moveTo(160f, 320f)
+                verticalLineToRelative(-80f)
+                verticalLineToRelative(480f)
+                close()
+            }
+        }.build()
+        return _mailSVG!!
+    }
+
+private var _linkSVG: ImageVector? = null
+val linkSVG: ImageVector
+    get() {
+        if (_linkSVG != null) {
+            return _linkSVG!!
+        }
+        _linkSVG = ImageVector.Builder(
+            name = "Link",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(440f, 680f)
+                horizontalLineTo(280f)
+                quadToRelative(-83f, 0f, -141.5f, -58.5f)
+                reflectiveQuadTo(80f, 480f)
+                reflectiveQuadToRelative(58.5f, -141.5f)
+                reflectiveQuadTo(280f, 280f)
+                horizontalLineToRelative(160f)
+                verticalLineToRelative(80f)
+                horizontalLineTo(280f)
+                quadToRelative(-50f, 0f, -85f, 35f)
+                reflectiveQuadToRelative(-35f, 85f)
+                reflectiveQuadToRelative(35f, 85f)
+                reflectiveQuadToRelative(85f, 35f)
+                horizontalLineToRelative(160f)
+                close()
+                moveTo(320f, 520f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(320f)
+                verticalLineToRelative(80f)
+                close()
+                moveToRelative(200f, 160f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(160f)
+                quadToRelative(50f, 0f, 85f, -35f)
+                reflectiveQuadToRelative(35f, -85f)
+                reflectiveQuadToRelative(-35f, -85f)
+                reflectiveQuadToRelative(-85f, -35f)
+                horizontalLineTo(520f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(160f)
+                quadToRelative(83f, 0f, 141.5f, 58.5f)
+                reflectiveQuadTo(880f, 480f)
+                reflectiveQuadToRelative(-58.5f, 141.5f)
+                reflectiveQuadTo(680f, 680f)
+                close()
+            }
+        }.build()
+        return _linkSVG!!
+    }
