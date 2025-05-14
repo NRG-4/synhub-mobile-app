@@ -3,6 +3,8 @@ package com.example.synhub.shared.views
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -11,7 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -41,7 +42,7 @@ fun Home(nav: NavHostController){
             containerColor = Color(0xFFFFFFFF),
             topBar = {
                 TopBar(
-                    onOpenDrawer = {
+                    function = {
                         scope.launch {
                             slideMenuState.apply {
                                 if(isClosed)
@@ -51,9 +52,10 @@ fun Home(nav: NavHostController){
                             }
                         }
                     },
-                    "Principal"
+                    "Principal",
+                    Icons.Default.Menu
                 )
-            },
+            }
         ){
                 innerPadding -> HomeScreen(modifier = Modifier.padding(innerPadding),
             nav)
@@ -67,7 +69,7 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)
-            .padding(top = 80.dp),
+            .padding(top = 90.dp),
     ){
         Text(text = "hola")
     }
