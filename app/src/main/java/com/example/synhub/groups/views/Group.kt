@@ -50,7 +50,7 @@ fun Group(nav: NavHostController) {
 
 @Composable
 fun GroupScreen(modifier: Modifier, nav: NavHostController) {
-    var group = false
+    var group = true
     var members = false
     Column (
         modifier = Modifier
@@ -92,7 +92,40 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                     }
                 }
             }
-
+        }else{
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 40.dp)
+                .padding(top = 10.dp)
+                .background(Color(0xFF1A4E85),
+                    shape = RoundedCornerShape(10.dp)),
+                contentAlignment = Alignment.Center){
+                Column(
+                    modifier = Modifier
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Tu grupo no tiene miembros",
+                        fontSize = 25.sp,
+                        color = Color(0xFFFFFFFF)
+                    )
+                    ElevatedButton(
+                        colors = ButtonDefaults.buttonColors(Color(0xFF4A90E2)),
+                        shape = RoundedCornerShape(10.dp),
+                        onClick = {
+                            nav.navigate("Group/Invite")
+                        }
+                    ) {
+                        Text(
+                            text = "Invitar Miembros", fontSize = 20.sp,
+                            color = Color.White, fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
         }
+
     }
 }

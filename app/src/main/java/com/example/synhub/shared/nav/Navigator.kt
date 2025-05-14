@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.synhub.analytics.views.AnalyticsAndReports
 import com.example.synhub.groups.views.CreateGroup
 import com.example.synhub.groups.views.Group
+import com.example.synhub.groups.views.InviteMembers
 import com.example.synhub.groups.views.Members
 import com.example.synhub.requests.views.RequestsAndValidations
 import com.example.synhub.shared.views.Home
@@ -28,5 +29,6 @@ fun Navigator(){
         composable("Tasks") { Tasks(rememberScreen) }
         composable("Register") { Register(rememberScreen) }
         composable("Group/CreateGroup") { CreateGroup(rememberScreen) }
+        composable("Group/Invite") { InviteMembers(rememberScreen) }
     }
 }
