@@ -42,6 +42,7 @@ import com.example.synhub.groups.views.integrantes
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.abcSVG
 import com.example.synhub.shared.icons.editSVG
+import com.example.synhub.shared.icons.logoutSVG
 import com.example.synhub.shared.icons.trashSVG
 
 
@@ -156,7 +157,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-                                                nav.navigate("")
+                                                nav.navigate("Tasks/Edit")
                                             }
                                         ) {
                                             Icon(
@@ -166,7 +167,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
-                                                text = "Editar", fontSize = 20.sp,
+                                                text = "Editar", fontSize = 15.sp,
                                                 color = Color.White, fontWeight = FontWeight.Bold
                                             )
 
@@ -176,7 +177,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-                                                nav.navigate("")
+
                                             }
                                         ) {
                                             Icon(
@@ -186,7 +187,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                             )
                                             Spacer(modifier = Modifier.width(8.dp))
                                             Text(
-                                                text = "Borrar", fontSize = 20.sp,
+                                                text = "Borrar", fontSize = 15.sp,
                                                 color = Color.White, fontWeight = FontWeight.Bold
                                             )
                                         }
@@ -195,6 +196,28 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                             }
                         }
                         )
+                }
+
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                ElevatedButton(
+                    colors = ButtonDefaults.buttonColors(Color(0xFF1A4E85)),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier,
+                    onClick = {
+                        nav.navigate("Tasks/Create")
+                    }
+                ) {
+                    Text(
+                        text = "Crear Tarea", fontSize = 20.sp,
+                        color = Color.White, fontWeight = FontWeight.Bold
+                    )
+
                 }
             }
         }

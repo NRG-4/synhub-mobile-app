@@ -93,8 +93,8 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
         OutlinedTextField(
             value = txtDescriptionGroup,
             modifier = Modifier,
-            label = { Text(text = "Insert Password")},
-            placeholder = { Text(text = "password")},
+            label = { Text(text = "Descripción del grupo")},
+            placeholder = { Text(text = "Descripción")},
             leadingIcon = {
                 Icon(
                     imageVector = keyboardSVG,
