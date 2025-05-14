@@ -1,9 +1,12 @@
-package com.example.synhub.groups.views
+package com.example.synhub.tasks.views
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -23,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -31,11 +35,15 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.abcSVG
+import com.example.synhub.shared.icons.calendarSVG
 import com.example.synhub.shared.icons.keyboardSVG
 import com.example.synhub.shared.icons.linkSVG
+import com.example.synhub.shared.icons.logoutSVG
+import com.example.synhub.shared.icons.personSVG
+import com.example.synhub.shared.icons.saveSVG
 
 @Composable
-fun CreateGroup(nav: NavHostController) {
+fun EditTask(nav: NavHostController) {
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -44,19 +52,24 @@ fun CreateGroup(nav: NavHostController) {
                 function = {
                     nav.popBackStack()
                 },
-                "Crear Grupo",
+                "Editar Tarea",
                 Icons.AutoMirrored.Filled.ArrowBack
             )
         }
     ){
-        innerPadding -> CreateGroupScreen(modifier = Modifier.padding(innerPadding), nav)
+            innerPadding -> EditTaskScreen(modifier = Modifier.padding(innerPadding),
+        nav)
     }
 }
+
 @Composable
-fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
-    var txtNameGroup by remember { mutableStateOf("") }
-    var txtDescriptionGroup by remember { mutableStateOf("") }
-    var txtUrlPfp by remember { mutableStateOf("") }
+fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
+) {
+    var txtTitle by remember { mutableStateOf("") }
+    var txtDescription by remember { mutableStateOf("") }
+    var txtMember by remember { mutableStateOf("") }
+    var txtDueDate by remember { mutableStateOf("") }
+
 
     Column (
         modifier = Modifier
@@ -67,11 +80,11 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         OutlinedTextField(
-            value = txtNameGroup,
+            value = txtTitle,
             singleLine = true,
             modifier = Modifier,
-            label = { Text(text = "Nombre de grupo")},
-            placeholder = { Text(text = "Nombre de grupo")},
+            label = { Text(text = "Titulo de la tarea") },
+            placeholder = { Text(text = "Titulo") },
             leadingIcon = {
                 Icon(
                     imageVector = abcSVG,
@@ -87,14 +100,14 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
                 unfocusedContainerColor = Color.White,
                 cursorColor = Color.Cyan
             ),
-            onValueChange = {txtNameGroup=it}
+            onValueChange = {txtTitle=it}
         )
 
         OutlinedTextField(
-            value = txtDescriptionGroup,
+            value = txtDescription,
             modifier = Modifier,
-            label = { Text(text = "Descripción del grupo")},
-            placeholder = { Text(text = "Descripción")},
+            label = { Text(text = "Descripción de la tarea") },
+            placeholder = { Text(text = "Descripción") },
             leadingIcon = {
                 Icon(
                     imageVector = keyboardSVG,
@@ -103,56 +116,105 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password
+                keyboardType = KeyboardType.Email
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
                 unfocusedContainerColor = Color.White,
                 cursorColor = Color.Cyan
             ),
-            visualTransformation = PasswordVisualTransformation(),
-            onValueChange = {txtDescriptionGroup=it}
+            onValueChange = {txtDescription=it}
         )
 
         OutlinedTextField(
-            value = txtUrlPfp,
+            value = txtMember,
             singleLine = true,
             modifier = Modifier,
-            label = { Text(text = "Url de la foto de perfil")},
-            placeholder = { Text(text = "Url de la foto de perfil")},
+            label = { Text(text = "Integrante") },
+            placeholder = { Text(text = "Integrante") },
             leadingIcon = {
                 Icon(
-                    imageVector = linkSVG,
+                    imageVector = personSVG,
                     tint = Color.Gray,
                     contentDescription = ""
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password
+                keyboardType = KeyboardType.Email
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
                 unfocusedContainerColor = Color.White,
                 cursorColor = Color.Cyan
             ),
-            visualTransformation = PasswordVisualTransformation(),
-            onValueChange = {txtUrlPfp=it}
+            onValueChange = {txtMember=it}
         )
 
-        ElevatedButton(
-            colors = ButtonDefaults.buttonColors(Color(0xFF4A90E2)),
-            shape = RoundedCornerShape(10.dp),
+        OutlinedTextField(
+            value = txtDueDate,
+            singleLine = true,
             modifier = Modifier,
-            onClick = {
-                nav.navigate("Group")
+            label = { Text(text = "Fecha de entrega") },
+            placeholder = { Text(text = "Fecha") },
+            leadingIcon = {
+                Icon(
+                    imageVector = calendarSVG,
+                    tint = Color.Gray,
+                    contentDescription = ""
+                )
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email
+            ),
+            colors = TextFieldDefaults.colors(
+                focusedContainerColor = Color(0xFFF3F3F3),
+                unfocusedContainerColor = Color.White,
+                cursorColor = Color.Cyan
+            ),
+            onValueChange = {txtDueDate=it}
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(20.dp)){
+            ElevatedButton(
+                colors = ButtonDefaults.buttonColors(Color(0xFF4CAF50)),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier,
+                onClick = {
+                    nav.popBackStack()
+                }
+            ) {
+                Icon(
+                    painter = rememberVectorPainter(image = saveSVG),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Guardar", fontSize = 20.sp,
+                    color = Color.White, fontWeight = FontWeight.Bold
+                )
+
             }
-        ) {
-            Text(
-                text = "Crear Grupo", fontSize = 20.sp,
-                color = Color.White, fontWeight = FontWeight.Bold
-            )
+            ElevatedButton(
+                colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier,
+                onClick = {
+                    nav.popBackStack()
+                }
+            ) {
+                Icon(
+                    painter = rememberVectorPainter(image = logoutSVG),
+                    contentDescription = null,
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Cancelar", fontSize = 20.sp,
+                    color = Color.White, fontWeight = FontWeight.Bold
+                )
 
+            }
         }
-
     }
 }

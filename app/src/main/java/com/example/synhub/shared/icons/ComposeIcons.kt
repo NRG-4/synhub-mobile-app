@@ -876,3 +876,360 @@ public val keyboardSVG: ImageVector
         }.build()
         return _keyboardSVG!!
     }
+
+private var _trashSVG: ImageVector? = null
+public val trashSVG: ImageVector
+    get() {
+        if (_trashSVG != null) {
+            return _trashSVG!!
+        }
+        _trashSVG = ImageVector.Builder(
+            name = "Trash",
+            defaultWidth = 16.dp,
+            defaultHeight = 16.dp,
+            viewportWidth = 16f,
+            viewportHeight = 16f
+        ).apply {
+            path(
+                fill = SolidColor(Color(0xFF000000)),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(5.5f, 5.5f)
+                arcTo(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 6f, 6f)
+                verticalLineToRelative(6f)
+                arcToRelative(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, -1f, 0f)
+                verticalLineTo(6f)
+                arcToRelative(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 0.5f, -0.5f)
+                moveToRelative(2.5f, 0f)
+                arcToRelative(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 0.5f, 0.5f)
+                verticalLineToRelative(6f)
+                arcToRelative(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, -1f, 0f)
+                verticalLineTo(6f)
+                arcToRelative(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = true, 0.5f, -0.5f)
+                moveToRelative(3f, 0.5f)
+                arcToRelative(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = false, -1f, 0f)
+                verticalLineToRelative(6f)
+                arcToRelative(0.5f, 0.5f, 0f, isMoreThanHalf = false, isPositiveArc = false, 1f, 0f)
+                close()
+            }
+            path(
+                fill = SolidColor(Color(0xFF000000)),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(14.5f, 3f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = true, -1f, 1f)
+                horizontalLineTo(13f)
+                verticalLineToRelative(9f)
+                arcToRelative(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, -2f, 2f)
+                horizontalLineTo(5f)
+                arcToRelative(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, -2f, -2f)
+                verticalLineTo(4f)
+                horizontalLineToRelative(-0.5f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = true, -1f, -1f)
+                verticalLineTo(2f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = true, 1f, -1f)
+                horizontalLineTo(6f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = true, 1f, -1f)
+                horizontalLineToRelative(2f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = true, 1f, 1f)
+                horizontalLineToRelative(3.5f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = true, 1f, 1f)
+                close()
+                moveTo(4.118f, 4f)
+                lineTo(4f, 4.059f)
+                verticalLineTo(13f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = false, 1f, 1f)
+                horizontalLineToRelative(6f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = false, 1f, -1f)
+                verticalLineTo(4.059f)
+                lineTo(11.882f, 4f)
+                close()
+                moveTo(2.5f, 3f)
+                horizontalLineToRelative(11f)
+                verticalLineTo(2f)
+                horizontalLineToRelative(-11f)
+                close()
+            }
+        }.build()
+        return _trashSVG!!
+    }
+
+private var _editSVG: ImageVector? = null
+public val editSVG: ImageVector
+    get() {
+        if (_editSVG != null) {
+            return _editSVG!!
+        }
+        _editSVG = ImageVector.Builder(
+            name = "Edit_square",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(200f, 840f)
+                quadToRelative(-33f, 0f, -56.5f, -23.5f)
+                reflectiveQuadTo(120f, 760f)
+                verticalLineToRelative(-560f)
+                quadToRelative(0f, -33f, 23.5f, -56.5f)
+                reflectiveQuadTo(200f, 120f)
+                horizontalLineToRelative(357f)
+                lineToRelative(-80f, 80f)
+                horizontalLineTo(200f)
+                verticalLineToRelative(560f)
+                horizontalLineToRelative(560f)
+                verticalLineToRelative(-278f)
+                lineToRelative(80f, -80f)
+                verticalLineToRelative(358f)
+                quadToRelative(0f, 33f, -23.5f, 56.5f)
+                reflectiveQuadTo(760f, 840f)
+                close()
+                moveToRelative(160f, -240f)
+                verticalLineToRelative(-170f)
+                lineToRelative(367f, -367f)
+                quadToRelative(12f, -12f, 27f, -18f)
+                reflectiveQuadToRelative(30f, -6f)
+                quadToRelative(16f, 0f, 30.5f, 6f)
+                reflectiveQuadToRelative(26.5f, 18f)
+                lineToRelative(56f, 57f)
+                quadToRelative(11f, 12f, 17f, 26.5f)
+                reflectiveQuadToRelative(6f, 29.5f)
+                reflectiveQuadToRelative(-5.5f, 29.5f)
+                reflectiveQuadTo(897f, 232f)
+                lineTo(530f, 600f)
+                close()
+                moveToRelative(481f, -424f)
+                lineToRelative(-56f, -56f)
+                close()
+                moveTo(440f, 520f)
+                horizontalLineToRelative(56f)
+                lineToRelative(232f, -232f)
+                lineToRelative(-28f, -28f)
+                lineToRelative(-29f, -28f)
+                lineToRelative(-231f, 231f)
+                close()
+                moveToRelative(260f, -260f)
+                lineToRelative(-29f, -28f)
+                close()
+                lineToRelative(28f, 28f)
+                close()
+            }
+        }.build()
+        return _editSVG!!
+    }
+
+private var _calendarSVG: ImageVector? = null
+public val calendarSVG: ImageVector
+    get() {
+        if (_calendarSVG != null) {
+            return _calendarSVG!!
+        }
+        _calendarSVG = ImageVector.Builder(
+            name = "Calendar_month",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 960f,
+            viewportHeight = 960f
+        ).apply {
+            path(
+                fill = SolidColor(Color.Black),
+                fillAlpha = 1.0f,
+                stroke = null,
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 1.0f,
+                strokeLineCap = StrokeCap.Butt,
+                strokeLineJoin = StrokeJoin.Miter,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(200f, 880f)
+                quadToRelative(-33f, 0f, -56.5f, -23.5f)
+                reflectiveQuadTo(120f, 800f)
+                verticalLineToRelative(-560f)
+                quadToRelative(0f, -33f, 23.5f, -56.5f)
+                reflectiveQuadTo(200f, 160f)
+                horizontalLineToRelative(40f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(80f)
+                horizontalLineToRelative(320f)
+                verticalLineToRelative(-80f)
+                horizontalLineToRelative(80f)
+                verticalLineToRelative(80f)
+                horizontalLineToRelative(40f)
+                quadToRelative(33f, 0f, 56.5f, 23.5f)
+                reflectiveQuadTo(840f, 240f)
+                verticalLineToRelative(560f)
+                quadToRelative(0f, 33f, -23.5f, 56.5f)
+                reflectiveQuadTo(760f, 880f)
+                close()
+                moveToRelative(0f, -80f)
+                horizontalLineToRelative(560f)
+                verticalLineToRelative(-400f)
+                horizontalLineTo(200f)
+                close()
+                moveToRelative(0f, -480f)
+                horizontalLineToRelative(560f)
+                verticalLineToRelative(-80f)
+                horizontalLineTo(200f)
+                close()
+                moveToRelative(0f, 0f)
+                verticalLineToRelative(-80f)
+                close()
+                moveToRelative(280f, 240f)
+                quadToRelative(-17f, 0f, -28.5f, -11.5f)
+                reflectiveQuadTo(440f, 520f)
+                reflectiveQuadToRelative(11.5f, -28.5f)
+                reflectiveQuadTo(480f, 480f)
+                reflectiveQuadToRelative(28.5f, 11.5f)
+                reflectiveQuadTo(520f, 520f)
+                reflectiveQuadToRelative(-11.5f, 28.5f)
+                reflectiveQuadTo(480f, 560f)
+                moveToRelative(-160f, 0f)
+                quadToRelative(-17f, 0f, -28.5f, -11.5f)
+                reflectiveQuadTo(280f, 520f)
+                reflectiveQuadToRelative(11.5f, -28.5f)
+                reflectiveQuadTo(320f, 480f)
+                reflectiveQuadToRelative(28.5f, 11.5f)
+                reflectiveQuadTo(360f, 520f)
+                reflectiveQuadToRelative(-11.5f, 28.5f)
+                reflectiveQuadTo(320f, 560f)
+                moveToRelative(320f, 0f)
+                quadToRelative(-17f, 0f, -28.5f, -11.5f)
+                reflectiveQuadTo(600f, 520f)
+                reflectiveQuadToRelative(11.5f, -28.5f)
+                reflectiveQuadTo(640f, 480f)
+                reflectiveQuadToRelative(28.5f, 11.5f)
+                reflectiveQuadTo(680f, 520f)
+                reflectiveQuadToRelative(-11.5f, 28.5f)
+                reflectiveQuadTo(640f, 560f)
+                moveTo(480f, 720f)
+                quadToRelative(-17f, 0f, -28.5f, -11.5f)
+                reflectiveQuadTo(440f, 680f)
+                reflectiveQuadToRelative(11.5f, -28.5f)
+                reflectiveQuadTo(480f, 640f)
+                reflectiveQuadToRelative(28.5f, 11.5f)
+                reflectiveQuadTo(520f, 680f)
+                reflectiveQuadToRelative(-11.5f, 28.5f)
+                reflectiveQuadTo(480f, 720f)
+                moveToRelative(-160f, 0f)
+                quadToRelative(-17f, 0f, -28.5f, -11.5f)
+                reflectiveQuadTo(280f, 680f)
+                reflectiveQuadToRelative(11.5f, -28.5f)
+                reflectiveQuadTo(320f, 640f)
+                reflectiveQuadToRelative(28.5f, 11.5f)
+                reflectiveQuadTo(360f, 680f)
+                reflectiveQuadToRelative(-11.5f, 28.5f)
+                reflectiveQuadTo(320f, 720f)
+                moveToRelative(320f, 0f)
+                quadToRelative(-17f, 0f, -28.5f, -11.5f)
+                reflectiveQuadTo(600f, 680f)
+                reflectiveQuadToRelative(11.5f, -28.5f)
+                reflectiveQuadTo(640f, 640f)
+                reflectiveQuadToRelative(28.5f, 11.5f)
+                reflectiveQuadTo(680f, 680f)
+                reflectiveQuadToRelative(-11.5f, 28.5f)
+                reflectiveQuadTo(640f, 720f)
+            }
+        }.build()
+        return _calendarSVG!!
+    }
+
+private var _saveSVG: ImageVector? = null
+public val saveSVG: ImageVector
+    get() {
+        if (_saveSVG != null) {
+            return _saveSVG!!
+        }
+        _saveSVG = ImageVector.Builder(
+            name = "Save",
+            defaultWidth = 24.dp,
+            defaultHeight = 24.dp,
+            viewportWidth = 24f,
+            viewportHeight = 24f
+        ).apply {
+            path(
+                fill = null,
+                fillAlpha = 1.0f,
+                stroke = SolidColor(Color(0xFF000000)),
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(15.2f, 3f)
+                arcToRelative(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 1.4f, 0.6f)
+                lineToRelative(3.8f, 3.8f)
+                arcToRelative(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 0.6f, 1.4f)
+                verticalLineTo(19f)
+                arcToRelative(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, -2f, 2f)
+                horizontalLineTo(5f)
+                arcToRelative(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, -2f, -2f)
+                verticalLineTo(5f)
+                arcToRelative(2f, 2f, 0f, isMoreThanHalf = false, isPositiveArc = true, 2f, -2f)
+                close()
+            }
+            path(
+                fill = null,
+                fillAlpha = 1.0f,
+                stroke = SolidColor(Color(0xFF000000)),
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(17f, 21f)
+                verticalLineToRelative(-7f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = false, -1f, -1f)
+                horizontalLineTo(8f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = false, -1f, 1f)
+                verticalLineToRelative(7f)
+            }
+            path(
+                fill = null,
+                fillAlpha = 1.0f,
+                stroke = SolidColor(Color(0xFF000000)),
+                strokeAlpha = 1.0f,
+                strokeLineWidth = 2f,
+                strokeLineCap = StrokeCap.Round,
+                strokeLineJoin = StrokeJoin.Round,
+                strokeLineMiter = 1.0f,
+                pathFillType = PathFillType.NonZero
+            ) {
+                moveTo(7f, 3f)
+                verticalLineToRelative(4f)
+                arcToRelative(1f, 1f, 0f, isMoreThanHalf = false, isPositiveArc = false, 1f, 1f)
+                horizontalLineToRelative(7f)
+            }
+        }.build()
+        return _saveSVG!!
+    }

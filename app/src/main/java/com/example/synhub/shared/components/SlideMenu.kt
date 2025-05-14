@@ -113,7 +113,7 @@ fun SlideMenu(nav:NavHostController){
                 },
                 selected = false,
                 onClick = {
-                    nav.navigate("Members")
+                    nav.navigate("Group/Invite")
                 }
             )
             NavigationDrawerItem(
