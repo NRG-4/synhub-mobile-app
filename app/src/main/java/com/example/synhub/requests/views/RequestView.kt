@@ -4,6 +4,5 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 
 @Composable
-fun RequestsAndValidations(nav: NavHostController) {
-
+fun RequestView(nav: NavHostController) {
 }
