@@ -40,7 +40,10 @@ fun Navigator(){
         composable("Validation") { ValidationView(rememberScreen) }
 
         composable("Tasks") { Tasks(rememberScreen) }
-        composable("Tasks/Details") { TaskDetail(rememberScreen) }
+        composable("Tasks/Detail/{taskId}") { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getString("taskId")
+            TaskDetail(rememberScreen, taskId)
+        }
         composable("Register") { Register(rememberScreen) }
         composable("Group/CreateGroup") { CreateGroup(rememberScreen) }
         composable("Group/Invite") { InviteMembers(rememberScreen) }
