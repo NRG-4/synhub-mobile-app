@@ -1,5 +1,7 @@
 package com.example.synhub.shared.nav
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,8 +19,10 @@ import com.example.synhub.shared.views.Login
 import com.example.synhub.shared.views.Register
 import com.example.synhub.tasks.views.CreateTask
 import com.example.synhub.tasks.views.EditTask
+import com.example.synhub.tasks.views.TaskDetail
 import com.example.synhub.tasks.views.Tasks
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Navigator(){
     val rememberScreen = rememberNavController()
@@ -36,6 +40,7 @@ fun Navigator(){
         composable("Validation") { ValidationView(rememberScreen) }
 
         composable("Tasks") { Tasks(rememberScreen) }
+        composable("Tasks/Details") { TaskDetail(rememberScreen) }
         composable("Register") { Register(rememberScreen) }
         composable("Group/CreateGroup") { CreateGroup(rememberScreen) }
         composable("Group/Invite") { InviteMembers(rememberScreen) }
