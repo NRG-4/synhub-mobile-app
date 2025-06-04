@@ -48,6 +48,9 @@ fun Navigator(){
         composable("Group/CreateGroup") { CreateGroup(rememberScreen) }
         composable("Group/Invite") { InviteMembers(rememberScreen) }
         composable("Tasks/Create") { CreateTask(rememberScreen) }
-        composable("Tasks/Edit") { EditTask(rememberScreen) }
+        composable("Tasks/Edit/{taskId}") { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getString("taskId")
+            EditTask(rememberScreen, taskId)
+        }
     }
 }

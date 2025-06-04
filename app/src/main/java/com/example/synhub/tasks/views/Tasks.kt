@@ -20,10 +20,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -171,201 +173,205 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
 
     var tareas = true
 
-    Column (
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 120.dp)
-            .padding(horizontal = 20.dp)
-    ){
+    Box(modifier = Modifier.fillMaxSize()){
         if(!tareas)
         {
-            NoTasks(nav)
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 120.dp)
+                    .padding(horizontal = 20.dp)
+            ) {
+                NoTasks(nav)
+            }
+
         }else{
-            LazyColumn (
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ){
-                items(exampleTasks){
-                        task ->(
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(
-                                    elevation = 5.dp,
-                                    shape = RoundedCornerShape(10.dp),
-                                    clip = true
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 120.dp)
+                    .padding(horizontal = 20.dp)
+            ) {
+                LazyColumn (
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ){
+                    items(exampleTasks){
+                            task ->(
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFFF5F5F5)
                                 ),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = cardColors(
-                                containerColor = Color(0xFFF5F5F5)
-                            ),
-                            onClick = {
-                                nav.navigate("Tasks/Detail/${task.id}")
-                            }
-                        ){
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.padding(10.dp)
-                                    .background(Color(0xFFF5F5F5))
-                            ) {
-                                Row (
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ){
-                                    Box(
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .shadow(
-                                                elevation = 5.dp,
-                                                shape = CircleShape,
-                                                clip = true
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        AsyncImage(
-                                            model = task.member.urlImage,
-                                            contentDescription = null,
-                                            contentScale = ContentScale.Crop,
+                                onClick = {
+                                    nav.navigate("Tasks/Detail/${task.id}")
+                                }
+                            ){
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.padding(10.dp)
+                                        .background(Color(0xFFF5F5F5))
+                                ) {
+                                    Row (
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ){
+                                        Box(
                                             modifier = Modifier
-                                                .matchParentSize()
-                                                .clip(CircleShape)
+                                                .size(40.dp)
+                                                .shadow(
+                                                    elevation = 5.dp,
+                                                    shape = CircleShape,
+                                                    clip = true
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = task.member.urlImage,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .matchParentSize()
+                                                    .clip(CircleShape)
+                                            )
+                                        }
+                                        Text(
+                                            text = task.member.name + " " + task.member.surname,
+                                            fontSize = 20.sp,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
                                         )
                                     }
-                                    Text(
-                                        text = task.member.name + " " + task.member.surname,
-                                        fontSize = 20.sp,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
 
-                                Text(
-                                    text=task.title,
-                                    fontSize = 15.sp,
-                                    color = Color.Black
-                                )
-                                HorizontalDivider(color = Color.Black)
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .shadow(
-                                            elevation = 5.dp,
-                                            shape = RoundedCornerShape(10.dp),
-                                            clip = true
-                                        ),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = cardColors(
-                                        containerColor = Color(0xFFFFFFFF)
-                                    ),
-                                ){
-                                    Column (
+                                    Text(
+                                        text=task.title,
+                                        fontSize = 15.sp,
+                                        color = Color.Black
+                                    )
+                                    HorizontalDivider(color = Color.Black)
+                                    Card(
                                         modifier = Modifier
-                                            .padding(10.dp),
-                                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                                            .fillMaxWidth()
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = RoundedCornerShape(10.dp),
+                                                clip = true
+                                            ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = cardColors(
+                                            containerColor = Color(0xFFFFFFFF)
+                                        ),
+                                    ){
+                                        Column (
+                                            modifier = Modifier
+                                                .padding(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        ){
+                                            Text(
+                                                text=task.description,
+                                                fontSize = 15.sp,
+                                                color = Color.Black
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(10.dp)
+                                            .background(
+                                                color = getDividerColor(task.createdAt, task.dueDate),
+                                                shape = RoundedCornerShape(10.dp)
+                                            )
+                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
                                     ){
                                         Text(
-                                            text=task.description,
+                                            text = task.createdAt + " - " + task.dueDate,
                                             fontSize = 15.sp,
                                             color = Color.Black
                                         )
                                     }
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(10.dp)
-                                        .background(
-                                            color = getDividerColor(task.createdAt, task.dueDate),
-                                            shape = RoundedCornerShape(10.dp)
-                                        )
-                                )
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ){
-                                    Text(
-                                        text = task.createdAt + " - " + task.dueDate,
-                                        fontSize = 15.sp,
-                                        color = Color.Black
-                                    )
-                                }
-                                Column (
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ){
-                                    Row (
-                                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                    Column (
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
                                     ){
-                                        ElevatedButton(
-                                            colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
-                                            shape = RoundedCornerShape(10.dp),
-                                            modifier = Modifier,
-                                            onClick = {
-                                                nav.navigate("Tasks/Edit")
-                                            }
-                                        ) {
-                                            Icon(
-                                                painter = rememberVectorPainter(image = editSVG),
-                                                contentDescription = null,
-                                                tint = Color.White
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text(
-                                                text = "Editar", fontSize = 15.sp,
-                                                color = Color.White, fontWeight = FontWeight.Bold
-                                            )
-
-                                        }
-                                        ElevatedButton(
-                                            colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
-                                            shape = RoundedCornerShape(10.dp),
-                                            modifier = Modifier,
-                                            onClick = {
+                                        Row (
+                                            horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                        ){
+                                            ElevatedButton(
+                                                colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
+                                                shape = RoundedCornerShape(10.dp),
+                                                modifier = Modifier,
+                                                onClick = {
+                                                    nav.navigate("Tasks/Edit/${task.id}")
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = rememberVectorPainter(image = editSVG),
+                                                    contentDescription = null,
+                                                    tint = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Editar", fontSize = 15.sp,
+                                                    color = Color.White, fontWeight = FontWeight.Bold
+                                                )
 
                                             }
-                                        ) {
-                                            Icon(
-                                                painter = rememberVectorPainter(image = trashSVG),
-                                                contentDescription = null,
-                                                tint = Color.White
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
-                                            Text(
-                                                text = "Borrar", fontSize = 15.sp,
-                                                color = Color.White, fontWeight = FontWeight.Bold
-                                            )
+                                            ElevatedButton(
+                                                colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                                                shape = RoundedCornerShape(10.dp),
+                                                modifier = Modifier,
+                                                onClick = {
+
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = rememberVectorPainter(image = trashSVG),
+                                                    contentDescription = null,
+                                                    tint = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Borrar", fontSize = 15.sp,
+                                                    color = Color.White, fontWeight = FontWeight.Bold
+                                                )
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
-                        )
-                }
-
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Column (
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                ElevatedButton(
-                    colors = ButtonDefaults.buttonColors(Color(0xFF1A4E85)),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier,
-                    onClick = {
-                        nav.navigate("Tasks/Create")
+                            )
                     }
-                ) {
-                    Text(
-                        text = "Crear Tarea", fontSize = 20.sp,
-                        color = Color.White, fontWeight = FontWeight.Bold
-                    )
-
                 }
+            }
+            FloatingActionButton(
+                onClick = { nav.navigate("Tasks/Create") },
+                containerColor = Color(0xFF1A4E85),
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp)
+            ) {
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(40.dp)
+                )
             }
         }
     }
 }
+
 
 
 @RequiresApi(Build.VERSION_CODES.O)
