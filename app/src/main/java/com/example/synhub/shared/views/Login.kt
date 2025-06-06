@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,10 +32,13 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.synhub.R
 import com.example.synhub.shared.icons.lockSVG
 import com.example.synhub.shared.icons.personSVG
+import com.example.synhub.shared.viewmodel.LogInViewModel
+import kotlin.math.log
 
 
 @Composable
@@ -47,10 +52,17 @@ fun Login(nav: NavHostController) {
 }
 
 @Composable
-fun LoginScreen(modifier: Modifier, nav: NavHostController){
+fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: LogInViewModel = viewModel()){
 
     var txtUser by remember { mutableStateOf("") }
     var txtPass by remember { mutableStateOf("") }
+
+    val loginSuccess by loginViewModel.loginSuccess.collectAsState()
+    if (loginSuccess == true) {
+        nav.navigate("Home")
+    } else if (loginSuccess == false) {
+
+    }
 
     Column (
         modifier = Modifier
@@ -85,7 +97,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
         OutlinedTextField(
             value = txtUser,
             singleLine = true,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Insert User")},
             placeholder = { Text(text = "User")},
             leadingIcon = {
@@ -109,7 +121,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
         OutlinedTextField(
             value = txtPass,
             singleLine = true,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Insert Password")},
             placeholder = { Text(text = "password")},
             leadingIcon = {
@@ -136,14 +148,13 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier,
             onClick = {
-                nav.navigate("Home")
+                loginViewModel.signIn(txtUser, txtPass)
             }
         ) {
             Text(
                 text = "Iniciar Sesion", fontSize = 20.sp,
                 color = Color.White, fontWeight = FontWeight.Bold
             )
-
         }
 
         ElevatedButton(
@@ -160,5 +171,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController){
             )
 
         }
+
+
     }
 }
