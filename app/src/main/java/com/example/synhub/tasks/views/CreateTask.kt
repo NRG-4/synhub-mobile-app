@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,7 +51,7 @@ fun CreateTask(nav: NavHostController) {
                 function = {
                     nav.popBackStack()
                 },
-                "Create Tarea",
+                "Crear Tarea",
                 Icons.AutoMirrored.Filled.ArrowBack
             )
         }
@@ -72,15 +73,15 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 90.dp)
-            .padding(horizontal = 10.dp),
+            .padding(top = 120.dp)
+            .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         OutlinedTextField(
             value = txtTitle,
             singleLine = true,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Titulo de la tarea") },
             placeholder = { Text(text = "Titulo") },
             leadingIcon = {
@@ -103,7 +104,7 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
 
         OutlinedTextField(
             value = txtDescription,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Descripción de la tarea") },
             placeholder = { Text(text = "Descripción") },
             leadingIcon = {
@@ -127,7 +128,7 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
         OutlinedTextField(
             value = txtMember,
             singleLine = true,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Integrante") },
             placeholder = { Text(text = "Integrante") },
             leadingIcon = {
@@ -151,7 +152,7 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
         OutlinedTextField(
             value = txtDueDate,
             singleLine = true,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Fecha de entrega") },
             placeholder = { Text(text = "Fecha") },
             leadingIcon = {

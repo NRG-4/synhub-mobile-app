@@ -5,22 +5,28 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,55 +34,80 @@ import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.synhub.shared.components.TopBar
 
-// Clase para la tarea
-data class Tarea(
-    val titulo: String,
-    val descripcion: String,
-    val fechaCreacion: String,
-    val fechaFinal: String
+data class Grupo(
+    val id: Int,
+    val name: String,
+    val imgUrl: String,
+    val description: String,
+    val code: String,
+    val memberCount: Int
 )
 
-// Clase para el integrante
-data class Integrante(
-    val nombre: String,
-    val tarea: Tarea
+// Ejemplo de instancia:
+val grupoEjemplo = Grupo(
+    id = 0,
+    name = "Los Backyardigans",
+    imgUrl = "https://ejemplo.com/imagen.png",
+    description = "\"Los Backyardigans\" es un equipo de trabajo cohesionado y multifuncional, especializado en soluciones logísticas, desarrollo de proyectos creativos y análisis de datos.",
+    code = "A7B9X2Q1Z",
+    memberCount = 5
 )
 
-// Lista de ejemplo
-public val integrantes = listOf(
-    Integrante(
-        nombre = "Ana",
-        tarea = Tarea(
-            titulo = "Diseñar logo",
-            descripcion = "Crear el logo principal del grupo",
-            fechaCreacion = "2024-06-10",
-            fechaFinal = "2024-06-15"
-        )
+data class ExampleMember(
+    val id: Int,
+    val username: String,
+    val name: String,
+    val surname: String,
+    val imgUrl: String
+)
+
+val exampleMembers = listOf(
+    ExampleMember(
+        id = 1,
+        username = "ana.garcia",
+        name = "Ana",
+        surname = "García",
+        imgUrl = "https://s1.elespanol.com/2023/06/08/vivir/salud-mental/769933690_233804290_1706x960.jpg"
     ),
-    Integrante(
-        nombre = "Luis",
-        tarea = Tarea(
-            titulo = "Desarrollar app",
-            descripcion = "Programar la funcionalidad básica",
-            fechaCreacion = "2024-06-11",
-            fechaFinal = "2024-06-20"
-        )
+    ExampleMember(
+        id = 2,
+        username = "luis.perez",
+        name = "Luis",
+        surname = "Pérez",
+        imgUrl = "https://images.ecestaticos.com/vU8sC8tLdkx-2YYh1fkOGL8vfeY=/0x0:990x557/1200x900/filters:fill(white):format(jpg)/f.elconfidencial.com%2Foriginal%2F62c%2Fe5d%2F314%2F62ce5d3141c0b670144a692b7f6a21fa.jpg"
     ),
-    Integrante(
-        nombre = "María",
-        tarea = Tarea(
-            titulo = "Redactar documentación",
-            descripcion = "Escribir la documentación del proyecto",
-            fechaCreacion = "2024-06-12",
-            fechaFinal = "2024-06-18"
-        )
+    ExampleMember(
+        id = 3,
+        username = "maria.lopez",
+        name = "María",
+        surname = "López",
+        imgUrl = "https://img.freepik.com/free-psd/expressive-woman-gesturing_23-2150198838.jpg?semt=ais_items_boosted&w=740"
+    ),
+    ExampleMember(
+        id = 4,
+        username = "juan.lopez",
+        name = "Juan",
+        surname = "López",
+        imgUrl = "https://www.trendtic.cl/wp-content/uploads/2018/05/003-Rub%C3%A9n-Belluomo-INFOR-2018.jpg"
+    ),
+    ExampleMember(
+        id = 5,
+        username = "maria.huaman",
+        name = "María",
+        surname = "Huaman",
+        imgUrl = "https://www.caritas.org.mx/wp-content/uploads/2019/02/cualidades-persona-humanitaria.jpg"
     )
 )
 
@@ -90,7 +121,7 @@ fun Group(nav: NavHostController) {
                 function = {
                     nav.popBackStack()
                 },
-                "Grupos",
+                grupoEjemplo.name,
                 Icons.AutoMirrored.Filled.ArrowBack
             )
         }
@@ -102,131 +133,149 @@ fun Group(nav: NavHostController) {
 
 @Composable
 fun GroupScreen(modifier: Modifier, nav: NavHostController) {
-    var group = true
-    var members = true
+    var group = true // Simulando que el usuario tiene un grupo
+    Box(modifier = Modifier.fillMaxSize()){
+        Column (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 120.dp)
+                .padding(horizontal = 15.dp)
+        ) {
+            if(!group){
+                NoGroup(nav)
+            } else {
+                Column (
+                    verticalArrangement = Arrangement.spacedBy(15.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Card(
+                        shape = RoundedCornerShape(10.dp),
+                        colors = cardColors(containerColor = Color(0xFF4A90E2)),
+                        modifier = Modifier
+                            .shadow(
+                                elevation = 5.dp,
+                                shape = RoundedCornerShape(10.dp),
+                                clip = true
+                            ),
+                    ) {
+                        Text(
+                            text = "#" + grupoEjemplo.code,
+                            style = TextStyle(
+                                fontSize = 20.sp,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
 
-    Column (
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 90.dp)
-            .padding(horizontal = 20.dp)
-    ){
-        if(!group) {
-            noGroup(nav)
-        }else{
-            if(!members){
-                noMembers(nav)
-            }else{
-                Text(
-                    text = "Integrantes",
-                    fontSize = 25.sp,
-                    color = Color(0xFF1A4E85),
-                )
-                Spacer(modifier = Modifier.height(20.dp))
-                LazyColumn (
-                    verticalArrangement = Arrangement.spacedBy(15.dp)
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = cardColors(containerColor = Color(0xFF1A4E85))
+                    ) {
+                        Text(
+                            text = grupoEjemplo.description,
+                            fontSize = 20.sp,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
+                }
+                Column (
+                    modifier = Modifier.padding(bottom = 26.dp),
                 ){
-                    items(integrantes){
-                        integrante ->(
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth(),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = cardColors(
-                                        containerColor = Color(0xFFF5F5F5)
-                                    ),
-                                ){
-                                    Column(
-                                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                                        modifier = Modifier.padding(10.dp)
-                                            .background(Color(0xFFF5F5F5))
+                    Text(
+                        "Integrantes del grupo",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1A4E85),
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 15.dp),
+                        color = Color(0xFF1A4E85),
+                        thickness = 1.dp
+                    )
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(
+                                elevation = 5.dp,
+                                shape = RoundedCornerShape(10.dp),
+                                clip = true
+                            ),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = cardColors(containerColor = Color(0xFFF5F5F5))
+                    ) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(20.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = cardColors(containerColor = Color.White)
+                        ) {
+                            LazyColumn(
+                                contentPadding = PaddingValues(5.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                items(exampleMembers) { member ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                                     ) {
-                                        Text(
-                                            text = integrante.nombre,
-                                            fontSize = 15.sp,
-                                            color = Color(0xFF000000)
-                                        )
                                         Box(
                                             modifier = Modifier
-                                                .fillMaxWidth()
-                                                .background(Color(0xFF1A4E85),
-                                                    shape = RoundedCornerShape(10.dp)),
-                                        ){
-                                            Column (
+                                                .size(50.dp)
+                                                .shadow(
+                                                    elevation = 5.dp,
+                                                    shape = CircleShape,
+                                                    clip = true
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = member.imgUrl,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
                                                 modifier = Modifier
-                                                    .padding(10.dp),
-                                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                                            ){
-                                                Text(
-                                                    text="${integrante.tarea.titulo}",
-                                                    fontSize = 15.sp,
-                                                    color = Color.White
-                                                )
-                                                HorizontalDivider(color = Color.White)
-                                                Text(
-                                                    text="${integrante.tarea.descripcion}",
-                                                    fontSize = 15.sp,
-                                                    color = Color.White
-                                                )
-                                            }
-                                        }
-                                        Column(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalAlignment = Alignment.CenterHorizontally
-                                        ){
-                                            Text(
-                                                text = "${integrante.tarea.fechaCreacion} - ${integrante.tarea.fechaFinal}",
-                                                fontSize = 15.sp,
-                                                color = Color.Black
+                                                    .matchParentSize()
+                                                    .clip(CircleShape)
                                             )
                                         }
-
+                                        Column (
+                                            modifier = Modifier.weight(1f)
+                                        ){
+                                            Text(
+                                                text = "${member.name} ${member.surname}",
+                                                fontSize = 16.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Text(
+                                                text = member.username,
+                                                fontSize = 14.sp,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                        IconButton(
+                                            onClick = {
+                                            }
+                                        ) {
+                                            Icon(Icons.Default.Delete, contentDescription = null)
+                                        }
                                     }
                                 }
-                                )
+                            }
+                        }
                     }
-                }
-            }
-        }
-
-    }
-}
-
-@Composable
-fun noMembers(nav: NavHostController){
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp))
-    {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 25.dp)
-            .padding(top = 10.dp)
-            .background(Color(0xFF1A4E85),
-                shape = RoundedCornerShape(10.dp)),
-            contentAlignment = Alignment.Center){
-            Column(
-                modifier = Modifier
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "Tu grupo no tiene miembros",
-                    fontSize = 25.sp,
-                    color = Color(0xFFFFFFFF)
-                )
-                ElevatedButton(
-                    colors = ButtonDefaults.buttonColors(Color(0xFF4A90E2)),
-                    shape = RoundedCornerShape(10.dp),
-                    onClick = {
-                        nav.navigate("Group/Invite")
-                    }
-                ) {
-                    Text(
-                        text = "Invitar Miembros", fontSize = 20.sp,
-                        color = Color.White, fontWeight = FontWeight.Bold
-                    )
                 }
             }
         }
@@ -234,7 +283,7 @@ fun noMembers(nav: NavHostController){
 }
 
 @Composable
-fun noGroup(nav: NavHostController){
+fun NoGroup(nav: NavHostController){
 
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,

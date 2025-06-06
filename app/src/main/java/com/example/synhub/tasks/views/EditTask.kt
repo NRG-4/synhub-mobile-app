@@ -1,10 +1,12 @@
 package com.example.synhub.tasks.views
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -43,7 +46,8 @@ import com.example.synhub.shared.icons.personSVG
 import com.example.synhub.shared.icons.saveSVG
 
 @Composable
-fun EditTask(nav: NavHostController) {
+fun EditTask(nav: NavHostController, taskId: String?) {
+    val task = exampleTasks.firstOrNull { it.id == taskId?.toIntOrNull() }
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -58,13 +62,13 @@ fun EditTask(nav: NavHostController) {
         }
     ){
             innerPadding -> EditTaskScreen(modifier = Modifier.padding(innerPadding),
-        nav)
+        nav, task)
     }
 }
 
 @Composable
-fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
-) {
+fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: Task?)
+{
     var txtTitle by remember { mutableStateOf("") }
     var txtDescription by remember { mutableStateOf("") }
     var txtMember by remember { mutableStateOf("") }
@@ -74,146 +78,163 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 90.dp)
-            .padding(horizontal = 10.dp),
+            .padding(top = 120.dp)
+            .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
-        OutlinedTextField(
-            value = txtTitle,
-            singleLine = true,
-            modifier = Modifier,
-            label = { Text(text = "Titulo de la tarea") },
-            placeholder = { Text(text = "Titulo") },
-            leadingIcon = {
-                Icon(
-                    imageVector = abcSVG,
-                    tint = Color.Gray,
-                    contentDescription = ""
-                )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFF3F3F3),
-                unfocusedContainerColor = Color.White,
-                cursorColor = Color.Cyan
-            ),
-            onValueChange = {txtTitle=it}
-        )
+        if (task != null) {
+            OutlinedTextField(
+                value = txtTitle,
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(text = "Titulo de la tarea") },
+                placeholder = { Text(text = task.title) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = abcSVG,
+                        tint = Color.Gray,
+                        contentDescription = ""
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFF3F3F3),
+                    unfocusedContainerColor = Color.White,
+                    cursorColor = Color.Cyan
+                ),
+                onValueChange = {txtTitle=it}
+            )
 
-        OutlinedTextField(
-            value = txtDescription,
-            modifier = Modifier,
-            label = { Text(text = "Descripción de la tarea") },
-            placeholder = { Text(text = "Descripción") },
-            leadingIcon = {
-                Icon(
-                    imageVector = keyboardSVG,
-                    tint = Color.Gray,
-                    contentDescription = ""
-                )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFF3F3F3),
-                unfocusedContainerColor = Color.White,
-                cursorColor = Color.Cyan
-            ),
-            onValueChange = {txtDescription=it}
-        )
+            OutlinedTextField(
+                value = txtDescription,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(text = "Descripción de la tarea") },
+                placeholder = { Text(text = task.description) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = keyboardSVG,
+                        tint = Color.Gray,
+                        contentDescription = ""
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFF3F3F3),
+                    unfocusedContainerColor = Color.White,
+                    cursorColor = Color.Cyan
+                ),
+                onValueChange = {txtDescription=it}
+            )
 
-        OutlinedTextField(
-            value = txtMember,
-            singleLine = true,
-            modifier = Modifier,
-            label = { Text(text = "Integrante") },
-            placeholder = { Text(text = "Integrante") },
-            leadingIcon = {
-                Icon(
-                    imageVector = personSVG,
-                    tint = Color.Gray,
-                    contentDescription = ""
-                )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFF3F3F3),
-                unfocusedContainerColor = Color.White,
-                cursorColor = Color.Cyan
-            ),
-            onValueChange = {txtMember=it}
-        )
+            OutlinedTextField(
+                value = txtMember,
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(text = "Integrante") },
+                placeholder = { Text(text = task.member.name + " " + task.member.surname) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = personSVG,
+                        tint = Color.Gray,
+                        contentDescription = ""
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFF3F3F3),
+                    unfocusedContainerColor = Color.White,
+                    cursorColor = Color.Cyan
+                ),
+                onValueChange = {txtMember=it}
+            )
 
-        OutlinedTextField(
-            value = txtDueDate,
-            singleLine = true,
-            modifier = Modifier,
-            label = { Text(text = "Fecha de entrega") },
-            placeholder = { Text(text = "Fecha") },
-            leadingIcon = {
-                Icon(
-                    imageVector = calendarSVG,
-                    tint = Color.Gray,
-                    contentDescription = ""
-                )
-            },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFFF3F3F3),
-                unfocusedContainerColor = Color.White,
-                cursorColor = Color.Cyan
-            ),
-            onValueChange = {txtDueDate=it}
-        )
+            OutlinedTextField(
+                value = txtDueDate,
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(text = "Fecha de entrega") },
+                placeholder = { Text(text = task.dueDate) },
+                leadingIcon = {
+                    Icon(
+                        imageVector = calendarSVG,
+                        tint = Color.Gray,
+                        contentDescription = ""
+                    )
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email
+                ),
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = Color(0xFFF3F3F3),
+                    unfocusedContainerColor = Color.White,
+                    cursorColor = Color.Cyan
+                ),
+                onValueChange = {txtDueDate=it}
+            )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(20.dp)){
-            ElevatedButton(
-                colors = ButtonDefaults.buttonColors(Color(0xFF4CAF50)),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier,
-                onClick = {
-                    nav.popBackStack()
+            Row(horizontalArrangement = Arrangement.spacedBy(20.dp)){
+                ElevatedButton(
+                    colors = ButtonDefaults.buttonColors(Color(0xFF4CAF50)),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier,
+                    onClick = {
+                        nav.popBackStack()
+                    }
+                ) {
+                    Icon(
+                        painter = rememberVectorPainter(image = saveSVG),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Guardar", fontSize = 20.sp,
+                        color = Color.White, fontWeight = FontWeight.Bold
+                    )
+
                 }
-            ) {
-                Icon(
-                    painter = rememberVectorPainter(image = saveSVG),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "Guardar", fontSize = 20.sp,
-                    color = Color.White, fontWeight = FontWeight.Bold
-                )
+                ElevatedButton(
+                    colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier,
+                    onClick = {
+                        nav.popBackStack()
+                    }
+                ) {
+                    Icon(
+                        painter = rememberVectorPainter(image = logoutSVG),
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Cancelar", fontSize = 20.sp,
+                        color = Color.White, fontWeight = FontWeight.Bold
+                    )
 
+                }
             }
-            ElevatedButton(
-                colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier,
-                onClick = {
-                    nav.popBackStack()
-                }
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    painter = rememberVectorPainter(image = logoutSVG),
-                    contentDescription = null,
-                    tint = Color.White
-                )
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Cancelar", fontSize = 20.sp,
-                    color = Color.White, fontWeight = FontWeight.Bold
+                    text = "Tarea no encontrada",
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        color = Color.Red
+                    )
                 )
-
             }
         }
     }

@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.synhub.R
 import com.example.synhub.shared.icons.groupSVG
+import com.example.synhub.shared.icons.invitationSVG
 import com.example.synhub.shared.icons.logoutSVG
 import com.example.synhub.shared.icons.membersSVG
 import com.example.synhub.shared.icons.reportsSVG
@@ -100,6 +101,25 @@ fun SlideMenu(nav:NavHostController){
             NavigationDrawerItem(
                 icon = {
                     Icon(
+                        invitationSVG,
+                        contentDescription = null,
+                        tint = Color.White
+                    )
+                },
+                label = {
+                    Text(text = "Solicitudes de unión",
+                        fontSize = 17.sp,
+                        modifier = Modifier.padding(16.dp),
+                        color = Color.White)
+                },
+                selected = false,
+                onClick = {
+                    nav.navigate("")
+                }
+            )
+            NavigationDrawerItem(
+                icon = {
+                    Icon(
                         membersSVG,
                         contentDescription = null,
                         tint = Color.White
@@ -113,7 +133,7 @@ fun SlideMenu(nav:NavHostController){
                 },
                 selected = false,
                 onClick = {
-                    nav.navigate("Group/Invite")
+                    nav.navigate("Group/Members")
                 }
             )
             NavigationDrawerItem(
@@ -154,7 +174,6 @@ fun SlideMenu(nav:NavHostController){
                     nav.navigate("AnalyticsAndReports")
                 }
             )
-
 
             NavigationDrawerItem(
                 icon = {
