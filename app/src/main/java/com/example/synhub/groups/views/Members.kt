@@ -1,16 +1,21 @@
 package com.example.synhub.groups.views
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -20,63 +25,30 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.example.synhub.groups.viewmodel.GroupViewModel
+import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.shared.components.TopBar
-import kotlin.code
+import com.example.synhub.tasks.views.getDividerColor
+import androidx.lifecycle.viewmodel.compose.viewModel
 
-// Clase para la tarea
-data class Tarea(
-    val titulo: String,
-    val descripcion: String,
-    val fechaCreacion: String,
-    val fechaFinal: String
-)
-
-// Clase para el integrante
-data class Integrante(
-    val nombre: String,
-    val tarea: Tarea
-)
-
-// Lista de ejemplo
-public val integrantes = listOf(
-    Integrante(
-        nombre = "Ana",
-        tarea = Tarea(
-            titulo = "Diseñar logo",
-            descripcion = "Crear el logo principal del grupo",
-            fechaCreacion = "2024-06-10",
-            fechaFinal = "2024-06-15"
-        )
-    ),
-    Integrante(
-        nombre = "Luis",
-        tarea = Tarea(
-            titulo = "Desarrollar app",
-            descripcion = "Programar la funcionalidad básica",
-            fechaCreacion = "2024-06-11",
-            fechaFinal = "2024-06-20"
-        )
-    ),
-    Integrante(
-        nombre = "María",
-        tarea = Tarea(
-            titulo = "Redactar documentación",
-            descripcion = "Escribir la documentación del proyecto",
-            fechaCreacion = "2024-06-12",
-            fechaFinal = "2024-06-18"
-        )
-    )
-)
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Members(nav: NavHostController){
     Scaffold (
@@ -97,10 +69,20 @@ fun Members(nav: NavHostController){
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MembersScreen(modifier: Modifier, nav: NavHostController){
-    var group = true
-    var members = true
+fun MembersScreen(modifier: Modifier, nav: NavHostController,
+                  memberViewModel: MemberViewModel = viewModel(), groupViewModel: GroupViewModel = viewModel()) {
+
+    val haveGroup by groupViewModel.haveGroup.collectAsState()
+    val members by memberViewModel.members.collectAsState()
+    val haveMembers by memberViewModel.haveMembers.collectAsState()
+    val nextTaskMap by memberViewModel.nextTaskMap.collectAsState()
+
+    LaunchedEffect(Unit) {
+        groupViewModel.fetchLeaderGroup()
+        memberViewModel.fetchGroupMembers()
+    }
 
     Column (
         modifier = Modifier
@@ -108,10 +90,10 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController){
             .padding(top = 120.dp)
             .padding(horizontal = 20.dp)
     ){
-        if(!group) {
+        if(!haveGroup) {
             NoGroup(nav)
         }else{
-            if(!members){
+            if(!haveMembers){
                 NoMembers(nav)
             }else{
                 Text(
@@ -123,64 +105,127 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController){
                 LazyColumn (
                     verticalArrangement = Arrangement.spacedBy(15.dp)
                 ){
-                    items(integrantes){
-                            integrante ->(
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = cardColors(
-                                    containerColor = Color(0xFFF5F5F5)
+                    items(members) { member ->
+
+                        val nextTask = nextTaskMap[member.id]
+                        LaunchedEffect(member.id) {
+                            memberViewModel.fetchNextTask(member.id)
+                        }
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(
+                                    elevation = 5.dp,
+                                    shape = RoundedCornerShape(10.dp),
+                                    clip = true
                                 ),
-                            ){
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                                    modifier = Modifier.padding(10.dp)
-                                        .background(Color(0xFFF5F5F5))
+                            shape = RoundedCornerShape(10.dp),
+                            colors = cardColors(
+                                containerColor = Color(0xFFF5F5F5)
+                            ),
+                            onClick = {
+                                nav.navigate("Members/Detail/${member.id}")
+                            }
+                        ) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.padding(10.dp)
+                                    .background(Color(0xFFF5F5F5))
+                            ) {
+                                Row (
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = CircleShape,
+                                                clip = true
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AsyncImage(
+                                            model = member.imgUrl,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .matchParentSize()
+                                                .clip(CircleShape)
+                                        )
+                                    }
                                     Text(
-                                        text = integrante.nombre,
-                                        fontSize = 15.sp,
-                                        color = Color(0xFF000000)
+                                        text = member.name + " " + member.surname,
+                                        fontSize = 20.sp,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
                                     )
+                                }
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .shadow(
+                                            elevation = 5.dp,
+                                            shape = RoundedCornerShape(10.dp),
+                                            clip = true
+                                        ),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = cardColors(containerColor = Color(0xFF1A4E85))
+                                ) {
+                                    Column (
+                                        modifier = Modifier
+                                            .padding(10.dp),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    ) {
+                                        Text(
+                                            text = nextTask?.title ?: "Sin próxima tarea",
+                                            fontSize = 15.sp,
+                                            color = Color.White
+                                        )
+                                        HorizontalDivider(color = Color.White)
+                                        Text(
+                                            text = nextTask?.description ?: "",
+                                            fontSize = 15.sp,
+                                            color = Color.White
+                                        )
+                                    }
+                                }
+
+                                if(nextTask?.createdAt != null && nextTask?.dueDate != null){
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .background(Color(0xFF1A4E85),
-                                                shape = RoundedCornerShape(10.dp)),
-                                    ){
-                                        Column (
-                                            modifier = Modifier
-                                                .padding(10.dp),
-                                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                                        ){
-                                            Text(
-                                                text="${integrante.tarea.titulo}",
-                                                fontSize = 15.sp,
-                                                color = Color.White
+                                            .height(10.dp)
+                                            .background(
+                                                color = getDividerColor(
+                                                    nextTask!!.createdAt.toString(),
+                                                    nextTask!!.dueDate.toString()
+                                                ),
+                                                shape = RoundedCornerShape(10.dp)
                                             )
-                                            HorizontalDivider(color = Color.White)
-                                            Text(
-                                                text="${integrante.tarea.descripcion}",
-                                                fontSize = 15.sp,
-                                                color = Color.White
-                                            )
-                                        }
-                                    }
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ){
-                                        Text(
-                                            text = "${integrante.tarea.fechaCreacion} - ${integrante.tarea.fechaFinal}",
-                                            fontSize = 15.sp,
-                                            color = Color.Black
-                                        )
-                                    }
+                                    )
+                                }
 
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(10.dp)
+                                )
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    val createdDate = nextTask?.createdAt?.substring(0, 10) ?: ""
+                                    val dueDate = nextTask?.dueDate?.substring(0, 10) ?: ""
+                                    Text(
+                                        text = "$createdDate - $dueDate",
+                                        fontSize = 15.sp,
+                                        color = Color.Black
+                                    )
                                 }
                             }
-                            )
+                        }
                     }
                 }
             }
@@ -220,7 +265,7 @@ fun NoMembers(nav: NavHostController){
                     colors = cardColors(containerColor = Color(0xFF4A90E2))
                 ) {
                     Text(
-                        text = "#" + grupoEjemplo.code,
+                        text = "#" /* + grupoEjemplo.code*/,
                         fontSize = 20.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
