@@ -33,6 +33,6 @@ object RetrofitClient {
         .build()
 
     val logInWebService: LogInWebService = retrofit.create(LogInWebService::class.java)
-    val groupService: GroupWebService = retrofit.create(GroupWebService::class.java)
+    val groupWebService: GroupWebService = retrofit.create(GroupWebService::class.java)
     val homeWebService: HomeWebService = retrofit.create(HomeWebService::class.java)
 }

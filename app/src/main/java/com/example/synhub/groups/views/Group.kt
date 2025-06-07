@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -27,11 +24,12 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.shared.components.TopBar
 
 data class Grupo(
@@ -112,7 +111,12 @@ val exampleMembers = listOf(
 )
 
 @Composable
-fun Group(nav: NavHostController) {
+fun Group(nav: NavHostController, groupViewModel: GroupViewModel = GroupViewModel()) {
+    val group by groupViewModel.group.collectAsState()
+    LaunchedEffect(Unit) {
+        groupViewModel.fetchLeaderGroup()
+    }
+
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -121,7 +125,7 @@ fun Group(nav: NavHostController) {
                 function = {
                     nav.popBackStack()
                 },
-                grupoEjemplo.name,
+                group?.name ?: "Grupo",
                 Icons.AutoMirrored.Filled.ArrowBack
             )
         }
@@ -132,8 +136,17 @@ fun Group(nav: NavHostController) {
 }
 
 @Composable
-fun GroupScreen(modifier: Modifier, nav: NavHostController) {
-    var group = true // Simulando que el usuario tiene un grupo
+fun GroupScreen(modifier: Modifier, nav: NavHostController, groupViewModel: GroupViewModel = GroupViewModel()) {
+
+    val group by groupViewModel.group.collectAsState()
+    val haveGroup by groupViewModel.haveGroup.collectAsState()
+    val members by groupViewModel.members.collectAsState()
+
+    LaunchedEffect(Unit) {
+        groupViewModel.fetchLeaderGroup()
+        groupViewModel.fetchGroupMembers()
+    }
+
     Box(modifier = Modifier.fillMaxSize()){
         Column (
             modifier = Modifier
@@ -141,7 +154,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                 .padding(top = 120.dp)
                 .padding(horizontal = 15.dp)
         ) {
-            if(!group){
+            if(!haveGroup){
                 NoGroup(nav)
             } else {
                 Column (
@@ -159,7 +172,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                             ),
                     ) {
                         Text(
-                            text = "#" + grupoEjemplo.code,
+                            text = ("#" + group?.code),
                             style = TextStyle(
                                 fontSize = 20.sp,
                                 color = Color.White,
@@ -177,7 +190,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                         colors = cardColors(containerColor = Color(0xFF1A4E85))
                     ) {
                         Text(
-                            text = grupoEjemplo.description,
+                            text = group?.description ?: "",
                             fontSize = 20.sp,
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -224,7 +237,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                                 contentPadding = PaddingValues(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                items(exampleMembers) { member ->
+                                items(members) { member ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
