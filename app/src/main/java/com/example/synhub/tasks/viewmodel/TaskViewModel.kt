@@ -12,6 +12,10 @@ class TaskViewModel : ViewModel() {
     private val _tasks = MutableStateFlow<List<TaskResponse>>(emptyList())
     val tasks: StateFlow<List<TaskResponse>> = _tasks
 
+    private val _task = MutableStateFlow<TaskResponse?>(null)
+    val task: StateFlow<TaskResponse?> = _task
+
+    //TO-DO: Borrar los logs de depuración antes de la entrega final
     fun fetchGroupTasks() {
         viewModelScope.launch {
             try {
@@ -27,6 +31,27 @@ class TaskViewModel : ViewModel() {
             } catch (e: Exception) {
                 _tasks.value = emptyList()
                 android.util.Log.e("TaskViewModel", "Error al obtener tareas", e)
+            }
+        }
+    }
+
+    //TO-DO: Borrar los logs de depuración antes de la entrega final
+    fun fetchTaskById(taskId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.tasksWebService.getTaskById(taskId)
+                android.util.Log.d("TaskViewModel", "Respuesta tarea por ID: ${response.code()} - body: ${response.body()}")
+                if (response.isSuccessful && response.body() != null) {
+                    val task = response.body()!!
+                    _task.value = task
+                    android.util.Log.d("TaskViewModel", "Tarea obtenida: ${task.title}")
+                } else {
+                    _task.value = null
+                    android.util.Log.d("TaskViewModel", "No se obtuvo tarea o respuesta inesperada: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                _task.value = null
+                android.util.Log.e("TaskViewModel", "Error al obtener tarea por ID", e)
             }
         }
     }
