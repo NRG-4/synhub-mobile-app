@@ -124,7 +124,7 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
                                 containerColor = Color(0xFFF5F5F5)
                             ),
                             onClick = {
-                                nav.navigate("Members/Detail/${member.id}")
+                                nav.navigate("Group/Member/${member.id}")
                             }
                         ) {
                             Column(
