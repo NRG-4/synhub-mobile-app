@@ -1,6 +1,6 @@
 package com.example.synhub.groups.application.dto
 
-data class NextTaskResponse(
+data class TaskResponse(
     val id: Long,
     val title: String,
     val description: String,

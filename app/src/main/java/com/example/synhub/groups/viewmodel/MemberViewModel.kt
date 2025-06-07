@@ -3,8 +3,7 @@ package com.example.synhub.groups.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synhub.groups.application.dto.MemberResponse
-import com.example.synhub.groups.application.dto.NextTaskResponse
-import com.example.synhub.groups.model.response.MembersWebService
+import com.example.synhub.groups.application.dto.TaskResponse
 import com.example.synhub.shared.model.client.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,11 +16,14 @@ class MemberViewModel : ViewModel() {
     private val _haveMembers = MutableStateFlow(false)
     val haveMembers: StateFlow<Boolean> = _haveMembers
 
-    private val _nextTask = MutableStateFlow<NextTaskResponse?>(null)
-    val nextTask: StateFlow<NextTaskResponse?> = _nextTask
+    private val _nextTaskMap = MutableStateFlow<Map<Long, TaskResponse?>>(emptyMap())
+    val nextTaskMap: StateFlow<Map<Long, TaskResponse?>> = _nextTaskMap
 
-    private val _nextTaskMap = MutableStateFlow<Map<Long, NextTaskResponse?>>(emptyMap())
-    val nextTaskMap: StateFlow<Map<Long, NextTaskResponse?>> = _nextTaskMap
+    private val _memberDetails = MutableStateFlow<MemberResponse?>(null)
+    val member: StateFlow<MemberResponse?> = _memberDetails
+
+    private val _memberTasks = MutableStateFlow<List<TaskResponse>>(emptyList())
+    val memberTasks: StateFlow<List<TaskResponse>> = _memberTasks
 
     //TO-DO: Borrar los logs de producción
     fun fetchGroupMembers() {
@@ -62,6 +64,46 @@ class MemberViewModel : ViewModel() {
             } catch (e: Exception) {
                 _nextTaskMap.value = _nextTaskMap.value.toMutableMap().apply { put(memberId, null) }
                 android.util.Log.e("MemberViewModel", "Error al obtener nextTask", e)
+            }
+        }
+    }
+
+    //TO-DO: Borrar los logs de producción
+    fun fetchMemberDetails(memberId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.membersWebService.getMemberDetails(memberId)
+                android.util.Log.d("MemberViewModel", "Respuesta detalles miembro: ${response.code()} - body: ${response.body()}")
+                if (response.isSuccessful && response.body() != null) {
+                    val member = response.body()
+                    _memberDetails.value = member
+                    android.util.Log.d("MemberViewModel", "Detalles del miembro obtenidos: ${member?.username}")
+                } else {
+                    _memberDetails.value = null
+                    android.util.Log.d("MemberViewModel", "No se obtuvieron detalles del miembro o respuesta inesperada: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                _memberDetails.value = null
+                android.util.Log.e("MemberViewModel", "Error al obtener detalles del miembro", e)
+            }
+        }
+    }
+
+    fun fetchMemberTasks(memberId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.membersWebService.getMemberTasks(memberId)
+                android.util.Log.d("MemberViewModel", "Respuesta tareas miembro: ${response.code()} - body: ${response.body()}")
+                if (response.isSuccessful && response.body() != null) {
+                    _memberTasks.value = response.body()!!
+                    android.util.Log.d("MemberViewModel", "Tareas del miembro obtenidas: ${response.body()?.size}")
+                } else {
+                    _memberTasks.value = emptyList()
+                    android.util.Log.d("MemberViewModel", "No se obtuvieron tareas del miembro o respuesta inesperada: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                _memberTasks.value = emptyList()
+                android.util.Log.e("MemberViewModel", "Error al obtener tareas del miembro", e)
             }
         }
     }
