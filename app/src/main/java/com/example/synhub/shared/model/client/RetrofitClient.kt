@@ -2,6 +2,7 @@ package com.example.synhub.shared.model.client
 
 import com.example.synhub.groups.model.response.GroupWebService
 import com.example.synhub.groups.model.response.MembersWebService
+import com.example.synhub.invitations.model.response.InvitationsWebService
 import com.example.synhub.shared.model.response.LogInWebService
 import com.example.synhub.shared.model.response.HomeWebService
 import com.example.synhub.tasks.model.response.TasksWebService
@@ -39,4 +40,5 @@ object RetrofitClient {
     val homeWebService: HomeWebService = retrofit.create(HomeWebService::class.java)
     val tasksWebService: TasksWebService = retrofit.create(TasksWebService::class.java)
     val membersWebService: MembersWebService = retrofit.create(MembersWebService::class.java)
+    val invitationsWebService: InvitationsWebService = retrofit.create(InvitationsWebService::class.java)
 }

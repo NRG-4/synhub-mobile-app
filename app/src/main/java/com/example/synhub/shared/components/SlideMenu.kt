@@ -122,7 +122,7 @@ fun SlideMenu(nav:NavHostController, name: String, surname: String, imgUrl: Stri
                 },
                 selected = false,
                 onClick = {
-                    nav.navigate("")
+                    nav.navigate("Group/Invitations")
                 }
             )
             NavigationDrawerItem(
