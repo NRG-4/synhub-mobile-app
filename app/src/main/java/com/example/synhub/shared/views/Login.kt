@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,11 +58,42 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
     var txtUser by remember { mutableStateOf("") }
     var txtPass by remember { mutableStateOf("") }
 
+    var shouldNavigate by remember { mutableStateOf(false) }
+    var isLeader by remember { mutableStateOf(false) }
     val loginSuccess by loginViewModel.loginSuccess.collectAsState()
-    if (loginSuccess == true) {
-        nav.navigate("Home")
-    } else if (loginSuccess == false) {
 
+    //TO-DO: eliminar prints cuando esté listo
+    LaunchedEffect(loginSuccess) {
+        println("LoginScreen: loginSuccess cambió a $loginSuccess")
+        if (loginSuccess == true) {
+            println("LoginScreen: Intentando obtener detalles de líder...")
+            isLeader = loginViewModel.getLeaderDetails()
+            println("LoginScreen: ¿Es líder? $isLeader")
+            shouldNavigate = isLeader
+            println("LoginScreen: shouldNavigate actualizado a $shouldNavigate")
+            if (isLeader) {
+                shouldNavigate = false
+                isLeader = false
+                loginViewModel.resetLoginState()
+                nav.navigate("Home")
+            } else {
+                // Reinicia estados si no es líder
+                shouldNavigate = false
+                isLeader = false
+                loginViewModel.resetLoginState()
+                println("LoginScreen: Usuario no es líder, estados reiniciados")
+                // TO-DO: Mostrar dialog de error o mensaje al usuario
+            }
+            // Reinicia el estado de loginSuccess para permitir nuevos intentos
+            loginViewModel.resetLoginState()
+        } else if (loginSuccess == false) {
+            shouldNavigate = false
+            isLeader = false
+            loginViewModel.resetLoginState()
+            println("LoginScreen: Estados reiniciados tras fallo de login")
+            // Reinicia el estado de loginSuccess para permitir nuevos intentos
+            // TO-DO: Mostrar dialog de error o mensaje al usuario
+        }
     }
 
     Column (
@@ -149,6 +181,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
             modifier = Modifier,
             onClick = {
                 loginViewModel.signIn(txtUser, txtPass)
+                println("LoginScreen: Intentando iniciar sesión con usuario: $txtUser")
             }
         ) {
             Text(

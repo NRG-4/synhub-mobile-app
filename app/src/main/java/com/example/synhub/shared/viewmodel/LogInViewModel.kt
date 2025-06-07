@@ -37,4 +37,18 @@ class LogInViewModel : ViewModel() {
             }
         }
     }
+
+    suspend fun getLeaderDetails(): Boolean {
+        return try {
+            val response = RetrofitClient.webService.getLeaderDetails()
+            response.isSuccessful && response.body() != null
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    // Nueva función para resetear el estado de loginSuccess
+    fun resetLoginState() {
+        _loginSuccess.value = null
+    }
 }

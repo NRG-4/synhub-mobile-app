@@ -1,6 +1,6 @@
 package com.example.synhub.shared.model.client
 
-import com.example.synhub.shared.model.response.WebService
+import com.example.synhub.shared.model.response.SharedWebService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -24,10 +24,10 @@ object RetrofitClient {
             }
             .build()
 
-    val webService: WebService = Retrofit.Builder()
+    val webService: SharedWebService = Retrofit.Builder()
         .baseUrl("http://10.0.2.2:8080/api/v1/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
-        .create(WebService::class.java)
+        .create(SharedWebService::class.java)
 }
