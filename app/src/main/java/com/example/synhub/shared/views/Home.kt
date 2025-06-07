@@ -10,19 +10,30 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.synhub.shared.components.SlideMenu
 import com.example.synhub.shared.components.TopBar
+import com.example.synhub.shared.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun Home(nav: NavHostController){
+fun Home(nav: NavHostController, homeViewModel: HomeViewModel = HomeViewModel()) {
+
+    LaunchedEffect(Unit) {
+        homeViewModel.fetchLeaderDetails()
+    }
+
+    val leader by homeViewModel.leader.collectAsState()
+
     val slideMenuState =rememberDrawerState(
         initialValue = DrawerValue.Closed
     )
@@ -33,7 +44,7 @@ fun Home(nav: NavHostController){
         drawerState = slideMenuState,
         drawerContent = {
             ModalDrawerSheet {
-                SlideMenu(nav)
+                SlideMenu(nav, leader?.name ?: "", leader?.surname ?: "", leader?.imgUrl ?: "")
             }
         }
     ) {

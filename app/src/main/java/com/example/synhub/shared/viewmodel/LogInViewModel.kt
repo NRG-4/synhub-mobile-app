@@ -20,7 +20,7 @@ class LogInViewModel : ViewModel() {
     fun signIn(username: String, password: String) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.webService.signIn(SignInRequest(username, password))
+                val response = RetrofitClient.logInWebService.signIn(SignInRequest(username, password))
                 if (response.isSuccessful) {
                     val body = response.body()
                     body?.let {
@@ -40,7 +40,7 @@ class LogInViewModel : ViewModel() {
 
     suspend fun getLeaderDetails(): Boolean {
         return try {
-            val response = RetrofitClient.webService.getLeaderDetails()
+            val response = RetrofitClient.homeWebService.getLeaderDetails()
             response.isSuccessful && response.body() != null
         } catch (e: Exception) {
             false
