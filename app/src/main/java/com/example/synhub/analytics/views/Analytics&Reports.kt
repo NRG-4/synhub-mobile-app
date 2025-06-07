@@ -35,71 +35,62 @@ fun AnalyticsAndReports(nav: NavHostController, groupId: Long = 1L) {
     val slideMenuState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    ModalNavigationDrawer(
-        drawerState = slideMenuState,
-        drawerContent = {
-            ModalDrawerSheet {
-                SlideMenu(nav)
-            }
-        }
-    ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            containerColor = Color(0xFFFFFFFF),
-            topBar = {
-                TopBar(
-                    function = {
-                        nav.popBackStack()
-                    },
-                    "Analítica y Reportes",
-                    Icons.AutoMirrored.Filled.ArrowBack
-                )
-            },
-            content = { innerPadding ->
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    item {
-                        MetricCard(
-                            title = "Vista General de Tareas",
-                            content = taskOverview["summary"] as String
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Distribución de Tareas",
-                            content = taskDistribution["summary"] as String,
-                            additionalContent = {
-                                EnhancedBarChart(taskDistribution["details"] as Map<String, Int>)
-                            }
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Tareas Reprogramadas",
-                            content = rescheduledTasks["summary"] as String
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Tiempo Promedio de Solución (Líder)",
-                            content = avgSolutionTime["summary"] as String
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Tiempo Promedio de Desarrollo",
-                            content = avgDevTime["summary"] as String
-                        )
-                    }
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        containerColor = Color(0xFFFFFFFF),
+        topBar = {
+            TopBar(
+                function = {
+                    nav.popBackStack()
+                },
+                "Analítica y Reportes",
+                Icons.AutoMirrored.Filled.ArrowBack
+            )
+        },
+        content = { innerPadding ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item {
+                    MetricCard(
+                        title = "Vista General de Tareas",
+                        content = taskOverview["summary"] as String
+                    )
+                }
+                item {
+                    MetricCard(
+                        title = "Distribución de Tareas",
+                        content = taskDistribution["summary"] as String,
+                        additionalContent = {
+                            EnhancedBarChart(taskDistribution["details"] as Map<String, Int>)
+                        }
+                    )
+                }
+                item {
+                    MetricCard(
+                        title = "Tareas Reprogramadas",
+                        content = rescheduledTasks["summary"] as String
+                    )
+                }
+                item {
+                    MetricCard(
+                        title = "Tiempo Promedio de Solución (Líder)",
+                        content = avgSolutionTime["summary"] as String
+                    )
+                }
+                item {
+                    MetricCard(
+                        title = "Tiempo Promedio de Desarrollo",
+                        content = avgDevTime["summary"] as String
+                    )
                 }
             }
-        )
-    }
+        }
+    )
 }
 
 @Composable

@@ -34,14 +34,23 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.synhub.shared.components.TopBar
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import com.example.synhub.tasks.viewmodel.TaskViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import com.example.synhub.tasks.application.dto.TaskResponse
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskDetail(nav: NavHostController, taskId: String?) {
-    val task = exampleTasks.firstOrNull { it.id == taskId?.toIntOrNull() }
+    val taskViewModel: TaskViewModel = viewModel()
+    val task by taskViewModel.task.collectAsState()
+
+    LaunchedEffect(taskId) {
+        taskId?.toLongOrNull()?.let { taskViewModel.fetchTaskById(it) }
+    }
+
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -57,13 +66,14 @@ fun TaskDetail(nav: NavHostController, taskId: String?) {
     ){
             innerPadding -> TaskDetailScreen(
         modifier = Modifier.padding(innerPadding),
-        nav, task)
+        nav, task
+    )
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: Task?) {
+fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: TaskResponse?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -202,8 +212,9 @@ fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: Task?) {
                     )
                     HorizontalDivider(color = Color.Black)
                     Spacer(modifier = Modifier.size(15.dp))
+                    val createdDate = task.createdAt.substring(0, 10)
                     Text(
-                        text = task.createdAt,
+                        text = createdDate,
                         style = TextStyle(fontSize = 18.sp, color = Color.Black)
                     )
                 }
@@ -240,8 +251,9 @@ fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: Task?) {
                             )
                     )
                     Spacer(modifier = Modifier.size(8.dp))
+                    val dueDate = task.dueDate.substring(0, 10)
                     Text(
-                        text = task.dueDate,
+                        text = dueDate,
                         style = TextStyle(fontSize = 18.sp, color = Color.Black)
                     )
                 }
@@ -265,4 +277,3 @@ fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: Task?) {
         }
     }
 }
-

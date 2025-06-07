@@ -6,13 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -27,11 +24,12 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,75 +42,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.shared.components.TopBar
 
-data class Grupo(
-    val id: Int,
-    val name: String,
-    val imgUrl: String,
-    val description: String,
-    val code: String,
-    val memberCount: Int
-)
-
-// Ejemplo de instancia:
-val grupoEjemplo = Grupo(
-    id = 0,
-    name = "Los Backyardigans",
-    imgUrl = "https://ejemplo.com/imagen.png",
-    description = "\"Los Backyardigans\" es un equipo de trabajo cohesionado y multifuncional, especializado en soluciones logísticas, desarrollo de proyectos creativos y análisis de datos.",
-    code = "A7B9X2Q1Z",
-    memberCount = 5
-)
-
-data class ExampleMember(
-    val id: Int,
-    val username: String,
-    val name: String,
-    val surname: String,
-    val imgUrl: String
-)
-
-val exampleMembers = listOf(
-    ExampleMember(
-        id = 1,
-        username = "ana.garcia",
-        name = "Ana",
-        surname = "García",
-        imgUrl = "https://s1.elespanol.com/2023/06/08/vivir/salud-mental/769933690_233804290_1706x960.jpg"
-    ),
-    ExampleMember(
-        id = 2,
-        username = "luis.perez",
-        name = "Luis",
-        surname = "Pérez",
-        imgUrl = "https://images.ecestaticos.com/vU8sC8tLdkx-2YYh1fkOGL8vfeY=/0x0:990x557/1200x900/filters:fill(white):format(jpg)/f.elconfidencial.com%2Foriginal%2F62c%2Fe5d%2F314%2F62ce5d3141c0b670144a692b7f6a21fa.jpg"
-    ),
-    ExampleMember(
-        id = 3,
-        username = "maria.lopez",
-        name = "María",
-        surname = "López",
-        imgUrl = "https://img.freepik.com/free-psd/expressive-woman-gesturing_23-2150198838.jpg?semt=ais_items_boosted&w=740"
-    ),
-    ExampleMember(
-        id = 4,
-        username = "juan.lopez",
-        name = "Juan",
-        surname = "López",
-        imgUrl = "https://www.trendtic.cl/wp-content/uploads/2018/05/003-Rub%C3%A9n-Belluomo-INFOR-2018.jpg"
-    ),
-    ExampleMember(
-        id = 5,
-        username = "maria.huaman",
-        name = "María",
-        surname = "Huaman",
-        imgUrl = "https://www.caritas.org.mx/wp-content/uploads/2019/02/cualidades-persona-humanitaria.jpg"
-    )
-)
-
 @Composable
-fun Group(nav: NavHostController) {
+fun Group(nav: NavHostController, groupViewModel: GroupViewModel = GroupViewModel()) {
+    val group by groupViewModel.group.collectAsState()
+    LaunchedEffect(Unit) {
+        groupViewModel.fetchLeaderGroup()
+    }
+
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -121,7 +60,7 @@ fun Group(nav: NavHostController) {
                 function = {
                     nav.popBackStack()
                 },
-                grupoEjemplo.name,
+                group?.name ?: "Grupo",
                 Icons.AutoMirrored.Filled.ArrowBack
             )
         }
@@ -132,8 +71,17 @@ fun Group(nav: NavHostController) {
 }
 
 @Composable
-fun GroupScreen(modifier: Modifier, nav: NavHostController) {
-    var group = true // Simulando que el usuario tiene un grupo
+fun GroupScreen(modifier: Modifier, nav: NavHostController, groupViewModel: GroupViewModel = GroupViewModel()) {
+
+    val group by groupViewModel.group.collectAsState()
+    val haveGroup by groupViewModel.haveGroup.collectAsState()
+    val members by groupViewModel.members.collectAsState()
+
+    LaunchedEffect(Unit) {
+        groupViewModel.fetchLeaderGroup()
+        groupViewModel.fetchGroupMembers()
+    }
+
     Box(modifier = Modifier.fillMaxSize()){
         Column (
             modifier = Modifier
@@ -141,7 +89,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                 .padding(top = 120.dp)
                 .padding(horizontal = 15.dp)
         ) {
-            if(!group){
+            if(!haveGroup){
                 NoGroup(nav)
             } else {
                 Column (
@@ -159,7 +107,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                             ),
                     ) {
                         Text(
-                            text = "#" + grupoEjemplo.code,
+                            text = ("#" + group?.code),
                             style = TextStyle(
                                 fontSize = 20.sp,
                                 color = Color.White,
@@ -177,7 +125,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                         colors = cardColors(containerColor = Color(0xFF1A4E85))
                     ) {
                         Text(
-                            text = grupoEjemplo.description,
+                            text = group?.description ?: "",
                             fontSize = 20.sp,
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
@@ -224,7 +172,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                                 contentPadding = PaddingValues(5.dp),
                                 verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                items(exampleMembers) { member ->
+                                items(members) { member ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()

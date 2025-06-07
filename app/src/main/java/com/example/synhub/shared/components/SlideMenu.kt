@@ -21,11 +21,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.example.synhub.R
 import com.example.synhub.shared.icons.groupSVG
 import com.example.synhub.shared.icons.invitationSVG
@@ -36,7 +39,7 @@ import com.example.synhub.shared.icons.requestSVG
 import com.example.synhub.shared.icons.tasksSVG
 
 @Composable
-fun SlideMenu(nav:NavHostController){
+fun SlideMenu(nav:NavHostController, name: String, surname: String, imgUrl: String) {
     var gap = 15.dp
 
     Column (
@@ -48,7 +51,7 @@ fun SlideMenu(nav:NavHostController){
         Spacer(modifier = Modifier.height(gap))
 
         Text(
-            text="Juana De Armas",
+            text= "$name $surname",
             fontSize = 24.sp,
             color = Color.White
         )
@@ -57,16 +60,21 @@ fun SlideMenu(nav:NavHostController){
 
         Box(
             modifier = Modifier
-                .size(180.dp),
+                .size(180.dp)
+                .shadow(
+                    elevation = 5.dp,
+                    shape = CircleShape,
+                    clip = true
+                ),
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.pfp_ex),
+            AsyncImage(
+                model = imgUrl,
                 contentDescription = null,
+                contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(180.dp)
+                    .matchParentSize()
                     .clip(CircleShape)
-                    .border(2.dp, Color.Red, CircleShape)
             )
         }
 

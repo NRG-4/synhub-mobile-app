@@ -1,4 +1,4 @@
-package com.example.synhub.tasks.views
+package com.example.synhub.groups.views
 
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -16,11 +16,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
@@ -32,31 +32,40 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
+import com.example.synhub.groups.application.dto.MemberResponse
+import com.example.synhub.groups.application.dto.TaskResponse
+import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.editSVG
 import com.example.synhub.shared.icons.trashSVG
-import com.example.synhub.tasks.viewmodel.TaskViewModel
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
+import com.example.synhub.tasks.views.getDividerColor
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Tasks(nav: NavHostController) {
+fun MemberDetails(nav: NavHostController, memberId: String?) {
+    val memberViewModel: MemberViewModel = viewModel()
+    val member by memberViewModel.member.collectAsState()
+    val memberTasks by memberViewModel.memberTasks.collectAsState()
+
+    LaunchedEffect(memberId) {
+        memberId?.toLongOrNull()?.let {
+            memberViewModel.fetchMemberDetails(it)
+            memberViewModel.fetchMemberTasks(it)
+        }
+    }
+
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -65,49 +74,36 @@ fun Tasks(nav: NavHostController) {
                 function = {
                     nav.popBackStack()
                 },
-                "Tareas",
+                "${member?.name} ${member?.surname}",
                 Icons.AutoMirrored.Filled.ArrowBack
             )
         }
     ){
-            innerPadding -> TaskScreen(modifier = Modifier.padding(innerPadding),
-        nav)
+            innerPadding -> MemberDetailScreen(
+        modifier = Modifier.padding(innerPadding),
+        nav, member, memberTasks)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskViewModel = TaskViewModel()) {
-    val tasks by tasksViewModel.tasks.collectAsState()
-    val haveTasks = tasks.isNotEmpty()
-
-    LaunchedEffect(Unit) {
-        tasksViewModel.fetchGroupTasks()
-    }
-
-    Box(modifier = Modifier.fillMaxSize()){
-        if(!haveTasks)
-        {
-            Column (
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 120.dp)
-                    .padding(horizontal = 20.dp)
-            ) {
-                NoTasks(nav)
-            }
-
-        }else{
-            Column (
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(top = 120.dp)
-                    .padding(horizontal = 20.dp)
-            ) {
-                LazyColumn (
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ){
-                    items(tasks){ task ->
+fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, member: MemberResponse?, tasks: List<TaskResponse>) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column (
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 120.dp)
+                .padding(horizontal = 20.dp)
+        ) {
+            Text("Tareas:", fontSize = 25.sp, color = Color(0xFF1A4E85), fontWeight = FontWeight.Bold)
+            HorizontalDivider(color = Color(0xFF1A4E85), thickness = 2.dp)
+            Spacer(modifier = Modifier.height(20.dp))
+            if(tasks.isNotEmpty()){
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(tasks) { task ->
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -126,40 +122,10 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskV
                         ){
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.padding(10.dp)
+                                modifier = Modifier
+                                    .padding(10.dp)
                                     .background(Color(0xFFF5F5F5))
                             ) {
-                                Row (
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ){
-                                    Box(
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .shadow(
-                                                elevation = 5.dp,
-                                                shape = CircleShape,
-                                                clip = true
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        AsyncImage(
-                                            model = task.member.urlImage,
-                                            contentDescription = null,
-                                            contentScale = ContentScale.Crop,
-                                            modifier = Modifier
-                                                .matchParentSize()
-                                                .clip(CircleShape)
-                                        )
-                                    }
-                                    Text(
-                                        text = task.member.name + " " + task.member.surname,
-                                        fontSize = 20.sp,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-
                                 Text(
                                     text=task.title,
                                     fontSize = 15.sp,
@@ -264,76 +230,66 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskV
                         }
                     }
                 }
-            }
-            FloatingActionButton(
-                onClick = { nav.navigate("Tasks/Create") },
-                containerColor = Color(0xFF1A4E85),
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
+            } else {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(20.dp))
+                {
+                    Box(modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 25.dp)
+                        .padding(top = 10.dp)
+                        .background(
+                            Color(0xFF1A4E85),
+                            shape = RoundedCornerShape(10.dp)
+                        ),
+                        contentAlignment = Alignment.Center){
+                        Column(
+                            modifier = Modifier
+                                .padding(20.dp),
+                            verticalArrangement = Arrangement.spacedBy(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "No hay tareas programadas para: ${member?.name ?: "Este miembro"}",
+                                fontSize = 25.sp,
+                                color = Color(0xFFFFFFFF)
+                            )
+                        }
+                    }
+                }
             }
         }
-    }
-}
-
-
-
-@RequiresApi(Build.VERSION_CODES.O)
-fun getDividerColor(
-    createdAt: String,
-    dueDate: String,
-    nowDate: String = LocalDate.now().toString()
-): Color {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-    val created = LocalDate.parse(createdAt, formatter)
-    val due = LocalDate.parse(dueDate, formatter)
-    val now = LocalDate.parse(nowDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-
-    val totalDays = ChronoUnit.DAYS.between(created, due).toFloat().coerceAtLeast(1f)
-    val daysPassed = ChronoUnit.DAYS.between(created, now).toFloat()
-    val progress = (daysPassed / totalDays).coerceIn(0f, 1f)
-
-    return when {
-        now.isAfter(due) -> Color(0xFFF44336)
-        progress < 0.7f -> Color(0xFF4CAF50)
-        else -> Color(0xFFFDD634)
-    }
-}
-
-@Composable
-fun NoTasks(nav: NavHostController){
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp))
-    {
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 25.dp)
-            .padding(top = 10.dp)
-            .background(Color(0xFF1A4E85),
-                shape = RoundedCornerShape(10.dp)
-            ),
-            contentAlignment = Alignment.Center){
-            Column(
+        FloatingActionButton(
+            onClick = { nav.navigate("Tasks/Create") },
+            containerColor = Color(0xFF1A4E85),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                tint = Color.White,
                 modifier = Modifier
-                    .padding(20.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = "No hay tareas programadas",
-                    fontSize = 25.sp,
-                    color = Color(0xFFFFFFFF)
-                )
-            }
+                    .size(40.dp)
+            )
+        }
+
+        FloatingActionButton(
+            onClick = { nav.popBackStack() },
+            containerColor = Color(0xFFF44336),
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .padding(20.dp)
+        ) {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .size(40.dp)
+            )
         }
     }
 }

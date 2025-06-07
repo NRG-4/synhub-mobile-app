@@ -21,6 +21,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.abcSVG
@@ -44,10 +47,18 @@ import com.example.synhub.shared.icons.linkSVG
 import com.example.synhub.shared.icons.logoutSVG
 import com.example.synhub.shared.icons.personSVG
 import com.example.synhub.shared.icons.saveSVG
+import com.example.synhub.tasks.application.dto.TaskResponse
+import com.example.synhub.tasks.viewmodel.TaskViewModel
 
 @Composable
 fun EditTask(nav: NavHostController, taskId: String?) {
-    val task = exampleTasks.firstOrNull { it.id == taskId?.toIntOrNull() }
+    val taskViewModel: TaskViewModel = viewModel()
+    val task by taskViewModel.task.collectAsState()
+
+    LaunchedEffect(taskId) {
+        taskId?.toLongOrNull()?.let { taskViewModel.fetchTaskById(it) }
+    }
+
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -67,13 +78,14 @@ fun EditTask(nav: NavHostController, taskId: String?) {
 }
 
 @Composable
-fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: Task?)
+fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: TaskResponse?)
 {
     var txtTitle by remember { mutableStateOf("") }
     var txtDescription by remember { mutableStateOf("") }
     var txtMember by remember { mutableStateOf("") }
     var txtDueDate by remember { mutableStateOf("") }
 
+    val dueDate = task?.dueDate?.substring(0, 10)
 
     Column (
         modifier = Modifier
@@ -160,7 +172,7 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 label = { Text(text = "Fecha de entrega") },
-                placeholder = { Text(text = task.dueDate) },
+                placeholder = { Text(text = dueDate.toString()) },
                 leadingIcon = {
                     Icon(
                         imageVector = calendarSVG,

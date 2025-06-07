@@ -17,7 +17,7 @@ class RequestViewModel: ViewModel() {
 
     fun getRequestById() {
         viewModelScope.launch(Dispatchers.IO) {
-            val response = RetrofitClient.webService.getRequestById(1)
+            val response = RetrofitClient.logInWebService.getRequestById(1)
             withContext(Dispatchers.Main) {
                 request = if (response.isSuccessful) {
                     response.body()
