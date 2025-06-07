@@ -31,6 +31,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +49,7 @@ import coil.compose.AsyncImage
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.editSVG
 import com.example.synhub.shared.icons.trashSVG
+import com.example.synhub.tasks.viewmodel.TaskViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -169,12 +173,16 @@ fun Tasks(nav: NavHostController) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TaskScreen(modifier: Modifier, nav: NavHostController) {
+fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskViewModel = TaskViewModel()) {
+    val tasks by tasksViewModel.tasks.collectAsState()
+    val haveTasks = tasks.isNotEmpty()
 
-    var tareas = true
+    LaunchedEffect(Unit) {
+        tasksViewModel.fetchGroupTasks()
+    }
 
     Box(modifier = Modifier.fillMaxSize()){
-        if(!tareas)
+        if(!haveTasks)
         {
             Column (
                 modifier = Modifier
@@ -195,161 +203,161 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                 LazyColumn (
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ){
-                    items(exampleTasks){
-                            task ->(
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .shadow(
-                                        elevation = 5.dp,
-                                        shape = RoundedCornerShape(10.dp),
-                                        clip = true
-                                    ),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = cardColors(
-                                    containerColor = Color(0xFFF5F5F5)
+                    items(tasks){ task ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(
+                                    elevation = 5.dp,
+                                    shape = RoundedCornerShape(10.dp),
+                                    clip = true
                                 ),
-                                onClick = {
-                                    nav.navigate("Tasks/Detail/${task.id}")
-                                }
-                            ){
-                                Column(
-                                    verticalArrangement = Arrangement.spacedBy(10.dp),
-                                    modifier = Modifier.padding(10.dp)
-                                        .background(Color(0xFFF5F5F5))
-                                ) {
-                                    Row (
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                    ){
-                                        Box(
-                                            modifier = Modifier
-                                                .size(40.dp)
-                                                .shadow(
-                                                    elevation = 5.dp,
-                                                    shape = CircleShape,
-                                                    clip = true
-                                                ),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            AsyncImage(
-                                                model = task.member.urlImage,
-                                                contentDescription = null,
-                                                contentScale = ContentScale.Crop,
-                                                modifier = Modifier
-                                                    .matchParentSize()
-                                                    .clip(CircleShape)
-                                            )
-                                        }
-                                        Text(
-                                            text = task.member.name + " " + task.member.surname,
-                                            fontSize = 20.sp,
-                                            color = Color.Black,
-                                            fontWeight = FontWeight.Bold
-                                        )
-                                    }
-
-                                    Text(
-                                        text=task.title,
-                                        fontSize = 15.sp,
-                                        color = Color.Black
-                                    )
-                                    HorizontalDivider(color = Color.Black)
-                                    Card(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .shadow(
-                                                elevation = 5.dp,
-                                                shape = RoundedCornerShape(10.dp),
-                                                clip = true
-                                            ),
-                                        shape = RoundedCornerShape(10.dp),
-                                        colors = cardColors(
-                                            containerColor = Color(0xFFFFFFFF)
-                                        ),
-                                    ){
-                                        Column (
-                                            modifier = Modifier
-                                                .padding(10.dp),
-                                            verticalArrangement = Arrangement.spacedBy(10.dp),
-                                        ){
-                                            Text(
-                                                text=task.description,
-                                                fontSize = 15.sp,
-                                                color = Color.Black
-                                            )
-                                        }
-                                    }
+                            shape = RoundedCornerShape(10.dp),
+                            colors = cardColors(
+                                containerColor = Color(0xFFF5F5F5)
+                            ),
+                            onClick = {
+                                nav.navigate("Tasks/Detail/${task.id}")
+                            }
+                        ){
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(10.dp),
+                                modifier = Modifier.padding(10.dp)
+                                    .background(Color(0xFFF5F5F5))
+                            ) {
+                                Row (
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ){
                                     Box(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(10.dp)
-                                            .background(
-                                                color = getDividerColor(task.createdAt, task.dueDate),
-                                                shape = RoundedCornerShape(10.dp)
-                                            )
+                                            .size(40.dp)
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = CircleShape,
+                                                clip = true
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AsyncImage(
+                                            model = task.member.urlImage,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .matchParentSize()
+                                                .clip(CircleShape)
+                                        )
+                                    }
+                                    Text(
+                                        text = task.member.name + " " + task.member.surname,
+                                        fontSize = 20.sp,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
                                     )
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalAlignment = Alignment.CenterHorizontally
+                                }
+
+                                Text(
+                                    text=task.title,
+                                    fontSize = 15.sp,
+                                    color = Color.Black
+                                )
+                                HorizontalDivider(color = Color.Black)
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .shadow(
+                                            elevation = 5.dp,
+                                            shape = RoundedCornerShape(10.dp),
+                                            clip = true
+                                        ),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = cardColors(
+                                        containerColor = Color(0xFFFFFFFF)
+                                    ),
+                                ){
+                                    Column (
+                                        modifier = Modifier
+                                            .padding(10.dp),
+                                        verticalArrangement = Arrangement.spacedBy(10.dp),
                                     ){
                                         Text(
-                                            text = task.createdAt + " - " + task.dueDate,
+                                            text=task.description,
                                             fontSize = 15.sp,
                                             color = Color.Black
                                         )
                                     }
-                                    Column (
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(10.dp)
+                                        .background(
+                                            color = getDividerColor(task.createdAt, task.dueDate),
+                                            shape = RoundedCornerShape(10.dp)
+                                        )
+                                )
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ){
+                                    val createdDate = task.createdAt.substring(0, 10)
+                                    val dueDate = task.dueDate.substring(0, 10)
+                                    Text(
+                                        text = "$createdDate - $dueDate",
+                                        fontSize = 15.sp,
+                                        color = Color.Black
+                                    )
+                                }
+                                Column (
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                ){
+                                    Row (
+                                        horizontalArrangement = Arrangement.spacedBy(20.dp)
                                     ){
-                                        Row (
-                                            horizontalArrangement = Arrangement.spacedBy(20.dp)
-                                        ){
-                                            ElevatedButton(
-                                                colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
-                                                shape = RoundedCornerShape(10.dp),
-                                                modifier = Modifier,
-                                                onClick = {
-                                                    nav.navigate("Tasks/Edit/${task.id}")
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = rememberVectorPainter(image = editSVG),
-                                                    contentDescription = null,
-                                                    tint = Color.White
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(
-                                                    text = "Editar", fontSize = 15.sp,
-                                                    color = Color.White, fontWeight = FontWeight.Bold
-                                                )
+                                        ElevatedButton(
+                                            colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier,
+                                            onClick = {
+                                                nav.navigate("Tasks/Edit/${task.id}")
+                                            }
+                                        ) {
+                                            Icon(
+                                                painter = rememberVectorPainter(image = editSVG),
+                                                contentDescription = null,
+                                                tint = Color.White
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Editar", fontSize = 15.sp,
+                                                color = Color.White, fontWeight = FontWeight.Bold
+                                            )
+
+                                        }
+                                        ElevatedButton(
+                                            colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                                            shape = RoundedCornerShape(10.dp),
+                                            modifier = Modifier,
+                                            onClick = {
 
                                             }
-                                            ElevatedButton(
-                                                colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
-                                                shape = RoundedCornerShape(10.dp),
-                                                modifier = Modifier,
-                                                onClick = {
-
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = rememberVectorPainter(image = trashSVG),
-                                                    contentDescription = null,
-                                                    tint = Color.White
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(
-                                                    text = "Borrar", fontSize = 15.sp,
-                                                    color = Color.White, fontWeight = FontWeight.Bold
-                                                )
-                                            }
+                                        ) {
+                                            Icon(
+                                                painter = rememberVectorPainter(image = trashSVG),
+                                                contentDescription = null,
+                                                tint = Color.White
+                                            )
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text(
+                                                text = "Borrar", fontSize = 15.sp,
+                                                color = Color.White, fontWeight = FontWeight.Bold
+                                            )
                                         }
                                     }
                                 }
                             }
-                            )
+                        }
                     }
                 }
             }
@@ -380,10 +388,10 @@ fun getDividerColor(
     dueDate: String,
     nowDate: String = LocalDate.now().toString()
 ): Color {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
     val created = LocalDate.parse(createdAt, formatter)
     val due = LocalDate.parse(dueDate, formatter)
-    val now = LocalDate.parse(nowDate, formatter)
+    val now = LocalDate.parse(nowDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 
     val totalDays = ChronoUnit.DAYS.between(created, due).toFloat().coerceAtLeast(1f)
     val daysPassed = ChronoUnit.DAYS.between(created, now).toFloat()

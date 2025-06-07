@@ -3,6 +3,7 @@ package com.example.synhub.shared.model.client
 import com.example.synhub.groups.model.response.GroupWebService
 import com.example.synhub.shared.model.response.LogInWebService
 import com.example.synhub.shared.model.response.HomeWebService
+import com.example.synhub.tasks.model.response.TasksWebService
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -35,4 +36,5 @@ object RetrofitClient {
     val logInWebService: LogInWebService = retrofit.create(LogInWebService::class.java)
     val groupWebService: GroupWebService = retrofit.create(GroupWebService::class.java)
     val homeWebService: HomeWebService = retrofit.create(HomeWebService::class.java)
+    val tasksWebService: TasksWebService = retrofit.create(TasksWebService::class.java)
 }
