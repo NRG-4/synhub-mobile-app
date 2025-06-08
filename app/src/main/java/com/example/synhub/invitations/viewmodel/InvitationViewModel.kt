@@ -27,4 +27,20 @@ class InvitationViewModel : ViewModel() {
             }
         }
     }
+
+    fun processInvitation(invitationId: Long, accept: Boolean) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("InvitationViewModel", "Procesando invitación $invitationId con accept=$accept")
+                val response = RetrofitClient.invitationsWebService.processInvitation(invitationId, accept)
+                if (response.isSuccessful) {
+                    android.util.Log.d("InvitationViewModel", "Invitación procesada correctamente")
+                } else {
+                    android.util.Log.e("InvitationViewModel", "Error al procesar invitación: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("InvitationViewModel", "Excepción al procesar invitación", e)
+            }
+        }
+    }
 }
