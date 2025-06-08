@@ -87,4 +87,21 @@ class GroupViewModel : ViewModel() {
             }
         }
     }
+
+    fun deleteGroupMember(memberId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.groupWebService.deleteGroupMember(memberId)
+                if (response.isSuccessful) {
+                    android.util.Log.d("GroupViewModel", "Miembro eliminado correctamente")
+                    fetchGroupMembers() // Actualiza la lista de miembros
+                } else {
+                    android.util.Log.e("GroupViewModel", "Error al eliminar miembro: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("GroupViewModel", "Excepción al eliminar miembro", e)
+            }
+        }
+    }
+
 }

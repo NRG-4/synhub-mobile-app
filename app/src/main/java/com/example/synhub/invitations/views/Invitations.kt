@@ -38,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,9 +45,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.synhub.invitations.viewmodel.InvitationViewModel
 import com.example.synhub.shared.components.TopBar
-import com.example.synhub.shared.icons.editSVG
-import com.example.synhub.shared.icons.trashSVG
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

@@ -44,6 +44,9 @@ import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.shared.components.TopBar
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun Group(nav: NavHostController, groupViewModel: GroupViewModel = GroupViewModel()) {
@@ -76,6 +79,8 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController, groupViewModel: Grou
     val group by groupViewModel.group.collectAsState()
     val haveGroup by groupViewModel.haveGroup.collectAsState()
     val members by groupViewModel.members.collectAsState()
+
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         groupViewModel.fetchLeaderGroup()
@@ -215,6 +220,11 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController, groupViewModel: Grou
                                         }
                                         IconButton(
                                             onClick = {
+                                                coroutineScope.launch{
+                                                    groupViewModel.deleteGroupMember(member.id)
+                                                    delay(200)
+                                                    groupViewModel.fetchGroupMembers()
+                                                }
                                             }
                                         ) {
                                             Icon(Icons.Default.Delete, contentDescription = null)
