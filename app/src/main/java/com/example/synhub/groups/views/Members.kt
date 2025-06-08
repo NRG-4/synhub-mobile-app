@@ -55,7 +55,7 @@ fun Members(nav: NavHostController){
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 "Miembros del grupo",
                 Icons.AutoMirrored.Filled.ArrowBack

@@ -56,7 +56,7 @@ fun Invitations(nav: NavHostController) {
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 "Solicitudes de unión",
                 Icons.AutoMirrored.Filled.ArrowBack
@@ -226,8 +226,7 @@ fun NoInvitations(){
     {
         Box(modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 25.dp)
-            .padding(top = 20.dp)
+            .padding(20.dp)
             .background(
                 Color(0xFF1A4E85),
                 shape = RoundedCornerShape(10.dp)

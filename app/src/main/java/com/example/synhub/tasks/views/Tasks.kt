@@ -63,7 +63,7 @@ fun Tasks(nav: NavHostController) {
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 "Tareas",
                 Icons.AutoMirrored.Filled.ArrowBack

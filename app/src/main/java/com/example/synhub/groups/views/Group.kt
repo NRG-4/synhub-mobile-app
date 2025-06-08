@@ -58,7 +58,7 @@ fun Group(nav: NavHostController, groupViewModel: GroupViewModel = GroupViewMode
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 group?.name ?: "Grupo",
                 Icons.AutoMirrored.Filled.ArrowBack
