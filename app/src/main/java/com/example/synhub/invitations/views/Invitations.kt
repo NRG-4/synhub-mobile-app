@@ -214,32 +214,36 @@ fun InvitationsScreen(modifier: Modifier, nav: NavHostController) {
                 }
             }
         } else {
+            NoInvitations()
+        }
+    }
+}
+@Composable
+fun NoInvitations(){
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp))
+    {
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 25.dp)
+            .padding(top = 20.dp)
+            .background(
+                Color(0xFF1A4E85),
+                shape = RoundedCornerShape(10.dp)
+            ),
+            contentAlignment = Alignment.Center){
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(20.dp))
-            {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 25.dp)
-                    .padding(top = 10.dp)
-                    .background(
-                        Color(0xFF1A4E85),
-                        shape = RoundedCornerShape(10.dp)
-                    ),
-                    contentAlignment = Alignment.Center){
-                    Column(
-                        modifier = Modifier
-                            .padding(20.dp),
-                        verticalArrangement = Arrangement.spacedBy(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "No hay invitationes pendientes",
-                            fontSize = 25.sp,
-                            color = Color(0xFFFFFFFF)
-                        )
-                    }
-                }
+                modifier = Modifier
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "No hay invitationes pendientes",
+                    fontSize = 20.sp,
+                    color = Color(0xFFFFFFFF)
+                )
             }
         }
     }

@@ -94,7 +94,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskV
                     .padding(top = 120.dp)
                     .padding(horizontal = 20.dp)
             ) {
-                NoTasks(nav)
+                NoTasks()
             }
 
         }else{
@@ -309,15 +309,14 @@ fun getDividerColor(
 }
 
 @Composable
-fun NoTasks(nav: NavHostController){
+fun NoTasks(){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp))
     {
         Box(modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 25.dp)
-            .padding(top = 10.dp)
+            .padding(20.dp)
             .background(Color(0xFF1A4E85),
                 shape = RoundedCornerShape(10.dp)
             ),
@@ -330,7 +329,7 @@ fun NoTasks(nav: NavHostController){
             ) {
                 Text(
                     text = "No hay tareas programadas",
-                    fontSize = 25.sp,
+                    fontSize = 20.sp,
                     color = Color(0xFFFFFFFF)
                 )
             }
