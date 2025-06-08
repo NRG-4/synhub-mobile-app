@@ -127,7 +127,7 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .padding(horizontal = 20.dp)
             .padding(top = 120.dp),
     ){
         if(haveGroup) {
