@@ -1,5 +1,6 @@
 package com.example.synhub.shared.views
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,15 +28,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.synhub.shared.application.dto.SignUpRequest
 import com.example.synhub.shared.icons.abcSVG
 import com.example.synhub.shared.icons.linkSVG
 import com.example.synhub.shared.icons.lockSVG
 import com.example.synhub.shared.icons.mailSVG
 import com.example.synhub.shared.icons.personSVG
+import com.example.synhub.shared.viewmodel.LogInViewModel
+import com.example.synhub.shared.viewmodel.RegisterViewModel
+import kotlin.math.log
 
 @Composable
 fun Register(nav: NavHostController) {
@@ -56,6 +62,12 @@ fun RegisterScreen(modifier: Modifier, nav: NavHostController){
     var txtUrlPfp by remember { mutableStateOf("") }
     var txtPass1 by remember { mutableStateOf("") }
     var txtPass2 by remember { mutableStateOf("") }
+
+    val registerViewModel : RegisterViewModel = viewModel()
+    val logInViewModel: LogInViewModel = viewModel()
+    val signUpResult by registerViewModel.signUpResult.collectAsState()
+    val loginSuccess by logInViewModel.loginSuccess.collectAsState()
+
     Column (
         modifier = Modifier
             .fillMaxSize()
@@ -244,14 +256,39 @@ fun RegisterScreen(modifier: Modifier, nav: NavHostController){
             colors = ButtonDefaults.buttonColors(Color(0xFF4A90E2)),
             shape = RoundedCornerShape(10.dp),
             onClick = {
-                nav.navigate("Home")
+                if(txtPass1 != txtPass2) {
+                    // Show error message for password mismatch
+                    Log.d("Register", "Passwords do not match")
+                }else{
+                    Log.d("Register", "Attempting to sign up with user: $txtUser")
+                    registerViewModel.signUp(
+                        SignUpRequest(
+                            username = txtUser,
+                            name = txtName,
+                            surname = txtSurname,
+                            imgUrl = txtUrlPfp,
+                            email = txtMail,
+                            password = txtPass1
+                        )
+                    )
+                }
             }
         ) {
             Text(
                 text = "Registrarse", fontSize = 20.sp,
                 color = Color.White, fontWeight = FontWeight.Bold
             )
+        }
 
+        if(signUpResult?.body()?.username == txtUser){
+            logInViewModel.signIn(txtUser, txtPass1)
+        }
+
+        if (loginSuccess == true){
+            logInViewModel.resetLoginState()
+            nav.navigate("Home") {
+                popUpTo("register") { inclusive = true }
+            }
         }
     }
 }
