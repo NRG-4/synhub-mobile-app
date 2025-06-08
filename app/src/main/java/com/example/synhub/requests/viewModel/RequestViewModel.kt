@@ -5,25 +5,59 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.synhub.requests.model.Requests
+import com.example.synhub.requests.application.dto.CreateRequest
+import com.example.synhub.requests.application.dto.RequestResponse
 import com.example.synhub.shared.model.client.RetrofitClient
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class RequestViewModel: ViewModel() {
-    var request: Requests? by mutableStateOf(null)
-    val requestId = 1
+    private val _request = MutableStateFlow<RequestResponse?>(null)
+    val request: StateFlow<RequestResponse?> = _request
 
-    fun getRequestById() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val response = RetrofitClient.logInWebService.getRequestById(1)
-            withContext(Dispatchers.Main) {
-                request = if (response.isSuccessful) {
-                    response.body()
+    fun fetchRequest(taskId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.requestsWebService.getRequest(taskId);
+                if (response.isSuccessful && response.body() != null) {
+                    val request = response.body()!!
+                    _request.value = request
                 } else {
-                    null
+                    _request.value = null
                 }
+            } catch (e: Exception) {
+                _request.value = null
+            }
+        }
+    }
+
+    fun createRequest(taskId: Long, createRequest: CreateRequest) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.requestsWebService.createRequest(taskId, createRequest)
+                if (response.isSuccessful && response.body() != null) {
+                    _request.value = response.body()
+                } else {
+                    _request.value = null
+                }
+            } catch (e: Exception) {
+                _request.value = null
+            }
+        }
+    }
+
+    fun updateRequestStatus(taskId: Long, status: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.requestsWebService.updateRequestStatus(taskId, status)
+                if (response.isSuccessful && response.body() != null) {
+                    _request.value = response.body()
+                } else {
+                    _request.value = null
+                }
+            } catch (e: Exception) {
+                _request.value = null
             }
         }
     }
