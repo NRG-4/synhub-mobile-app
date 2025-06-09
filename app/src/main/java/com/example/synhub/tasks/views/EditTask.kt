@@ -112,7 +112,11 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
         groupViewModel.fetchGroupMembers()
     }
 
-    txtMemberId = task?.member?.id
+    LaunchedEffect(task) {
+        if (task != null) {
+            txtMemberId = task.member?.id
+        }
+    }
 
     Column (
         modifier = Modifier
