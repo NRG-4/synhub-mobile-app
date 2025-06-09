@@ -77,4 +77,22 @@ class TaskViewModel : ViewModel() {
             }
         }
     }
+
+    fun deleteTask(taskId: Long) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("TaskViewModel", "Iniciando eliminación de tarea: $taskId")
+                val response = RetrofitClient.tasksWebService.deleteTask(taskId)
+                android.util.Log.d("TaskViewModel", "Respuesta eliminación tarea: ${response.code()}")
+                if (response.isSuccessful) {
+                    fetchGroupTasks()
+                    android.util.Log.d("TaskViewModel", "Tarea eliminada exitosamente: $taskId")
+                } else {
+                    android.util.Log.e("TaskViewModel", "Fallo al eliminar tarea: ${response.code()} - ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("TaskViewModel", "Error al eliminar tarea", e)
+            }
+        }
+    }
 }
