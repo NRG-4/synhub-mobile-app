@@ -13,6 +13,7 @@ data class TaskResponse(
 )
 
 data class TaskMember(
+    val id: Long,
     val name: String,
     val surname: String,
     val urlImage: String

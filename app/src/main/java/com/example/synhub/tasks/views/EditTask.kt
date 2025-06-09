@@ -57,6 +57,7 @@ import com.example.synhub.shared.icons.linkSVG
 import com.example.synhub.shared.icons.logoutSVG
 import com.example.synhub.shared.icons.personSVG
 import com.example.synhub.shared.icons.saveSVG
+import com.example.synhub.tasks.application.dto.EditTaskRequest
 import com.example.synhub.tasks.application.dto.TaskResponse
 import com.example.synhub.tasks.viewmodel.TaskViewModel
 import java.time.ZoneId
@@ -107,11 +108,11 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
     var txtMemberId by remember { mutableStateOf<Long?>(null) }
     var txtDueDate by remember { mutableStateOf("") }
 
-    val dueDate = task?.dueDate?.substring(0, 10)
-
     LaunchedEffect(Unit) {
         groupViewModel.fetchGroupMembers()
     }
+
+    txtMemberId = task?.member?.id
 
     Column (
         modifier = Modifier
@@ -280,6 +281,16 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier,
                     onClick = {
+                        taskViewModel.updateTask(
+                            task.id,
+                            EditTaskRequest(
+                                txtTitle,
+                                txtDescription,
+                                txtDueDate,
+                                txtMemberId ?: 0L
+                            )
+                        )
+
                         nav.popBackStack()
                     }
                 ) {
