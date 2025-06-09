@@ -45,11 +45,13 @@ import coil.compose.AsyncImage
 import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.shared.components.TopBar
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun Group(nav: NavHostController, groupViewModel: GroupViewModel = GroupViewModel()) {
+fun Group(nav: NavHostController) {
+    val groupViewModel: GroupViewModel = viewModel()
     val group by groupViewModel.group.collectAsState()
     LaunchedEffect(Unit) {
         groupViewModel.fetchLeaderGroup()
@@ -74,7 +76,8 @@ fun Group(nav: NavHostController, groupViewModel: GroupViewModel = GroupViewMode
 }
 
 @Composable
-fun GroupScreen(modifier: Modifier, nav: NavHostController, groupViewModel: GroupViewModel = GroupViewModel()) {
+fun GroupScreen(modifier: Modifier, nav: NavHostController) {
+    val groupViewModel: GroupViewModel = viewModel()
 
     val group by groupViewModel.group.collectAsState()
     val haveGroup by groupViewModel.haveGroup.collectAsState()
