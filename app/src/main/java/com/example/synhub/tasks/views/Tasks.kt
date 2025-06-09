@@ -1,6 +1,7 @@
 package com.example.synhub.tasks.views
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -34,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,12 +46,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.editSVG
 import com.example.synhub.shared.icons.trashSVG
 import com.example.synhub.tasks.viewmodel.TaskViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
@@ -63,7 +68,7 @@ fun Tasks(nav: NavHostController) {
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 "Tareas",
                 Icons.AutoMirrored.Filled.ArrowBack
@@ -77,13 +82,18 @@ fun Tasks(nav: NavHostController) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskViewModel = TaskViewModel()) {
+fun TaskScreen(modifier: Modifier, nav: NavHostController) {
+    val tasksViewModel: TaskViewModel = viewModel()
+
     val tasks by tasksViewModel.tasks.collectAsState()
+
     val haveTasks = tasks.isNotEmpty()
 
     LaunchedEffect(Unit) {
         tasksViewModel.fetchGroupTasks()
     }
+
+    Log.d("Tasks.kt", "Tareas obtenias: ${tasks.size}")
 
     Box(modifier = Modifier.fillMaxSize()){
         if(!haveTasks)
@@ -244,7 +254,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskV
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-
+                                                tasksViewModel.deleteTask(task.id)
                                             }
                                         ) {
                                             Icon(
@@ -265,21 +275,21 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskV
                     }
                 }
             }
-            FloatingActionButton(
-                onClick = { nav.navigate("Tasks/Create") },
-                containerColor = Color(0xFF1A4E85),
+        }
+        FloatingActionButton(
+            onClick = { nav.navigate("Tasks/Create") },
+            containerColor = Color(0xFF1A4E85),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                tint = Color.White,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
-            }
+                    .size(40.dp)
+            )
         }
     }
 }
@@ -292,9 +302,21 @@ fun getDividerColor(
     dueDate: String,
     nowDate: String = LocalDate.now().toString()
 ): Color {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-    val created = LocalDate.parse(createdAt, formatter)
-    val due = LocalDate.parse(dueDate, formatter)
+    val formatters = listOf(
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    )
+    fun parseDate(dateStr: String): LocalDate {
+        for (formatter in formatters) {
+            try {
+                return LocalDate.parse(dateStr, formatter)
+            } catch (_: Exception) {}
+        }
+        throw IllegalArgumentException("Formato de fecha no soportado: $dateStr")
+    }
+    val created = parseDate(createdAt)
+    val due = parseDate(dueDate)
     val now = LocalDate.parse(nowDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 
     val totalDays = ChronoUnit.DAYS.between(created, due).toFloat().coerceAtLeast(1f)

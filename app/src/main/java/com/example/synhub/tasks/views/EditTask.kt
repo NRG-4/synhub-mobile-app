@@ -1,5 +1,9 @@
 package com.example.synhub.tasks.views
 
+import android.app.TimePickerDialog
+import android.os.Build
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +19,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -39,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.abcSVG
 import com.example.synhub.shared.icons.calendarSVG
@@ -47,9 +57,15 @@ import com.example.synhub.shared.icons.linkSVG
 import com.example.synhub.shared.icons.logoutSVG
 import com.example.synhub.shared.icons.personSVG
 import com.example.synhub.shared.icons.saveSVG
+import com.example.synhub.tasks.application.dto.EditTaskRequest
 import com.example.synhub.tasks.application.dto.TaskResponse
 import com.example.synhub.tasks.viewmodel.TaskViewModel
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun EditTask(nav: NavHostController, taskId: String?) {
     val taskViewModel: TaskViewModel = viewModel()
@@ -77,15 +93,30 @@ fun EditTask(nav: NavHostController, taskId: String?) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: TaskResponse?)
 {
+    val groupViewModel:GroupViewModel = viewModel()
+    val taskViewModel:TaskViewModel = viewModel()
+
+    val members by groupViewModel.members.collectAsState()
+
     var txtTitle by remember { mutableStateOf("") }
     var txtDescription by remember { mutableStateOf("") }
-    var txtMember by remember { mutableStateOf("") }
+    var txtMemberId by remember { mutableStateOf<Long?>(null) }
     var txtDueDate by remember { mutableStateOf("") }
 
-    val dueDate = task?.dueDate?.substring(0, 10)
+    LaunchedEffect(Unit) {
+        groupViewModel.fetchGroupMembers()
+    }
+
+    LaunchedEffect(task) {
+        if (task != null) {
+            txtMemberId = task.member?.id
+        }
+    }
 
     Column (
         modifier = Modifier
@@ -143,53 +174,110 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                 onValueChange = {txtDescription=it}
             )
 
-            OutlinedTextField(
-                value = txtMember,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = "Integrante") },
-                placeholder = { Text(text = task.member.name + " " + task.member.surname) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = personSVG,
-                        tint = Color.Gray,
-                        contentDescription = ""
+            var expanded by remember { mutableStateOf(false) }
+            ExposedDropdownMenuBox(
+                expanded = expanded,
+                onExpandedChange = { expanded = !expanded }
+            ) {
+                OutlinedTextField(
+                    value = txtMemberId?.let { id ->
+                        members.find { it.id == id }?.let { it.name + " " + it.surname } ?: ""
+                    } ?: "",
+                    onValueChange = {}, // No editable manualmente
+                    readOnly = true,
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .menuAnchor(),
+                    label = { Text(text = "Integrante") },
+                    placeholder = { Text(text = "Integrante") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = personSVG,
+                            tint = Color.Gray,
+                            contentDescription = ""
+                        )
+                    },
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color(0xFFF3F3F3),
+                        unfocusedContainerColor = Color.White,
+                        cursorColor = Color.Cyan
                     )
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email
-                ),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF3F3F3),
-                    unfocusedContainerColor = Color.White,
-                    cursorColor = Color.Cyan
-                ),
-                onValueChange = {txtMember=it}
-            )
+                )
+                ExposedDropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false }
+                ) {
+                    members.forEach { member ->
+                        androidx.compose.material3.DropdownMenuItem(
+                            text = { Text(text = member.name + " " + member.surname) },
+                            onClick = {
+                                txtMemberId = member.id
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
+            var showModal by remember { mutableStateOf(false) }
+            var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
+            val context = LocalContext.current
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+            val calendar = remember { Calendar.getInstance() }
 
             OutlinedTextField(
                 value = txtDueDate,
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = "Fecha de entrega") },
-                placeholder = { Text(text = dueDate.toString()) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = calendarSVG,
-                        tint = Color.Gray,
-                        contentDescription = ""
-                    )
+                onValueChange = {},
+                label = { Text("Fecha de entrega") },
+                placeholder = { Text("Fecha") },
+                readOnly = true,
+                trailingIcon = {
+                    IconButton(onClick = { showModal = true }) {
+                        Icon(
+                            imageVector = calendarSVG,
+                            contentDescription = "Select date"
+                        )
+                    }
                 },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email
-                ),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF3F3F3),
-                    unfocusedContainerColor = Color.White,
-                    cursorColor = Color.Cyan
-                ),
-                onValueChange = {txtDueDate=it}
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { showModal = true }
             )
+
+            if (showModal) {
+                DatePickerModal(
+                    onDateSelected = { millis ->
+                        if (millis != null) {
+                            selectedDateMillis = millis
+                            calendar.timeInMillis = millis
+                            // Mostrar TimePickerDialog después de seleccionar fecha
+                            TimePickerDialog(
+                                context,
+                                { _, hour, minute ->
+                                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                                    calendar.set(Calendar.MINUTE, minute)
+                                    calendar.set(Calendar.SECOND, 0)
+                                    calendar.set(Calendar.MILLISECOND, 0)
+                                    val instant = calendar.time.toInstant()
+                                    val zoned = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"))
+                                    txtDueDate = zoned.format(formatter)
+                                    showModal = false
+                                },
+                                calendar.get(Calendar.HOUR_OF_DAY),
+                                calendar.get(Calendar.MINUTE),
+                                true
+                            ).show()
+                        } else {
+                            showModal = false
+                        }
+                    },
+                    onDismiss = { showModal = false }
+                )
+            }
 
             Row(horizontalArrangement = Arrangement.spacedBy(20.dp)){
                 ElevatedButton(
@@ -197,6 +285,16 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier,
                     onClick = {
+                        taskViewModel.updateTask(
+                            task.id,
+                            EditTaskRequest(
+                                txtTitle,
+                                txtDescription,
+                                txtDueDate,
+                                txtMemberId ?: 0L
+                            )
+                        )
+
                         nav.popBackStack()
                     }
                 ) {

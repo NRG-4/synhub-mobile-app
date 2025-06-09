@@ -1,6 +1,7 @@
 package com.example.synhub.groups.views
 
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -36,6 +37,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -46,23 +48,26 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.synhub.groups.application.dto.MemberResponse
 import com.example.synhub.groups.application.dto.TaskResponse
+import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.editSVG
 import com.example.synhub.shared.icons.trashSVG
+import com.example.synhub.tasks.viewmodel.TaskViewModel
 import com.example.synhub.tasks.views.getDividerColor
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun MemberDetails(nav: NavHostController, memberId: String?) {
     val memberViewModel: MemberViewModel = viewModel()
     val member by memberViewModel.member.collectAsState()
-    val memberTasks by memberViewModel.memberTasks.collectAsState()
 
     LaunchedEffect(memberId) {
+        Log.d("MemberDetails", "Fetching member details for ID: $memberId")
         memberId?.toLongOrNull()?.let {
             memberViewModel.fetchMemberDetails(it)
-            memberViewModel.fetchMemberTasks(it)
         }
     }
 
@@ -81,13 +86,30 @@ fun MemberDetails(nav: NavHostController, memberId: String?) {
     ){
             innerPadding -> MemberDetailScreen(
         modifier = Modifier.padding(innerPadding),
-        nav, member, memberTasks)
+        nav, memberId)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, member: MemberResponse?, tasks: List<TaskResponse>) {
+fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: String?) {
+
+    val groupViewModel: GroupViewModel = viewModel()
+    val memberViewModel: MemberViewModel = viewModel()
+    val tasksViewModel: TaskViewModel = viewModel ()
+    val coroutineScope = rememberCoroutineScope()
+
+    val tasks by memberViewModel.memberTasks.collectAsState()
+    val member by memberViewModel.member.collectAsState()
+
+
+    LaunchedEffect(Unit) {
+        memberId?.toLongOrNull()?.let {
+            memberViewModel.fetchMemberDetails(it)
+            memberViewModel.fetchMemberTasks(it)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column (
             modifier = Modifier
@@ -210,7 +232,13 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, member: Membe
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-
+                                                coroutineScope.launch {
+                                                    tasksViewModel.deleteTask(task.id)
+                                                    delay(200)
+                                                    memberId?.toLongOrNull()?.let {
+                                                        memberViewModel.fetchMemberTasks(it)
+                                                    }
+                                                }
                                             }
                                         ) {
                                             Icon(
@@ -277,7 +305,14 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, member: Membe
         }
 
         FloatingActionButton(
-            onClick = { nav.popBackStack() },
+            onClick = {
+                coroutineScope.launch {
+                    memberId?.toLongOrNull()?.let {
+                        groupViewModel.deleteGroupMember(it)
+                    }
+                    nav.popBackStack()
+                }
+            },
             containerColor = Color(0xFFF44336),
             modifier = Modifier
                 .align(Alignment.BottomStart)

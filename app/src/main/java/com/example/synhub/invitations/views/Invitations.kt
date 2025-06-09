@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -37,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.example.synhub.invitations.viewmodel.InvitationViewModel
 import com.example.synhub.shared.components.TopBar
-import com.example.synhub.shared.icons.editSVG
-import com.example.synhub.shared.icons.trashSVG
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun Invitations(nav: NavHostController) {
@@ -56,7 +56,7 @@ fun Invitations(nav: NavHostController) {
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 "Solicitudes de unión",
                 Icons.AutoMirrored.Filled.ArrowBack
@@ -72,6 +72,7 @@ fun Invitations(nav: NavHostController) {
 fun InvitationsScreen(modifier: Modifier, nav: NavHostController) {
     val invitationsViewmodel: InvitationViewModel = viewModel()
     val invitations by invitationsViewmodel.groupInvitations.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
     LaunchedEffect(Unit) {
         invitationsViewmodel.fetchGroupInvitations()
     }
@@ -173,7 +174,11 @@ fun InvitationsScreen(modifier: Modifier, nav: NavHostController) {
                                         shape = RoundedCornerShape(10.dp),
                                         modifier = Modifier,
                                         onClick = {
-
+                                            coroutineScope.launch {
+                                                invitationsViewmodel.processInvitation(invitation.id, true)
+                                                delay(200)
+                                                invitationsViewmodel.fetchGroupInvitations()
+                                            }
                                         }
                                     ) {
                                         Icon(
@@ -193,7 +198,11 @@ fun InvitationsScreen(modifier: Modifier, nav: NavHostController) {
                                         shape = RoundedCornerShape(10.dp),
                                         modifier = Modifier,
                                         onClick = {
-
+                                            coroutineScope.launch {
+                                                invitationsViewmodel.processInvitation(invitation.id, false)
+                                                delay(200)
+                                                invitationsViewmodel.fetchGroupInvitations()
+                                            }
                                         }
                                     ) {
                                         Icon(
@@ -226,8 +235,7 @@ fun NoInvitations(){
     {
         Box(modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 25.dp)
-            .padding(top = 20.dp)
+            .padding(20.dp)
             .background(
                 Color(0xFF1A4E85),
                 shape = RoundedCornerShape(10.dp)

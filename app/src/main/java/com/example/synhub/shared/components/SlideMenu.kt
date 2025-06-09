@@ -1,8 +1,6 @@
 package com.example.synhub.shared.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,12 +21,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
-import com.example.synhub.R
 import com.example.synhub.shared.icons.groupSVG
 import com.example.synhub.shared.icons.invitationSVG
 import com.example.synhub.shared.icons.logoutSVG
@@ -37,6 +32,7 @@ import com.example.synhub.shared.icons.membersSVG
 import com.example.synhub.shared.icons.reportsSVG
 import com.example.synhub.shared.icons.requestSVG
 import com.example.synhub.shared.icons.tasksSVG
+import com.example.synhub.shared.model.client.RetrofitClient
 
 @Composable
 fun SlideMenu(nav:NavHostController, name: String, surname: String, imgUrl: String) {
@@ -226,7 +222,12 @@ fun SlideMenu(nav:NavHostController, name: String, surname: String, imgUrl: Stri
                         color = Color.White)
                 },
                 selected = false,
-                onClick = {}
+                onClick = {
+                    nav.navigate("Login") {
+                        popUpTo("Login") { inclusive = true }
+                    }
+                    RetrofitClient.resetToken()
+                }
             )
         }
     }
