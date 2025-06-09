@@ -265,21 +265,21 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController, tasksViewModel: TaskV
                     }
                 }
             }
-            FloatingActionButton(
-                onClick = { nav.navigate("Tasks/Create") },
-                containerColor = Color(0xFF1A4E85),
+        }
+        FloatingActionButton(
+            onClick = { nav.navigate("Tasks/Create") },
+            containerColor = Color(0xFF1A4E85),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                tint = Color.White,
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(20.dp)
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier
-                        .size(40.dp)
-                )
-            }
+                    .size(40.dp)
+            )
         }
     }
 }
@@ -292,9 +292,21 @@ fun getDividerColor(
     dueDate: String,
     nowDate: String = LocalDate.now().toString()
 ): Color {
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-    val created = LocalDate.parse(createdAt, formatter)
-    val due = LocalDate.parse(dueDate, formatter)
+    val formatters = listOf(
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    )
+    fun parseDate(dateStr: String): LocalDate {
+        for (formatter in formatters) {
+            try {
+                return LocalDate.parse(dateStr, formatter)
+            } catch (_: Exception) {}
+        }
+        throw IllegalArgumentException("Formato de fecha no soportado: $dateStr")
+    }
+    val created = parseDate(createdAt)
+    val due = parseDate(dueDate)
     val now = LocalDate.parse(nowDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 
     val totalDays = ChronoUnit.DAYS.between(created, due).toFloat().coerceAtLeast(1f)

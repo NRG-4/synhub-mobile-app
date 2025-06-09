@@ -2,6 +2,7 @@ package com.example.synhub.tasks.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.synhub.tasks.application.dto.TaskRequest
 import com.example.synhub.tasks.application.dto.TaskResponse
 import com.example.synhub.shared.model.client.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,6 +53,27 @@ class TaskViewModel : ViewModel() {
             } catch (e: Exception) {
                 _task.value = null
                 android.util.Log.e("TaskViewModel", "Error al obtener tarea por ID", e)
+            }
+        }
+    }
+
+    fun createTask(
+        memberId: Long,
+        taskRequest: TaskRequest
+    ) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("TaskViewModel", "Iniciando creación de tarea para miembro: $memberId")
+                val response = RetrofitClient.tasksWebService.createTask(memberId, taskRequest)
+                android.util.Log.d("TaskViewModel", "Respuesta creación tarea: ${response.code()} - body: ${response.body()}")
+                if (response.isSuccessful && response.body() != null) {
+                    _task.value = response.body()
+                    android.util.Log.d("TaskViewModel", "Tarea creada exitosamente: ${response.body()!!.title}")
+                } else {
+                    android.util.Log.e("TaskViewModel", "Fallo al crear tarea: ${response.code()} - ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("TaskViewModel", "Error al crear tarea", e)
             }
         }
     }
