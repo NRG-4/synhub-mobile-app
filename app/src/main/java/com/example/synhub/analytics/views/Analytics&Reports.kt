@@ -33,10 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.synhub.analytics.application.dto.AnalyticsWebService
-import com.example.synhub.analytics.model.response.GroupMemberCountResource
-import com.example.synhub.analytics.model.response.MetricResource
-import com.example.synhub.analytics.model.response.TaskTimePassedResource
+import com.example.synhub.analytics.model.response.AnalyticsWebService
+import com.example.synhub.analytics.application.dto.GroupMemberCountResponse
+import com.example.synhub.analytics.application.dto.AnalyticsResponse
+import com.example.synhub.analytics.application.dto.TaskTimePassedResponse
 import com.example.synhub.shared.components.SlideMenu
 import com.example.synhub.shared.components.TopBar
 import okhttp3.Interceptor
@@ -117,25 +117,25 @@ fun AnalyticsAndReports(nav: NavHostController, groupId: Long = 1L) {
     }
     val api = remember { retrofit.create(AnalyticsWebService::class.java) }
 
-    val taskOverview by produceState<Result<MetricResource>?>(initialValue = null, api, groupId) {
+    val taskOverview by produceState<Result<AnalyticsResponse>?>(initialValue = null, api, groupId) {
         value = runCatching { api.getTaskOverview(groupId) }
     }
-    val taskDistribution by produceState<Result<MetricResource>?>(initialValue = null, api, groupId) {
+    val taskDistribution by produceState<Result<AnalyticsResponse>?>(initialValue = null, api, groupId) {
         value = runCatching { api.getTaskDistribution(groupId) }
     }
-    val rescheduledTasks by produceState<Result<MetricResource>?>(initialValue = null, api, groupId) {
+    val rescheduledTasks by produceState<Result<AnalyticsResponse>?>(initialValue = null, api, groupId) {
         value = runCatching { api.getRescheduledTasks(groupId) }
     }
-    val avgSolutionTime by produceState<Result<MetricResource>?>(initialValue = null, api) {
+    val avgSolutionTime by produceState<Result<AnalyticsResponse>?>(initialValue = null, api) {
         value = runCatching { api.getAvgSolutionTime(1L) }
     }
-    val avgDevTime by produceState<Result<MetricResource>?>(initialValue = null, api) {
+    val avgDevTime by produceState<Result<AnalyticsResponse>?>(initialValue = null, api) {
         value = runCatching { api.getAvgDevTime(1L) }
     }
-    val groupMemberCount by produceState<Result<GroupMemberCountResource>?>(initialValue = null, api, groupId) {
+    val groupMemberCount by produceState<Result<GroupMemberCountResponse>?>(initialValue = null, api, groupId) {
         value = runCatching { api.getGroupMemberCount(groupId) }
     }
-    val taskTimePassed by produceState<Result<TaskTimePassedResource>?>(initialValue = null, api) {
+    val taskTimePassed by produceState<Result<TaskTimePassedResponse>?>(initialValue = null, api) {
         value = runCatching { api.getTaskTimePassed(1L) }
     }
 
