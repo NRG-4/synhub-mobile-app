@@ -12,8 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.synhub.analytics.data.*
+import com.example.synhub.analytics.application.dto.AnalyticsResponse
+import com.example.synhub.analytics.model.response.GroupMemberCountResource
+import com.example.synhub.analytics.model.response.MetricResource
+import com.example.synhub.analytics.model.response.TaskTimePassedResource
 import com.example.synhub.shared.components.SlideMenu
 import com.example.synhub.shared.components.TopBar
 import okhttp3.Interceptor
@@ -43,7 +44,6 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-// Mapeo de claves técnicas a nombres amigables
 private val friendlyNames = mapOf(
     "IN_PROGRESS" to "En progreso",
     "COMPLETED" to "Completadas",
@@ -86,7 +86,6 @@ private fun formatDaysToDuration(days: Double?): String {
 
 private fun formatSummary(summary: String?): String {
     if (summary == null) return ""
-    // Reemplaza los valores decimales .00 por enteros en los textos conocidos
     return summary
         .replace(Regex("(Vista general de tareas: )([0-9]+)\\.00"), "$1$2")
         .replace(Regex("(Distribución de tareas: )([0-9]+)\\.00"), "$1$2")
@@ -116,7 +115,7 @@ fun AnalyticsAndReports(nav: NavHostController, groupId: Long = 1L) {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-    val api = remember { retrofit.create(AnalyticsApi::class.java) }
+    val api = remember { retrofit.create(AnalyticsResponse::class.java) }
 
     val taskOverview by produceState<Result<MetricResource>?>(initialValue = null, api, groupId) {
         value = runCatching { api.getTaskOverview(groupId) }
