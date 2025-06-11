@@ -6,7 +6,7 @@ import com.example.synhub.analytics.model.response.TaskTimePassedResource
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-interface AnalyticsResponse {
+interface AnalyticsWebService {
     @GET("api/v1/metrics/tasks/overview/{groupId}")
     suspend fun getTaskOverview(@Path("groupId") groupId: Long): MetricResource
 

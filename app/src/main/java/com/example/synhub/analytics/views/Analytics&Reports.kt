@@ -33,7 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.synhub.analytics.application.dto.AnalyticsResponse
+import com.example.synhub.analytics.application.dto.AnalyticsWebService
 import com.example.synhub.analytics.model.response.GroupMemberCountResource
 import com.example.synhub.analytics.model.response.MetricResource
 import com.example.synhub.analytics.model.response.TaskTimePassedResource
@@ -115,7 +115,7 @@ fun AnalyticsAndReports(nav: NavHostController, groupId: Long = 1L) {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
-    val api = remember { retrofit.create(AnalyticsResponse::class.java) }
+    val api = remember { retrofit.create(AnalyticsWebService::class.java) }
 
     val taskOverview by produceState<Result<MetricResource>?>(initialValue = null, api, groupId) {
         value = runCatching { api.getTaskOverview(groupId) }
