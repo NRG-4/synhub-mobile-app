@@ -1,9 +1,12 @@
-package com.example.synhub.analytics.data
+package com.example.synhub.analytics.application.dto
 
+import com.example.synhub.analytics.model.response.GroupMemberCountResource
+import com.example.synhub.analytics.model.response.MetricResource
+import com.example.synhub.analytics.model.response.TaskTimePassedResource
 import retrofit2.http.GET
 import retrofit2.http.Path
 
-interface AnalyticsApi {
+interface AnalyticsResponse {
     @GET("api/v1/metrics/tasks/overview/{groupId}")
     suspend fun getTaskOverview(@Path("groupId") groupId: Long): MetricResource
 
