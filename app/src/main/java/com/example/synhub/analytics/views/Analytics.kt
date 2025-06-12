@@ -2,12 +2,15 @@ package com.example.synhub.analytics.views
 
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalDrawerSheet
@@ -15,79 +18,205 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.synhub.analytics.model.response.AnalyticsWebService
-import com.example.synhub.analytics.application.dto.GroupMemberCountResponse
-import com.example.synhub.analytics.application.dto.AnalyticsResponse
-import com.example.synhub.analytics.application.dto.TaskTimePassedResponse
+import com.example.synhub.analytics.viewmodel.AnalyticsViewModel
 import com.example.synhub.shared.components.SlideMenu
 import com.example.synhub.shared.components.TopBar
-import okhttp3.Interceptor
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import com.example.synhub.analytics.views.AnalyticsDetails.EnhancedBarChart
-import com.example.synhub.analytics.views.AnalyticsDetails.MetricCard
-import com.example.synhub.analytics.views.AnalyticsDetails.formatDaysToDuration
-import com.example.synhub.analytics.views.AnalyticsDetails.formatDetailValue
-import com.example.synhub.analytics.views.AnalyticsDetails.formatDuration
-import com.example.synhub.analytics.views.AnalyticsDetails.formatSummary
-import com.example.synhub.analytics.views.AnalyticsDetails.getFriendlyName
+
+private val friendlyNames = mapOf(
+    "IN_PROGRESS" to "En progreso",
+    "COMPLETED" to "Completadas",
+    "total" to "Total",
+    "rescheduled" to "Reprogramadas",
+    "completedTasks" to "Tareas Completadas",
+    "taskCount" to "Cantidad de Tareas completadas"
+)
+
+fun getFriendlyName(key: String): String = friendlyNames[key] ?: key.replaceFirstChar { it.uppercase() }
+
+fun formatDetailValue(value: Any?): String =
+    when (value) {
+        is Double -> if (value % 1.0 == 0.0) value.toInt().toString() else "%.2f".format(value)
+        is Float -> if (value % 1.0f == 0.0f) value.toInt().toString() else "%.2f".format(value)
+        else -> value?.toString() ?: ""
+    }
+
+fun formatDuration(ms: Long?): String {
+    if (ms == null || ms <= 0) return "Sin tiempo registrado"
+    val seconds = ms / 1000
+    val days = seconds / (24 * 3600)
+    val hours = (seconds % (24 * 3600)) / 3600
+    val minutes = (seconds % 3600) / 60
+    val secs = seconds % 60
+
+    val parts = mutableListOf<String>()
+    if (days > 0) parts.add("$days día${if (days > 1) "s" else ""}")
+    if (hours > 0) parts.add("$hours h")
+    if (minutes > 0) parts.add("$minutes min")
+    if (secs > 0 || parts.isEmpty()) parts.add("$secs s")
+    return parts.joinToString(" ")
+}
+
+fun formatDaysToDuration(days: Double?): String {
+    if (days == null || days <= 0.0) return "Sin tiempo registrado"
+    val ms = (days * 24 * 60 * 60 * 1000).toLong()
+    return formatDuration(ms)
+}
+
+fun formatSummary(summary: String?): String {
+    if (summary == null) return ""
+    return summary
+        .replace(Regex("(Vista general de tareas: )([0-9]+)\\.00"), "$1$2")
+        .replace(Regex("(Distribución de tareas: )([0-9]+)\\.00"), "$1$2")
+        .replace(Regex("(Tareas reprogramadas vs no reprogramadas: )([0-9]+)\\.00"), "$1$2")
+}
+
+@Composable
+fun MetricCard(
+    title: String,
+    content: String,
+    additionalContent: (@Composable () -> Unit)? = null
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(2.dp),
+        shape = RoundedCornerShape(18.dp),
+        shadowElevation = 6.dp,
+        color = Color.White
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(20.dp)
+        ) {
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp
+            )
+            Divider(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth(),
+                color = Color(0xFFEEEEEE),
+                thickness = 1.dp
+            )
+            Text(
+                text = content,
+                color = Color(0xFF333333),
+                fontSize = 16.sp,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            additionalContent?.let {
+                Spacer(modifier = Modifier.padding(top = 8.dp))
+                it()
+            }
+        }
+    }
+}
+
+// --- Mejorado: Gráfico de barras para distribución de tareas ---
+
+@Composable
+fun EnhancedBarChart(distribution: Map<String, Any>?) {
+    if (distribution.isNullOrEmpty()) return
+
+    // Extraer pares (nombre, cantidad) de la estructura { "2": {memberName=e,e, taskCount=1.0}, ... }
+    val parsed = distribution.mapNotNull { (_, v) ->
+        if (v is Map<*, *>) {
+            val name = v["memberName"]?.toString() ?: return@mapNotNull null
+            val count = (v["taskCount"] as? Number)?.toInt() ?: 0
+            name to count
+        } else null
+    }
+
+    if (parsed.isEmpty()) return
+
+    val max = parsed.maxOf { it.second }.takeIf { it > 0 } ?: 1
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp)
+            .background(Color(0xFFF7F7F7), RoundedCornerShape(8.dp))
+            .padding(12.dp)
+    ) {
+        parsed.forEach { (member, count) ->
+            Column {
+                Text(
+                    text = member,
+                    color = Color(0xFF666666),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(bottom = 6.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .height(18.dp)
+                            .weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(fraction = count / max.toFloat())
+                                .height(18.dp)
+                                .background(Color(0xFF1976D2), RoundedCornerShape(4.dp))
+                        )
+                        // Número de tareas al final de la barra
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(18.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                text = count.toString(),
+                                color = Color(0xFF1976D2),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(end = 6.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AnalyticsAndReports(
     nav: NavHostController,
-    groupId: Long = 1L,
-    token: String
+    token: String,
+    name: String = "",
+    surname: String = "",
+    imgUrl: String = "",
+    analyticsViewModel: AnalyticsViewModel = viewModel()
 ) {
-    val okHttpClient = remember {
-        OkHttpClient.Builder()
-            .addInterceptor(Interceptor { chain ->
-                val request = chain.request().newBuilder()
-                    .addHeader("Authorization", "Bearer $token")
-                    .build()
-                chain.proceed(request)
-            })
-            .build()
-    }
+    val haveGroup by analyticsViewModel.haveGroup.collectAsState()
+    val group by analyticsViewModel.group.collectAsState()
+    val members by analyticsViewModel.members.collectAsState()
+    val haveMembers by analyticsViewModel.haveMembers.collectAsState()
+    val analyticsState by analyticsViewModel.analyticsState.collectAsState()
+    val loading by analyticsViewModel.loading.collectAsState()
 
-    val retrofit = remember {
-        Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8080/")
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-    }
-    val api = remember { retrofit.create(AnalyticsWebService::class.java) }
-
-    val taskOverview by produceState<Result<AnalyticsResponse>?>(initialValue = null, api, groupId) {
-        value = runCatching { api.getTaskOverview(groupId) }
-    }
-    val taskDistribution by produceState<Result<AnalyticsResponse>?>(initialValue = null, api, groupId) {
-        value = runCatching { api.getTaskDistribution(groupId) }
-    }
-    val rescheduledTasks by produceState<Result<AnalyticsResponse>?>(initialValue = null, api, groupId) {
-        value = runCatching { api.getRescheduledTasks(groupId) }
-    }
-    val avgSolutionTime by produceState<Result<AnalyticsResponse>?>(initialValue = null, api) {
-        value = runCatching { api.getAvgSolutionTime(1L) }
-    }
-    val avgDevTime by produceState<Result<AnalyticsResponse>?>(initialValue = null, api) {
-        value = runCatching { api.getAvgDevTime(1L) }
-    }
-    val groupMemberCount by produceState<Result<GroupMemberCountResponse>?>(initialValue = null, api, groupId) {
-        value = runCatching { api.getGroupMemberCount(groupId) }
-    }
-    val taskTimePassed by produceState<Result<TaskTimePassedResponse>?>(initialValue = null, api) {
-        value = runCatching { api.getTaskTimePassed(1L) }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        analyticsViewModel.fetchAnalyticsData(token)
     }
 
     val slideMenuState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -97,7 +226,12 @@ fun AnalyticsAndReports(
         drawerState = slideMenuState,
         drawerContent = {
             ModalDrawerSheet {
-                SlideMenu(nav)
+                SlideMenu(
+                    nav,
+                    name = name,
+                    surname = surname,
+                    imgUrl = imgUrl
+                )
             }
         }
     ) {
@@ -116,117 +250,113 @@ fun AnalyticsAndReports(
                 )
             },
             content = { innerPadding ->
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(innerPadding)
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(18.dp)
-                ) {
-                    item {
-                        MetricCard(
-                            title = "Vista General de Tareas",
-                            content = taskOverview?.getOrNull()?.let {
-                                val summary = formatSummary(it.summary)
-                                val details = it.details?.entries
-                                    ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                    ?: ""
-                                "$summary\n$details"
-                            } ?: taskOverview?.exceptionOrNull()?.let {
-                                Log.e("Analytics", "Error al cargar overview", it)
-                                "Error al cargar: ${it.localizedMessage}"
-                            } ?: "Cargando..."
-                        )
+                if (loading) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(innerPadding)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                    ) {
+                        item { MetricCard(title = "Cargando métricas...", content = "Por favor espera...") }
                     }
-                    item {
-                        MetricCard(
-                            title = "Distribución de Tareas",
-                            content = taskDistribution?.getOrNull()?.let {
-                                val summary = formatSummary(it.summary)
-                                val details = it.details?.entries
-                                    ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                    ?: ""
-                                "$summary\n$details"
-                            } ?: taskDistribution?.exceptionOrNull()?.let {
-                                Log.e("Analytics", "Error al cargar distribution", it)
-                                "Error al cargar: ${it.localizedMessage}"
-                            } ?: "Cargando...",
-                            additionalContent = {
-                                taskDistribution?.getOrNull()?.details?.let { dist ->
-                                    EnhancedBarChart(dist.mapValues { v -> (v.value as? Number)?.toInt() ?: 0 })
+                } else if (!haveGroup) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(innerPadding)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                    ) {
+                        item { MetricCard(title = "Sin grupo", content = "No tienes grupo asignado.") }
+                    }
+                } else if (!haveMembers) {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(innerPadding)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                    ) {
+                        item { MetricCard(title = "Sin miembros", content = "Tu grupo no tiene miembros.") }
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(innerPadding)
+                            .padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(18.dp)
+                    ) {
+                        item {
+                            MetricCard(
+                                title = "Vista General de Tareas",
+                                content = analyticsState.taskOverview?.let {
+                                    val summary = formatSummary(it.summary)
+                                    val details = it.details?.entries
+                                        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
+                                        ?: ""
+                                    "$summary\n$details"
+                                } ?: "No disponible"
+                            )
+                        }
+                        item {
+                            MetricCard(
+                                title = "Distribución de Tareas",
+                                content = analyticsState.taskDistribution?.let {
+                                    val summary = formatSummary(it.summary)
+                                    val details = "" // Ocultamos el details textual, solo gráfico
+                                    "$summary\n$details"
+                                } ?: "No disponible",
+                                additionalContent = {
+                                    analyticsState.taskDistribution?.details?.let { dist ->
+                                        EnhancedBarChart(dist)
+                                    }
                                 }
-                            }
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Tareas Reprogramadas",
-                            content = rescheduledTasks?.getOrNull()?.let {
-                                val summary = formatSummary(it.summary)
-                                val details = it.details?.entries
-                                    ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                    ?: ""
-                                "$summary\n$details"
-                            } ?: rescheduledTasks?.exceptionOrNull()?.let {
-                                Log.e("Analytics", "Error al cargar rescheduled", it)
-                                "Error al cargar: ${it.localizedMessage}"
-                            } ?: "Cargando..."
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Tiempo Promedio de Solución (Líder)",
-                            content = avgSolutionTime?.getOrNull()?.let {
-                                val summary = it.summary ?: "Sin resumen"
-                                val details = it.details?.entries
-                                    ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                    ?: ""
-                                "$summary\n$details"
-                            } ?: avgSolutionTime?.exceptionOrNull()?.let {
-                                Log.e("Analytics", "Error al cargar avgSolutionTime", it)
-                                "Error al cargar: ${it.localizedMessage}"
-                            } ?: "Cargando..."
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Tiempo Promedio de Desarrollo",
-                            content = avgDevTime?.getOrNull()?.let {
-                                val summary = it.summary ?: "Sin resumen"
-                                // Busca el promedio en días en el summary usando regex
-                                val avgDays = Regex("([0-9]+(\\.[0-9]+)?) días?").find(summary)?.groupValues?.get(1)?.toDoubleOrNull()
-                                val formatted = formatDaysToDuration(avgDays)
-                                val details = it.details?.entries
-                                    ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                    ?: ""
-                                "$summary\nPromedio: $formatted\n$details"
-                            } ?: avgDevTime?.exceptionOrNull()?.let {
-                                Log.e("Analytics", "Error al cargar avgDevTime", it)
-                                "Error al cargar: ${it.localizedMessage}"
-                            } ?: "Cargando..."
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Miembros del Grupo",
-                            content = groupMemberCount?.getOrNull()?.let {
-                                "Miembros del grupo: ${it.memberCount ?: "?"}"
-                            } ?: groupMemberCount?.exceptionOrNull()?.let {
-                                Log.e("Analytics", "Error al cargar memberCount", it)
-                                "Error al cargar: ${it.localizedMessage}"
-                            } ?: "Cargando..."
-                        )
-                    }
-                    item {
-                        MetricCard(
-                            title = "Tiempo transcurrido de tarea",
-                            content = taskTimePassed?.getOrNull()?.let {
-                                "Tiempo transcurrido: ${formatDuration(it.timePassed)}"
-                            } ?: taskTimePassed?.exceptionOrNull()?.let {
-                                Log.e("Analytics", "Error al cargar timePassed", it)
-                                "Error al cargar: ${it.localizedMessage}"
-                            } ?: "Cargando..."
-                        )
+                            )
+                        }
+                        item {
+                            MetricCard(
+                                title = "Tareas Reprogramadas",
+                                content = analyticsState.rescheduledTasks?.let {
+                                    val summary = formatSummary(it.summary)
+                                    val details = it.details?.entries
+                                        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
+                                        ?: ""
+                                    "$summary\n$details"
+                                } ?: "No disponible"
+                            )
+                        }
+                        item {
+                            MetricCard(
+                                title = "Tiempo Promedio de Desarrollo",
+                                content = analyticsState.avgDevTime?.let {
+                                    val summary = it.summary ?: "Sin resumen"
+                                    val avgDays = Regex("([0-9]+(\\.[0-9]+)?) días?").find(summary)?.groupValues?.get(1)?.toDoubleOrNull()
+                                    val formatted = formatDaysToDuration(avgDays)
+                                    val details = it.details?.entries
+                                        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
+                                        ?: ""
+                                    "$summary\nPromedio: $formatted\n$details"
+                                } ?: "No disponible"
+                            )
+                        }
+                        item {
+                            MetricCard(
+                                title = "Miembros del Grupo",
+                                content = analyticsState.groupMemberCount?.let {
+                                    "Miembros del grupo: ${it.memberCount ?: 0}"
+                                } ?: "No disponible"
+                            )
+                        }
+                        item {
+                            MetricCard(
+                                title = "Tiempo transcurrido de tarea",
+                                content = analyticsState.taskTimePassed?.let {
+                                    "Tiempo transcurrido: ${formatDuration(it.timePassed)}"
+                                } ?: "No disponible"
+                            )
+                        }
                     }
                 }
             }
