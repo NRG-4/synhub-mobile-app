@@ -43,9 +43,11 @@ import com.example.synhub.analytics.views.AnalyticsDetails.getFriendlyName
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AnalyticsAndReports(nav: NavHostController, groupId: Long = 1L) {
-    val token = "eyJhbGciOiJIUzM4NCJ9.eyJzdWIiOiJnaWFubHVjYSIsImlhdCI6MTc0OTE4MDQ0NiwiZXhwIjoxNzQ5Nzg1MjQ2fQ.TLES8wqu9YQ_DlWitOL2DU4emGS7fHdiT2GspAS86804wCyW4fDv5umjd6hmFc-G"
-
+fun AnalyticsAndReports(
+    nav: NavHostController,
+    groupId: Long = 1L,
+    token: String
+) {
     val okHttpClient = remember {
         OkHttpClient.Builder()
             .addInterceptor(Interceptor { chain ->
