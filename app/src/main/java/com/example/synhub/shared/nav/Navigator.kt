@@ -15,6 +15,7 @@ import com.example.synhub.invitations.views.Invitations
 import com.example.synhub.requests.views.RequestAndValidationList
 import com.example.synhub.requests.views.RequestView
 import com.example.synhub.requests.views.ValidationView
+import com.example.synhub.shared.model.client.RetrofitClient
 import com.example.synhub.shared.views.Home
 import com.example.synhub.shared.views.Login
 import com.example.synhub.shared.views.Register
@@ -64,6 +65,11 @@ fun Navigator(){
         composable("Validation") { ValidationView(rememberScreen) }
 
         // Analítica
-        composable("AnalyticsAndReports") { AnalyticsAndReports(rememberScreen) }
+        composable("AnalyticsAndReports") {
+            AnalyticsAndReports(
+                nav = rememberScreen,
+                token = RetrofitClient.token ?: ""
+            )
+        }
     }
 }
