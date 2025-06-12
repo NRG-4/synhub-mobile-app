@@ -1,5 +1,6 @@
 package com.example.synhub.shared.model.client
 
+import com.example.synhub.analytics.model.response.AnalyticsWebService
 import com.example.synhub.groups.model.response.GroupWebService
 import com.example.synhub.groups.model.response.MembersWebService
 import com.example.synhub.invitations.model.response.InvitationsWebService
@@ -13,7 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
     @Volatile
-    private var token: String? = null
+    var token: String? = null
 
     fun updateToken(newToken: String) {
         token = newToken
@@ -27,8 +28,9 @@ object RetrofitClient {
         get() = OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val requestBuilder = chain.request().newBuilder()
-                token?.let {
-                    requestBuilder.addHeader("Authorization", "Bearer $it")
+                val currentToken = token
+                if (!currentToken.isNullOrBlank()) {
+                    requestBuilder.addHeader("Authorization", "Bearer $currentToken")
                 }
                 chain.proceed(requestBuilder.build())
             }
@@ -47,4 +49,5 @@ object RetrofitClient {
     val membersWebService: MembersWebService = retrofit.create(MembersWebService::class.java)
     val invitationsWebService: InvitationsWebService = retrofit.create(InvitationsWebService::class.java)
     val registerWebService: RegisterWebService = retrofit.create(RegisterWebService::class.java)
+    val analyticsWebService: AnalyticsWebService = retrofit.create(AnalyticsWebService::class.java)
 }
