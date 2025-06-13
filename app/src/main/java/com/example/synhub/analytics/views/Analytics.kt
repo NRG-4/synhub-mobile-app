@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -32,12 +33,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
+import com.example.synhub.groups.viewmodel.GroupViewModel
+import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.analytics.viewmodel.AnalyticsState
 import com.example.synhub.analytics.viewmodel.AnalyticsViewModel
 import com.example.synhub.shared.components.SlideMenu
@@ -46,6 +51,8 @@ import kotlinx.coroutines.delay
 import com.example.synhub.groups.model.response.MembersWebService
 import com.example.synhub.shared.model.client.RetrofitClient
 import com.example.synhub.tasks.application.dto.TaskResponse
+import kotlinx.coroutines.launch
+import com.example.synhub.analytics.model.response.AnalyticsWebService
 
 private val BluePrimary = Color(0xFF1A4E85)
 private val BlueLight = Color(0xFFE3F2FD)
@@ -361,7 +368,10 @@ fun AnalyticsOverviewSection(analyticsState: AnalyticsState) {
 }
 
 @Composable
-fun AnalyticsDistributionSection(analyticsState: AnalyticsState) {
+fun AnalyticsDistributionSection(
+    analyticsState: AnalyticsState,
+    members: List<com.example.synhub.groups.application.dto.MemberResponse> = emptyList()
+) {
     val dist = analyticsState.taskDistribution?.details
     androidx.compose.material3.Card(
         modifier = Modifier
@@ -383,20 +393,107 @@ fun AnalyticsDistributionSection(analyticsState: AnalyticsState) {
             if (dist.isNullOrEmpty()) {
                 Text("No disponible", color = Color.Gray)
             } else {
-                EnhancedBarChart(dist)
+                val parsed = dist.mapNotNull { (_, v) ->
+                    if (v is Map<*, *>) {
+                        val name = v["memberName"]?.toString() ?: return@mapNotNull null
+                        val count = (v["taskCount"] as? Number)?.toInt() ?: 0
+                        name to count
+                    } else null
+                }
+                if (parsed.isEmpty()) return@Column
+                val max = parsed.maxOf { it.second }.takeIf { it > 0 } ?: 1
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .background(Color(0xFFF7F7F7), RoundedCornerShape(8.dp))
+                        .padding(12.dp)
+                ) {
+                    parsed.forEach { (memberName, count) ->
+                        val member = members.find { "${it.name} ${it.surname}" == memberName }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 10.dp)
+                        ) {
+                            if (member != null && !member.imgUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = member.imgUrl,
+                                    contentDescription = "Foto de $memberName",
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = memberName,
+                                color = BluePrimary,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Medium,
+                                modifier = Modifier.width(80.dp)
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .height(18.dp)
+                                    .weight(1f)
+                                    .background(BlueLight, RoundedCornerShape(4.dp))
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth(fraction = count / max.toFloat())
+                                        .height(18.dp)
+                                        .background(BlueAccent, RoundedCornerShape(4.dp))
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = "$count tareas",
+                                color = BlueAccent,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 15.sp
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun AnalyticsCompletionTimeSection(analyticsState: AnalyticsState) {
+fun AnalyticsCompletionTimeSection(
+    analyticsState: AnalyticsState,
+    members: List<com.example.synhub.groups.application.dto.MemberResponse> = emptyList()
+) {
     val avg = analyticsState.avgCompletionTime
-    val avgDays = avg?.value
+    val avgDays = avg?.details?.get("COMPLETED") as? Double
     val formatted = formatDaysToDuration(avgDays)
-    val details = avg?.details?.entries
-        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-        ?: ""
+
+    val analyticsApi = RetrofitClient.analyticsWebService as AnalyticsWebService
+    val coroutineScope = rememberCoroutineScope()
+    var memberTimes by remember { mutableStateOf<Map<Long, Long?>>(emptyMap()) }
+    var loading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(members) {
+        loading = true
+        val times = mutableMapOf<Long, Long?>()
+        members.forEach { member ->
+            coroutineScope.launch {
+                try {
+                    val resp = analyticsApi.getTaskTimePassed(member.id)
+                    times[member.id] = resp.body()?.timePassed
+                } catch (_: Exception) {
+                    times[member.id] = null
+                }
+                memberTimes = times.toMap()
+            }
+        }
+        loading = false
+    }
+
     androidx.compose.material3.Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -411,24 +508,70 @@ fun AnalyticsCompletionTimeSection(analyticsState: AnalyticsState) {
                 .background(Color(0xFFEAF6FF), RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
-            SectionTitle("Tiempo Promedio de Finalización", icon = {
+            SectionTitle("Tiempo promedio de finalización", icon = {
                 Icon(Icons.Filled.DateRange, contentDescription = null, tint = BluePrimary)
             })
-            MetricRow("Promedio", formatted, highlight = true)
-            if (details.isNotBlank()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(details, color = Color(0xFF333333), fontSize = 15.sp)
+            if (formatted.isNotBlank() && formatted != "Sin tiempo registrado") {
+                MetricRow("Promedio tareas completadas", formatted, highlight = true)
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Promedio por miembro (solo tareas completadas):", color = BluePrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            if (loading && members.isNotEmpty()) {
+                Text("Cargando tiempos por miembro...", color = Color.Gray, fontSize = 14.sp)
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    members.forEach { member ->
+                        val name = "${member.name} ${member.surname}"
+                        val time = memberTimes[member.id]
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!member.imgUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = member.imgUrl,
+                                    contentDescription = "Foto de $name",
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = name,
+                                fontSize = 15.sp,
+                                color = Color(0xFF333333),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = formatDuration(time),
+                                fontWeight = FontWeight.Medium,
+                                color = BlueAccent,
+                                fontSize = 15.sp
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun AnalyticsRescheduledSection(analyticsState: AnalyticsState) {
+fun AnalyticsRescheduledSection(
+    analyticsState: AnalyticsState,
+    members: List<com.example.synhub.groups.application.dto.MemberResponse> = emptyList()
+) {
     val rescheduled = analyticsState.rescheduledTasks
-    val details = rescheduled?.details?.entries
-        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-        ?: ""
+    val totalRescheduled = (rescheduled?.details?.get("rescheduled") as? Number)?.toInt() ?: 0
+    val total = formatIntValue(rescheduled?.details?.get("total"))
+    val rescheduledMemberIds = rescheduled?.rescheduledMemberIds ?: emptyList()
+
+    val memberCount = rescheduledMemberIds.size.takeIf { it > 0 } ?: 1
+    val perMember = if (memberCount > 0) totalRescheduled / memberCount else 0
+    val remainder = if (memberCount > 0) totalRescheduled % memberCount else 0
+
     androidx.compose.material3.Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -443,13 +586,57 @@ fun AnalyticsRescheduledSection(analyticsState: AnalyticsState) {
                 .background(Color(0xFFEAF6FF), RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
-            SectionTitle("Tareas Reprogramadas", icon = {
+            SectionTitle("Tareas reprogramadas", icon = {
                 Icon(Icons.Filled.Build, contentDescription = null, tint = BluePrimary)
             })
-            if (details.isNotBlank()) {
-                Text(details, color = Color(0xFF333333), fontSize = 15.sp)
+            MetricRow("Total reprogramadas", totalRescheduled.toString(), highlight = true)
+            MetricRow("Total tareas", total)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text("Miembros que reprogramaron tareas:", color = BluePrimary, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(4.dp))
+            if (rescheduledMemberIds.isEmpty()) {
+                Text("Ningún miembro ha reprogramado tareas.", color = Color.Gray, fontSize = 14.sp)
             } else {
-                Text("No disponible", color = Color.Gray)
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    members.filter { it.id in rescheduledMemberIds }.forEachIndexed { idx, member ->
+                        val name = "${member.name} ${member.surname}"
+                        val count = perMember + if (idx < remainder) 1 else 0
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            if (!member.imgUrl.isNullOrBlank()) {
+                                AsyncImage(
+                                    model = member.imgUrl,
+                                    contentDescription = "Foto de $name",
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = name,
+                                fontSize = 15.sp,
+                                color = Color(0xFF333333),
+                                modifier = Modifier.weight(1f)
+                            )
+                            Text(
+                                text = "$count",
+                                fontWeight = FontWeight.Medium,
+                                color = BlueAccent,
+                                fontSize = 15.sp,
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Icon(
+                                imageVector = Icons.Filled.Build,
+                                contentDescription = "Reprogramó tarea",
+                                tint = BlueAccent,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -463,16 +650,20 @@ fun AnalyticsAndReports(
     name: String = "",
     surname: String = "",
     imgUrl: String = "",
-    analyticsViewModel: AnalyticsViewModel = viewModel()
+    analyticsViewModel: AnalyticsViewModel = viewModel(),
+    groupViewModel: GroupViewModel = viewModel(),
+    memberViewModel: MemberViewModel = viewModel()
 ) {
-    val haveGroup by analyticsViewModel.haveGroup.collectAsState()
-    val group by analyticsViewModel.group.collectAsState()
-    val members by analyticsViewModel.members.collectAsState()
-    val haveMembers by analyticsViewModel.haveMembers.collectAsState()
+    val haveGroup by groupViewModel.haveGroup.collectAsState()
+    val group by groupViewModel.group.collectAsState()
+    val members by memberViewModel.members.collectAsState()
+    val haveMembers by memberViewModel.haveMembers.collectAsState()
     val analyticsState by analyticsViewModel.analyticsState.collectAsState()
     val loading by analyticsViewModel.loading.collectAsState()
 
     LaunchedEffect(Unit) {
+        groupViewModel.fetchLeaderGroup()
+        memberViewModel.fetchGroupMembers()
         analyticsViewModel.fetchAnalyticsData(token)
     }
 
@@ -549,13 +740,13 @@ fun AnalyticsAndReports(
                             AnalyticsOverviewSection(analyticsState)
                         }
                         item {
-                            AnalyticsDistributionSection(analyticsState)
+                            AnalyticsDistributionSection(analyticsState, members)
                         }
                         item {
-                            AnalyticsCompletionTimeSection(analyticsState)
+                            AnalyticsCompletionTimeSection(analyticsState, members)
                         }
                         item {
-                            AnalyticsRescheduledSection(analyticsState)
+                            AnalyticsRescheduledSection(analyticsState, members)
                         }
                     }
                 }
