@@ -7,7 +7,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,9 +23,13 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,9 +38,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.example.synhub.analytics.viewmodel.AnalyticsState
 import com.example.synhub.analytics.viewmodel.AnalyticsViewModel
 import com.example.synhub.shared.components.SlideMenu
 import com.example.synhub.shared.components.TopBar
+import kotlinx.coroutines.delay
+import com.example.synhub.groups.model.response.MembersWebService
+import com.example.synhub.shared.model.client.RetrofitClient
+import com.example.synhub.tasks.application.dto.TaskResponse
+
+private val BluePrimary = Color(0xFF1A4E85)
+private val BlueLight = Color(0xFFE3F2FD)
+private val BlueLighter = Color(0xFFF0F6FF)
+private val BlueAccent = Color(0xFF1976D2)
+private val BlueCard = Color(0xFFF5F9FF)
+private val BlueDivider = Color(0xFFB3D1F7)
 
 private val friendlyNames = mapOf(
     "IN_PROGRESS" to "En progreso",
@@ -74,11 +95,7 @@ fun formatDaysToDuration(days: Double?): String {
 }
 
 fun formatSummary(summary: String?): String {
-    if (summary == null) return ""
-    return summary
-        .replace(Regex("(Vista general de tareas: )([0-9]+)\\.00"), "$1$2")
-        .replace(Regex("(Distribución de tareas: )([0-9]+)\\.00"), "$1$2")
-        .replace(Regex("(Tareas reprogramadas vs no reprogramadas: )([0-9]+)\\.00"), "$1$2")
+    return ""
 }
 
 @Composable
@@ -126,13 +143,10 @@ fun MetricCard(
     }
 }
 
-// --- Mejorado: Gráfico de barras para distribución de tareas ---
-
 @Composable
 fun EnhancedBarChart(distribution: Map<String, Any>?) {
     if (distribution.isNullOrEmpty()) return
 
-    // Extraer pares (nombre, cantidad) de la estructura { "2": {memberName=e,e, taskCount=1.0}, ... }
     val parsed = distribution.mapNotNull { (_, v) ->
         if (v is Map<*, *>) {
             val name = v["memberName"]?.toString() ?: return@mapNotNull null
@@ -153,46 +167,289 @@ fun EnhancedBarChart(distribution: Map<String, Any>?) {
             .padding(12.dp)
     ) {
         parsed.forEach { (member, count) ->
-            Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp)
+            ) {
                 Text(
                     text = member,
-                    color = Color(0xFF666666),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
+                    color = BluePrimary,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.width(80.dp)
                 )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(bottom = 6.dp)
+                Box(
+                    modifier = Modifier
+                        .height(18.dp)
+                        .weight(1f)
+                        .background(BlueLight, RoundedCornerShape(4.dp))
                 ) {
                     Box(
                         modifier = Modifier
+                            .fillMaxWidth(fraction = count / max.toFloat())
                             .height(18.dp)
-                            .weight(1f)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(fraction = count / max.toFloat())
-                                .height(18.dp)
-                                .background(Color(0xFF1976D2), RoundedCornerShape(4.dp))
-                        )
-                        // Número de tareas al final de la barra
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(18.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Spacer(modifier = Modifier.weight(1f))
-                            Text(
-                                text = count.toString(),
-                                color = Color(0xFF1976D2),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 14.sp,
-                                modifier = Modifier.padding(end = 6.dp)
-                            )
-                        }
+                            .background(BlueAccent, RoundedCornerShape(4.dp))
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = "$count tareas",
+                    color = BlueAccent,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TaskTimesList(memberId: Long?) {
+    val memberApi = RetrofitClient.membersWebService as MembersWebService
+    var tasks by remember { mutableStateOf<List<TaskResponse>>(emptyList()) }
+    var loading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(memberId) {
+        loading = true
+        tasks = if (memberId != null) {
+            val response = memberApi.getMemberTasks(memberId)
+            (response.body() as? List<*>)?.filterIsInstance<TaskResponse>() ?: emptyList()
+        } else emptyList()
+        loading = false
+    }
+
+    if (loading) {
+        Text("Cargando tareas...", color = Color.Gray, fontSize = 14.sp)
+        return
+    }
+
+    if (tasks.isEmpty()) {
+        Text("No disponible", color = Color.Gray, fontSize = 14.sp)
+        return
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        tasks.forEach { task ->
+            val taskId = task.id
+            val title = task.title
+            val status = task.status
+            var timePassed by remember { mutableStateOf<Long?>(null) }
+
+            LaunchedEffect(taskId, status) {
+                if (taskId != null) {
+                    while (true) {
+                        val analyticsApi = RetrofitClient.analyticsWebService as com.example.synhub.analytics.model.response.AnalyticsWebService
+                        val resp = analyticsApi.getTaskTimePassed(taskId)
+                        timePassed = resp.body()?.timePassed
+                        if (status != "IN_PROGRESS") break
+                        delay(1000)
                     }
                 }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = title,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp,
+                    modifier = Modifier.weight(1f)
+                )
+                Text(
+                    text = formatDuration(timePassed),
+                    color = BlueAccent,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SectionTitle(title: String, icon: @Composable (() -> Unit)? = null) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
+    ) {
+        icon?.let {
+            Box(modifier = Modifier.padding(end = 8.dp)) { it() }
+        }
+        Text(
+            text = title,
+            color = BluePrimary,
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp
+        )
+    }
+}
+
+fun formatIntValue(value: Any?): String =
+    when (value) {
+        is Number -> value.toInt().toString()
+        else -> value?.toString() ?: ""
+    }
+
+@Composable
+fun MetricRow(label: String, value: String, highlight: Boolean = false) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            fontWeight = if (highlight) FontWeight.Bold else FontWeight.Normal,
+            color = if (highlight) BluePrimary else Color(0xFF333333),
+            fontSize = 16.sp,
+            modifier = Modifier.weight(1f)
+        )
+        Text(
+            text = value,
+            fontWeight = if (highlight) FontWeight.Bold else FontWeight.Normal,
+            color = if (highlight) BluePrimary else Color(0xFF333333),
+            fontSize = 16.sp
+        )
+    }
+}
+
+@Composable
+fun AnalyticsOverviewSection(analyticsState: AnalyticsState) {
+    val overview = analyticsState.taskOverview
+    val completed = formatIntValue(overview?.details?.get("COMPLETED"))
+    val inProgress = formatIntValue(overview?.details?.get("IN_PROGRESS"))
+    val total = overview?.details?.values
+        ?.filterIsInstance<Number>()
+        ?.sumOf { it.toInt() }
+        ?.toString() ?: "0"
+    val rescheduled = formatIntValue(analyticsState.rescheduledTasks?.details?.get("rescheduled"))
+
+    val completedTasksValue = overview?.details?.get("completedTasks")
+        ?: analyticsState.rescheduledTasks?.details?.get("completedTasks")
+    val completedTasks = formatIntValue(completedTasksValue)
+
+    androidx.compose.material3.Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(18.dp),
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(BlueLight, RoundedCornerShape(12.dp))
+                .padding(16.dp)
+        ) {
+            SectionTitle("Resumen General", icon = {
+                Icon(Icons.Filled.Info, contentDescription = null, tint = BluePrimary)
+            })
+            MetricRow("Tareas completadas", completed, highlight = true)
+            MetricRow("Tareas en progreso", inProgress)
+            MetricRow("Total de tareas", total)
+            Spacer(modifier = Modifier.height(8.dp))
+            MetricRow("Tareas reprogramadas", rescheduled)
+        }
+    }
+}
+
+@Composable
+fun AnalyticsDistributionSection(analyticsState: AnalyticsState) {
+    val dist = analyticsState.taskDistribution?.details
+    androidx.compose.material3.Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(18.dp),
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(BlueLighter, RoundedCornerShape(12.dp))
+                .padding(16.dp)
+        ) {
+            SectionTitle("Distribución de Tareas", icon = {
+                Icon(Icons.Filled.AccountCircle, contentDescription = null, tint = BluePrimary)
+            })
+            if (dist.isNullOrEmpty()) {
+                Text("No disponible", color = Color.Gray)
+            } else {
+                EnhancedBarChart(dist)
+            }
+        }
+    }
+}
+
+@Composable
+fun AnalyticsCompletionTimeSection(analyticsState: AnalyticsState) {
+    val avg = analyticsState.avgCompletionTime
+    val avgDays = avg?.value
+    val formatted = formatDaysToDuration(avgDays)
+    val details = avg?.details?.entries
+        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
+        ?: ""
+    androidx.compose.material3.Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(18.dp),
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFEAF6FF), RoundedCornerShape(12.dp))
+                .padding(16.dp)
+        ) {
+            SectionTitle("Tiempo Promedio de Finalización", icon = {
+                Icon(Icons.Filled.DateRange, contentDescription = null, tint = BluePrimary)
+            })
+            MetricRow("Promedio", formatted, highlight = true)
+            if (details.isNotBlank()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(details, color = Color(0xFF333333), fontSize = 15.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun AnalyticsRescheduledSection(analyticsState: AnalyticsState) {
+    val rescheduled = analyticsState.rescheduledTasks
+    val details = rescheduled?.details?.entries
+        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
+        ?: ""
+    androidx.compose.material3.Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 2.dp, vertical = 2.dp),
+        shape = RoundedCornerShape(18.dp),
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFFEAF6FF), RoundedCornerShape(12.dp))
+                .padding(16.dp)
+        ) {
+            SectionTitle("Tareas Reprogramadas", icon = {
+                Icon(Icons.Filled.Build, contentDescription = null, tint = BluePrimary)
+            })
+            if (details.isNotBlank()) {
+                Text(details, color = Color(0xFF333333), fontSize = 15.sp)
+            } else {
+                Text("No disponible", color = Color.Gray)
             }
         }
     }
@@ -215,7 +472,7 @@ fun AnalyticsAndReports(
     val analyticsState by analyticsViewModel.analyticsState.collectAsState()
     val loading by analyticsViewModel.loading.collectAsState()
 
-    androidx.compose.runtime.LaunchedEffect(Unit) {
+    LaunchedEffect(Unit) {
         analyticsViewModel.fetchAnalyticsData(token)
     }
 
@@ -285,77 +542,20 @@ fun AnalyticsAndReports(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(innerPadding)
-                            .padding(16.dp),
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(18.dp)
                     ) {
                         item {
-                            MetricCard(
-                                title = "Vista General de Tareas",
-                                content = analyticsState.taskOverview?.let {
-                                    val summary = formatSummary(it.summary)
-                                    val details = it.details?.entries
-                                        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                        ?: ""
-                                    "$summary\n$details"
-                                } ?: "No disponible"
-                            )
+                            AnalyticsOverviewSection(analyticsState)
                         }
                         item {
-                            MetricCard(
-                                title = "Distribución de Tareas",
-                                content = analyticsState.taskDistribution?.let {
-                                    val summary = formatSummary(it.summary)
-                                    val details = "" // Ocultamos el details textual, solo gráfico
-                                    "$summary\n$details"
-                                } ?: "No disponible",
-                                additionalContent = {
-                                    analyticsState.taskDistribution?.details?.let { dist ->
-                                        EnhancedBarChart(dist)
-                                    }
-                                }
-                            )
+                            AnalyticsDistributionSection(analyticsState)
                         }
                         item {
-                            MetricCard(
-                                title = "Tareas Reprogramadas",
-                                content = analyticsState.rescheduledTasks?.let {
-                                    val summary = formatSummary(it.summary)
-                                    val details = it.details?.entries
-                                        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                        ?: ""
-                                    "$summary\n$details"
-                                } ?: "No disponible"
-                            )
+                            AnalyticsCompletionTimeSection(analyticsState)
                         }
                         item {
-                            MetricCard(
-                                title = "Tiempo Promedio de Desarrollo",
-                                content = analyticsState.avgDevTime?.let {
-                                    val summary = it.summary ?: "Sin resumen"
-                                    val avgDays = Regex("([0-9]+(\\.[0-9]+)?) días?").find(summary)?.groupValues?.get(1)?.toDoubleOrNull()
-                                    val formatted = formatDaysToDuration(avgDays)
-                                    val details = it.details?.entries
-                                        ?.joinToString("\n") { (k, v) -> "• ${getFriendlyName(k)}: ${formatDetailValue(v)}" }
-                                        ?: ""
-                                    "$summary\nPromedio: $formatted\n$details"
-                                } ?: "No disponible"
-                            )
-                        }
-                        item {
-                            MetricCard(
-                                title = "Miembros del Grupo",
-                                content = analyticsState.groupMemberCount?.let {
-                                    "Miembros del grupo: ${it.memberCount ?: 0}"
-                                } ?: "No disponible"
-                            )
-                        }
-                        item {
-                            MetricCard(
-                                title = "Tiempo transcurrido de tarea",
-                                content = analyticsState.taskTimePassed?.let {
-                                    "Tiempo transcurrido: ${formatDuration(it.timePassed)}"
-                                } ?: "No disponible"
-                            )
+                            AnalyticsRescheduledSection(analyticsState)
                         }
                     }
                 }
