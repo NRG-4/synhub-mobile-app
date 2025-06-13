@@ -41,7 +41,9 @@ fun Navigator(){
 
         // Request and validation screens
         composable("RequestsAndValidations") { RequestAndValidationList(rememberScreen) }
-        composable("Request") { RequestView(rememberScreen) }
+        composable("Request/{requestId}") { backStackEntry ->
+            val requestId = backStackEntry.arguments?.getString("requestId")
+            RequestView(rememberScreen, requestId) }
         composable("Validation") { ValidationView(rememberScreen) }
 
         composable("Tasks") { Tasks(rememberScreen) }
