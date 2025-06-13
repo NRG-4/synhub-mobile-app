@@ -16,13 +16,15 @@ class RequestViewModel: ViewModel() {
     private val _request = MutableStateFlow<RequestResponse?>(null)
     val request: StateFlow<RequestResponse?> = _request
 
-    fun fetchRequest(taskId: Long) {
+    private val _requests = MutableStateFlow<List<RequestResponse>>(emptyList())
+    val requests: StateFlow<List<RequestResponse>> = _requests
+
+    fun createRequest(taskId: Long, createRequest: CreateRequest) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.requestsWebService.getRequest(taskId);
+                val response = RetrofitClient.requestsWebService.createRequest(taskId, createRequest)
                 if (response.isSuccessful && response.body() != null) {
-                    val request = response.body()!!
-                    _request.value = request
+                    _request.value = response.body()
                 } else {
                     _request.value = null
                 }
@@ -32,12 +34,13 @@ class RequestViewModel: ViewModel() {
         }
     }
 
-    fun createRequest(taskId: Long, createRequest: CreateRequest) {
+    fun fetchRequestByTaskId(taskId: Long) {
         viewModelScope.launch {
             try {
-                val response = RetrofitClient.requestsWebService.createRequest(taskId, createRequest)
+                val response = RetrofitClient.requestsWebService.getRequestByTaskId(taskId);
                 if (response.isSuccessful && response.body() != null) {
-                    _request.value = response.body()
+                    val request = response.body()!!
+                    _request.value = request
                 } else {
                     _request.value = null
                 }
@@ -61,4 +64,55 @@ class RequestViewModel: ViewModel() {
             }
         }
     }
+
+    // Not tested yet
+    fun deleteRequest(taskId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.requestsWebService.deleteRequest(taskId)
+                if (response.isSuccessful) {
+                    _request.value = null
+                } else {
+                    _request.value = null
+                }
+            } catch (e: Exception) {
+                _request.value = null
+            }
+        }
+    }
+
+    fun fetchGroupRequests() {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.requestsWebService.getGroupRequests()
+                if (response.isSuccessful && response.body() != null) {
+                    _requests.value = response.body()!!
+                } else {
+                    _requests.value = emptyList()
+                }
+            } catch (e: Exception) {
+                _requests.value = emptyList()
+            }
+        }
+    }
+
+    fun fetchMemberRequests() {
+        viewModelScope.launch {
+            try {
+
+
+
+                val response = RetrofitClient.requestsWebService.getMemberRequests()
+                if (response.isSuccessful && response.body() != null) {
+                    _requests.value = response.body()!!
+                } else {
+                    _requests.value = emptyList()
+                }
+            } catch (e: Exception) {
+                _requests.value = emptyList()
+            }
+        }
+    }
+
+    // Fuse group and member requests in a single function maybe? (has to check if its leader or not)
 }
