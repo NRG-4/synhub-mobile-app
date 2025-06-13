@@ -20,7 +20,7 @@ data class AnalyticsState(
     val taskOverview: AnalyticsResponse? = null,
     val taskDistribution: AnalyticsResponse? = null,
     val rescheduledTasks: AnalyticsResponse? = null,
-    val avgDevTime: AnalyticsResponse? = null,
+    val avgCompletionTime: AnalyticsResponse? = null,
     val groupMemberCount: GroupMemberCountResponse? = null,
     val taskTimePassed: TaskTimePassedResponse? = null
 )
@@ -61,26 +61,24 @@ class AnalyticsViewModel : ViewModel() {
                 _members.value = members
                 _haveMembers.value = members.isNotEmpty()
 
-                val groupId = group.id
                 val memberId = members.firstOrNull()?.id
                 val taskId = memberId?.let {
                     val tasksResponse = memberApi.getMemberTasks(it)
-                    tasksResponse.body()?.firstOrNull()?.id
+                    // Solo toma el primer id de tareas del tipo correcto
+                    (tasksResponse.body() as? List<*>)?.filterIsInstance<com.example.synhub.tasks.application.dto.TaskResponse>()?.firstOrNull()?.id
                 }
 
-                val taskOverview = groupId?.let { analyticsApi.getTaskOverview(it).body() }
-                val taskDistribution = groupId?.let { analyticsApi.getTaskDistribution(it).body() }
-                val rescheduledTasks = groupId?.let { analyticsApi.getRescheduledTasks(it).body() }
-                val avgDevTime = memberId?.let { analyticsApi.getAvgDevTime(it).body() }
-                val groupMemberCount = groupId?.let { analyticsApi.getGroupMemberCount(it).body() }
+                val taskOverview = analyticsApi.getTaskOverview().body()
+                val taskDistribution = analyticsApi.getTaskDistribution().body()
+                val rescheduledTasks = analyticsApi.getRescheduledTasks().body()
+                val avgCompletionTime = analyticsApi.getAvgCompletionTime().body()
                 val taskTimePassed = taskId?.let { analyticsApi.getTaskTimePassed(it).body() }
 
                 _analyticsState.value = AnalyticsState(
                     taskOverview = taskOverview,
                     taskDistribution = taskDistribution,
                     rescheduledTasks = rescheduledTasks,
-                    avgDevTime = avgDevTime,
-                    groupMemberCount = groupMemberCount,
+                    avgCompletionTime = avgCompletionTime,
                     taskTimePassed = taskTimePassed
                 )
             } else {
