@@ -8,24 +8,19 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface AnalyticsWebService {
-    @GET("metrics/tasks/overview/{groupId}")
-    suspend fun getTaskOverview(@Path("groupId") groupId: Long): Response<AnalyticsResponse>
+    @GET("metrics/tasks/overview")
+    suspend fun getTaskOverview(): Response<AnalyticsResponse>
 
-    @GET("metrics/tasks/distribution/{groupId}")
-    suspend fun getTaskDistribution(@Path("groupId") groupId: Long): Response<AnalyticsResponse>
+    @GET("metrics/tasks/distribution")
+    suspend fun getTaskDistribution(): Response<AnalyticsResponse>
 
-    @GET("metrics/tasks/rescheduled/{groupId}")
-    suspend fun getRescheduledTasks(@Path("groupId") groupId: Long): Response<AnalyticsResponse>
+    @GET("metrics/tasks/rescheduled")
+    suspend fun getRescheduledTasks(): Response<AnalyticsResponse>
 
-    @GET("metrics/tasks/avg-solution-time/{leaderId}")
-    suspend fun getAvgSolutionTime(@Path("leaderId") leaderId: Long): Response<AnalyticsResponse>
-
-    @GET("metrics/tasks/avg-dev-time/{memberId}")
-    suspend fun getAvgDevTime(@Path("memberId") memberId: Long): Response<AnalyticsResponse>
+    @GET("metrics/tasks/avg-completion-time")
+    suspend fun getAvgCompletionTime(): Response<AnalyticsResponse>
 
     @GET("metrics/task/{taskId}/time-passed")
     suspend fun getTaskTimePassed(@Path("taskId") taskId: Long): Response<TaskTimePassedResponse>
 
-    @GET("metrics/groups/{groupId}/member-count")
-    suspend fun getGroupMemberCount(@Path("groupId") groupId: Long): Response<GroupMemberCountResponse>
 }
