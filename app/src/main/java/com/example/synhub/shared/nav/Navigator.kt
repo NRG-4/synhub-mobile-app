@@ -44,7 +44,9 @@ fun Navigator(){
         composable("Request/{requestId}") { backStackEntry ->
             val requestId = backStackEntry.arguments?.getString("requestId")
             RequestView(rememberScreen, requestId) }
-        composable("Validation") { ValidationView(rememberScreen) }
+        composable("Validation/{requestId}") { backStackEntry ->
+            val requestId = backStackEntry.arguments?.getString("requestId")
+            ValidationView(rememberScreen, requestId) }
 
         composable("Tasks") { Tasks(rememberScreen) }
         composable("Tasks/Detail/{taskId}") { backStackEntry ->
