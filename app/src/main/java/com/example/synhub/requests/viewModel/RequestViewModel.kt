@@ -99,9 +99,6 @@ class RequestViewModel: ViewModel() {
     fun fetchMemberRequests() {
         viewModelScope.launch {
             try {
-
-
-
                 val response = RetrofitClient.requestsWebService.getMemberRequests()
                 if (response.isSuccessful && response.body() != null) {
                     _requests.value = response.body()!!
