@@ -50,15 +50,26 @@ import com.example.synhub.R
 import com.example.synhub.requests.application.dto.RequestResponse
 import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
+import com.example.synhub.tasks.application.dto.TaskResponse
+import com.example.synhub.tasks.viewmodel.TaskViewModel
 
 @Composable
 fun RequestView(nav: NavHostController, taskId: String?) {
     val requestViewModel: RequestViewModel = viewModel()
     val request by requestViewModel.request.collectAsState()
 
+    val taskViewModel: TaskViewModel = viewModel()
+    val task by taskViewModel.task.collectAsState()
+
     LaunchedEffect(taskId) {
         taskId?.toLongOrNull()?.let {
             requestViewModel.fetchRequestByTaskId(it)
+        }
+    }
+
+    LaunchedEffect(request?.taskId) {
+        request?.taskId?.let {
+            taskViewModel.fetchTaskById(it)
         }
     }
 
@@ -75,13 +86,13 @@ fun RequestView(nav: NavHostController, taskId: String?) {
             )
         }
     ) {
-        innerPadding -> RequestDetails(modifier = Modifier.padding(innerPadding),nav, request)
+        innerPadding -> RequestDetails(modifier = Modifier.padding(innerPadding),nav, request, task)
     }
 }
 
 
 @Composable
-fun RequestDetails(modifier: Modifier, nav: NavHostController, request: RequestResponse?) {
+fun RequestDetails(modifier: Modifier, nav: NavHostController, request: RequestResponse?, task: TaskResponse?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -99,7 +110,7 @@ fun RequestDetails(modifier: Modifier, nav: NavHostController, request: RequestR
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = request?.memberId.toString(),
+                text = task?.member?.name.toString(),
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp
             )
@@ -134,7 +145,7 @@ fun RequestDetails(modifier: Modifier, nav: NavHostController, request: RequestR
                         Spacer(modifier = Modifier.height(10.dp))
                         HorizontalDivider(thickness = 2.dp)
                         Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = "Descripción tarea 1", color = Color.White)
+                        Text(text = task?.description.toString(), color = Color.White)
                     }
                 }
                 Column(
@@ -150,7 +161,7 @@ fun RequestDetails(modifier: Modifier, nav: NavHostController, request: RequestR
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = request?.createdAt.toString() + " - " + request?.updatedAt.toString(),
+                        text = task?.createdAt + " - " + task?.dueDate,
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
                         modifier = Modifier.fillMaxWidth()
