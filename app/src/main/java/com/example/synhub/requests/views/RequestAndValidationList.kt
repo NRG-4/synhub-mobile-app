@@ -136,7 +136,7 @@ fun RequestsListScreen(modifier: Modifier, nav: NavHostController, requestsViewM
                                 containerColor = Color(0xFF1A4E85)
                             ),
                             onClick = {
-                                nav.navigate("Request/${request.taskId}")
+                                nav.navigate("Validation/${request.taskId}")
                             }
                         ) {
                             Column(
