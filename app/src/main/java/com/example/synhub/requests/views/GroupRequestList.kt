@@ -20,9 +20,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +50,7 @@ import com.example.synhub.shared.components.TopBar
 
 
 @Composable
-fun RequestAndValidationList(nav: NavHostController) {
+fun GroupRequestList(nav: NavHostController) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -59,18 +64,17 @@ fun RequestAndValidationList(nav: NavHostController) {
             )
         }
     ) {
-        innerPadding -> RequestsListScreen(modifier = Modifier.padding(innerPadding), nav)
+        innerPadding -> GroupRequestsScreen(modifier = Modifier.padding(innerPadding), nav)
     }
 
 }
 
 @Composable
-fun RequestsListScreen(modifier: Modifier, nav: NavHostController, requestsViewModel: RequestViewModel = RequestViewModel()) {
+fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController, requestsViewModel: RequestViewModel = RequestViewModel()) {
     val requests by requestsViewModel.requests.collectAsState()
     val hasRequests = requests.isNotEmpty()
 
     LaunchedEffect(Unit) {
-        // Update this when a better fetch request logic is implemented, as it only works for leader
         requestsViewModel.fetchGroupRequests()
     }
 
@@ -195,7 +199,22 @@ fun RequestsListScreen(modifier: Modifier, nav: NavHostController, requestsViewM
                                             .clip(RoundedCornerShape(4.dp))
                                             .background(Color(0xFF4CAF50))
 
-                                    )
+                                    ) {
+                                        val icon = when (request.requestStatus) {
+                                            "COMPLETED" -> Icons.Default.CheckCircle
+                                            "EXPIRED" -> Icons.Default.Warning
+                                            "PENDING" -> Icons.Default.Email
+                                            else -> Icons.Default.Info
+                                        }
+                                        Icon(
+                                            imageVector = icon,
+                                            contentDescription = null,
+                                            tint = Color.White,
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .size(24.dp)
+                                        )
+                                    }
                                 }
                             }
 
