@@ -28,14 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -57,7 +55,7 @@ fun Members(nav: NavHostController){
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 "Miembros del grupo",
                 Icons.AutoMirrored.Filled.ArrowBack
@@ -75,6 +73,7 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
                   memberViewModel: MemberViewModel = viewModel(), groupViewModel: GroupViewModel = viewModel()) {
 
     val haveGroup by groupViewModel.haveGroup.collectAsState()
+    val group by groupViewModel.group.collectAsState()
     val members by memberViewModel.members.collectAsState()
     val haveMembers by memberViewModel.haveMembers.collectAsState()
     val nextTaskMap by memberViewModel.nextTaskMap.collectAsState()
@@ -94,7 +93,7 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
             NoGroup(nav)
         }else{
             if(!haveMembers){
-                NoMembers(nav)
+                NoMembers(nav, group?.code ?: "")
             }else{
                 Text(
                     text = "Integrantes",
@@ -235,7 +234,7 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
 }
 
 @Composable
-fun NoMembers(nav: NavHostController){
+fun NoMembers(nav: NavHostController, code:String){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp))
@@ -243,8 +242,7 @@ fun NoMembers(nav: NavHostController){
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 25.dp)
-                .padding(top = 10.dp),
+                .padding(20.dp),
             shape = RoundedCornerShape(10.dp),
             colors = cardColors(containerColor = Color(0xFF1A4E85)),
         ) {
@@ -255,17 +253,16 @@ fun NoMembers(nav: NavHostController){
             ) {
                 Text(
                     text = "Tu grupo no tiene miembros, invita anuevos integrantes a traves de este código",
-                    fontSize = 25.sp,
+                    fontSize = 20.sp,
                     color = Color(0xFFFFFFFF),
                     textAlign = TextAlign.Center
                 )
                 Card(
-                    modifier = Modifier.padding(10.dp),
                     shape = RoundedCornerShape(10.dp),
                     colors = cardColors(containerColor = Color(0xFF4A90E2))
                 ) {
                     Text(
-                        text = "#" /* + grupoEjemplo.code*/,
+                        text = "#${code}",
                         fontSize = 20.sp,
                         color = Color.White,
                         fontWeight = FontWeight.Bold,

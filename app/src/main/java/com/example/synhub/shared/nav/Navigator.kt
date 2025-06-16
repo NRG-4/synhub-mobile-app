@@ -13,6 +13,7 @@ import com.example.synhub.groups.views.MemberDetails
 import com.example.synhub.groups.views.Members
 import com.example.synhub.requests.views.GroupRequestList
 import com.example.synhub.requests.views.MemberRequestList
+import com.example.synhub.invitations.views.Invitations
 import com.example.synhub.requests.views.RequestView
 import com.example.synhub.requests.views.ValidationView
 import com.example.synhub.shared.views.Home
@@ -29,16 +30,22 @@ fun Navigator(){
     val rememberScreen = rememberNavController()
     NavHost(navController = rememberScreen,
         startDestination = "Login"){
+        // Autenticación y registro
         composable("Login") { Login(rememberScreen) }
-        composable("Home") { Home(rememberScreen) }
-        composable("AnalyticsAndReports") { AnalyticsAndReports(rememberScreen) }
-        composable("Group") { Group(rememberScreen) }
+        composable("Register") { Register(rememberScreen) }
 
+        // Pantalla principal
+        composable("Home") { Home(rememberScreen) }
+
+        // Grupos
+        composable("Group") { Group(rememberScreen) }
+        composable("Group/CreateGroup") { CreateGroup(rememberScreen) }
         composable("Group/Members") { Members(rememberScreen) }
         composable("Group/Member/{memberId}") { backStackEntry ->
             val memberId = backStackEntry.arguments?.getString("memberId")
             MemberDetails(rememberScreen, memberId)
         }
+        composable("Group/Invitations") { Invitations(rememberScreen) }
 
         composable("GroupRequests") { GroupRequestList(rememberScreen) }
         composable("Validation/{requestId}") { backStackEntry ->
@@ -51,17 +58,19 @@ fun Navigator(){
 
 
 
+        // Tareas
         composable("Tasks") { Tasks(rememberScreen) }
+        composable("Tasks/Create") { CreateTask(rememberScreen) }
         composable("Tasks/Detail/{taskId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId")
             TaskDetail(rememberScreen, taskId)
         }
-        composable("Register") { Register(rememberScreen) }
-        composable("Group/CreateGroup") { CreateGroup(rememberScreen) }
-        composable("Tasks/Create") { CreateTask(rememberScreen) }
         composable("Tasks/Edit/{taskId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId")
             EditTask(rememberScreen, taskId)
         }
+
+        // Analítica
+        composable("AnalyticsAndReports") { AnalyticsAndReports(rememberScreen) }
     }
 }

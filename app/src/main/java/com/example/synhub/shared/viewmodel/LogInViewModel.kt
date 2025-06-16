@@ -20,19 +20,23 @@ class LogInViewModel : ViewModel() {
     fun signIn(username: String, password: String) {
         viewModelScope.launch {
             try {
+                Log.d("LogInViewModel", "Iniciando login para usuario: $username")
                 val response = RetrofitClient.logInWebService.signIn(SignInRequest(username, password))
+                Log.d("LogInViewModel", "Respuesta del servidor: ${response.code()} - ${response.message()}")
                 if (response.isSuccessful) {
                     val body = response.body()
                     body?.let {
                         signInResponse = it
                         RetrofitClient.updateToken(it.token)
+                        Log.d("LogInViewModel", "Login exitoso. Token actualizado.")
                         _loginSuccess.value = true
                         return@launch
                     }
                 }
+                Log.d("LogInViewModel", "Login fallido. Código: ${response.code()}")
                 _loginSuccess.value = false
             } catch (e: Exception) {
-                Log.e("LoginPrueba", "Exception: ${e.message}")
+                Log.e("LogInViewModel", "Exception: ${e.message}", e)
                 _loginSuccess.value = false
             }
         }

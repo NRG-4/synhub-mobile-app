@@ -3,6 +3,7 @@ package com.example.synhub.groups.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.synhub.groups.application.dto.GroupMember
+import com.example.synhub.groups.application.dto.GroupRequest
 import com.example.synhub.groups.application.dto.GroupResponse
 import com.example.synhub.shared.model.client.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -64,4 +65,43 @@ class GroupViewModel : ViewModel() {
             }
         }
     }
+
+    fun createGroup(groupRequest: GroupRequest, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            try {
+                android.util.Log.d("GroupViewModel", "Intentando crear grupo: ${groupRequest.name}")
+                val response = RetrofitClient.groupWebService.createGroup(groupRequest)
+                android.util.Log.d("GroupViewModel", "Respuesta creación grupo: ${response.code()} - body: ${response.body()}")
+                if (response.isSuccessful && response.body() != null) {
+                    _group.value = response.body()
+                    _haveGroup.value = true
+                    android.util.Log.d("GroupViewModel", "Grupo creado exitosamente: ${response.body()!!.name}")
+                    onResult(true)
+                } else {
+                    android.util.Log.d("GroupViewModel", "Fallo al crear grupo: ${response.code()} - ${response.errorBody()?.string()}")
+                    onResult(false)
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("GroupViewModel", "Error al crear grupo", e)
+                onResult(false)
+            }
+        }
+    }
+
+    fun deleteGroupMember(memberId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.groupWebService.deleteGroupMember(memberId)
+                if (response.isSuccessful) {
+                    android.util.Log.d("GroupViewModel", "Miembro eliminado correctamente")
+                    fetchGroupMembers() // Actualiza la lista de miembros
+                } else {
+                    android.util.Log.e("GroupViewModel", "Error al eliminar miembro: ${response.code()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("GroupViewModel", "Excepción al eliminar miembro", e)
+            }
+        }
+    }
+
 }

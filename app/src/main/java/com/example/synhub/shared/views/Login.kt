@@ -75,7 +75,9 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
                 shouldNavigate = false
                 isLeader = false
                 loginViewModel.resetLoginState()
-                nav.navigate("Home")
+                nav.navigate("Home"){
+                    popUpTo("Login") { inclusive = true }
+                }
             } else {
                 // Reinicia estados si no es líder
                 shouldNavigate = false
