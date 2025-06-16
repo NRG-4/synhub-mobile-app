@@ -1,35 +1,47 @@
 package com.example.synhub.requests.model.response
 
-import com.example.synhub.requests.model.Requests
+import com.example.synhub.requests.application.dto.CreateRequest
+import com.example.synhub.requests.application.dto.RequestResponse
+import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
 interface RequestsWebService {
-    // GET a specific request
-    @GET("/api/v1/{memberId}/tasks/{taskId}/requests/{requestId}")
-    suspend fun getRequestById(
-        @Path("memberId") memberId: Long,
-        @Path("taskId") taskId: Long,
-        @Path("requestId") requestId: Long
-    ): Requests
-
-    // POST a new request
-    @POST("/api/v1/{memberId}/tasks/{taskId}/requests")
+    // Create request
+    @POST("tasks/{taskId}/request")
     suspend fun createRequest(
-        @Path("memberId") memberId: Long,
         @Path("taskId") taskId: Long,
-        @Body request: Requests
-    ): Requests
+        @Body request: CreateRequest
+    ): Response<RequestResponse>
 
-    // PUT to update request status
-    @PUT("/api/v1/{memberId}/tasks/{taskId}/requests/{requestId}/status")
+    // Get request by task ID
+    @GET("tasks/{taskId}/request")
+    suspend fun getRequestByTaskId(
+        @Path("taskId") taskId: Long
+    ): Response<RequestResponse>
+
+    // Update request status
+    @PUT("tasks/{taskId}/request/status/{status}")
     suspend fun updateRequestStatus(
-        @Path("memberId") memberId: Long,
         @Path("taskId") taskId: Long,
-        @Path("requestId") requestId: Long,
-        @Body status: String
-    ): Requests
+        @Path("status") status: String
+    ): Response<RequestResponse>
+
+    // Delete request by task ID
+    @DELETE("tasks/{taskId}/request")
+    suspend fun deleteRequest(
+        @Path("taskId") taskId: Long
+    ): Response<Unit>
+
+    // Get all requests from a group
+    @GET("leader/group/requests")
+    suspend fun getGroupRequests(): Response<List<RequestResponse>>
+
+    // Get all requests from a member
+    @GET("leader/member/requests")
+    suspend fun getMemberRequests(): Response<List<RequestResponse>>
 }

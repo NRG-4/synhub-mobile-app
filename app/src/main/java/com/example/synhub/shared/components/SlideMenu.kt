@@ -179,6 +179,8 @@ fun SlideMenu(nav:NavHostController, name: String, surname: String, imgUrl: Stri
                 }
             )
 
+            // TODO: Add a condition check if user is leader or member.
+
             NavigationDrawerItem(
                 icon = {
                     Icon(
@@ -195,7 +197,7 @@ fun SlideMenu(nav:NavHostController, name: String, surname: String, imgUrl: Stri
                 },
                 selected = false,
                 onClick = {
-                    nav.navigate("RequestsAndValidations")
+                    nav.navigate("GroupRequests")
                 }
             )
             Spacer(modifier = Modifier.height(gap))
