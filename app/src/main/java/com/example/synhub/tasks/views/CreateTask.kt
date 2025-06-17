@@ -65,6 +65,8 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Locale
+import kotlin.text.format
+import kotlin.text.set
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -216,8 +218,10 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
         var showModal by remember { mutableStateOf(false) }
         var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
         val context = LocalContext.current
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        val formatterUtc = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        val formatterLocal = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         val calendar = remember { Calendar.getInstance() }
+        var dueDateUtc by remember { mutableStateOf("") }
 
         OutlinedTextField(
             value = txtDueDate,
@@ -244,21 +248,25 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
                     if (millis != null) {
                         selectedDateMillis = millis
                         calendar.timeInMillis = millis
+                        // Obtener la fecha seleccionada directamente del calendar (no convertir a LocalDate desde millis)
+                        val year = calendar.get(Calendar.YEAR)
+                        val month = calendar.get(Calendar.MONTH) + 1 // Calendar.MONTH es base 0
+                        val day = calendar.get(Calendar.DAY_OF_MONTH)
                         // Mostrar TimePickerDialog después de seleccionar fecha
                         TimePickerDialog(
                             context,
                             { _, hour, minute ->
-                                calendar.set(Calendar.HOUR_OF_DAY, hour)
-                                calendar.set(Calendar.MINUTE, minute)
-                                calendar.set(Calendar.SECOND, 0)
-                                calendar.set(Calendar.MILLISECOND, 0)
-                                val instant = calendar.time.toInstant()
-                                val zoned = ZonedDateTime.ofInstant(instant, ZoneId.of("UTC"))
-                                txtDueDate = zoned.format(formatter)
+                                // Crear LocalDateTime sumando 1 día como medida provisional
+                                val localDateTime = java.time.LocalDateTime.of(year, month, day + 1, hour, minute)
+                                // Mostrar en formato local
+                                txtDueDate = localDateTime.format(formatterLocal)
+                                // Convertir a UTC para enviar
+                                val zonedLocal = localDateTime.atZone(ZoneId.systemDefault())
+                                dueDateUtc = zonedLocal.withZoneSameInstant(ZoneId.of("UTC")).format(formatterUtc)
                                 showModal = false
                             },
-                            calendar.get(Calendar.HOUR_OF_DAY),
-                            calendar.get(Calendar.MINUTE),
+                            12, // Sugerir la hora seleccionada
+                            0,
                             true
                         ).show()
                     } else {
@@ -279,7 +287,7 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
                         TaskRequest(
                             title = txtTitle,
                             description = txtDescription,
-                            dueDate = txtDueDate,
+                            dueDate = dueDateUtc,
                         )
                     )
                     nav.popBackStack()
@@ -348,3 +356,6 @@ fun DatePickerModal(
         DatePicker(state = datePickerState)
     }
 }
+
+
+
