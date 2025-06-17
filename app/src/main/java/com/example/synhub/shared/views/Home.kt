@@ -166,7 +166,7 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
                                         verticalArrangement = Arrangement.spacedBy(20.dp),
                                         modifier = Modifier
                                             .padding(20.dp)
-                                            .heightIn(max = 200.dp)
+                                            .heightIn(max = 300.dp)
                                     ){
                                         items(members) {
                                                 member ->
@@ -258,7 +258,7 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
                                     verticalArrangement = Arrangement.spacedBy(20.dp),
                                     modifier = Modifier
                                         .padding(20.dp)
-                                        .heightIn(max = 200.dp)
+                                        .heightIn(max = 300.dp)
                                 ){
                                     items(tasks) { task ->
                                         Card (
@@ -382,7 +382,7 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
                                     verticalArrangement = Arrangement.spacedBy(20.dp),
                                     modifier = Modifier
                                         .padding(20.dp)
-                                        .heightIn(max = 200.dp)
+                                        .heightIn(max = 300.dp)
                                 ){
                                     items(invitations) { invitation ->
                                         Column(

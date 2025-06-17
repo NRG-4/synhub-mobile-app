@@ -304,6 +304,7 @@ fun getDividerColor(
 ): Color {
     val formatters = listOf(
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS"),
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"),
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
     )
