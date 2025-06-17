@@ -29,4 +29,7 @@ interface TasksWebService {
 
     @PUT("tasks/{taskId}")
     suspend fun updateTask(@Path("taskId") taskId: Long, @Body editTaskRequest: EditTaskRequest): Response<TaskResponse>
+
+    @PUT("tasks/{taskId}/status/{status}")
+    suspend fun updateTaskStatus(@Path("taskId") taskId: Long?, @Path("status") status: String): Response<TaskResponse>
 }
