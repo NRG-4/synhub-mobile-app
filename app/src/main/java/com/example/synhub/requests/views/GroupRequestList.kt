@@ -75,9 +75,9 @@ fun GroupRequestList(nav: NavHostController) {
 
 @Composable
 fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
-    requestsViewModel: RequestViewModel = viewModel(),
-    taskViewModel: TaskViewModel = viewModel(),
-    ) {
+                        requestsViewModel: RequestViewModel = viewModel(),
+                        taskViewModel: TaskViewModel = viewModel(),
+) {
     val requests by requestsViewModel.requests.collectAsState()
     val tasksMap by taskViewModel.tasksMap.collectAsState()
     val visibleRequests = requests.filter { it.requestStatus == "PENDING" }
@@ -146,7 +146,7 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
                     items(visibleRequests) {
-                        request ->
+                            request ->
                         LaunchedEffect(request.taskId) {
                             taskViewModel.fetchTaskByIdToMap(request.taskId)
                         }
@@ -239,6 +239,4 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
             }
         }
     }
-
-
 }

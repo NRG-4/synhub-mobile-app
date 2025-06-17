@@ -123,7 +123,6 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
                 unfocusedContainerColor = Color.White,
                 cursorColor = Color.Cyan
             ),
-            visualTransformation = PasswordVisualTransformation(),
             onValueChange = {txtDescriptionGroup=it}
         )
 
@@ -145,7 +144,6 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
                 unfocusedContainerColor = Color.White,
                 cursorColor = Color.Cyan
             ),
-            visualTransformation = PasswordVisualTransformation(),
             onValueChange = {txtUrlPfp=it}
         )
 
