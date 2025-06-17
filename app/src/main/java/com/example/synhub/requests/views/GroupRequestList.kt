@@ -45,8 +45,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.synhub.R
+import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
+import com.example.synhub.tasks.viewmodel.TaskViewModel
 
 
 @Composable
@@ -70,9 +72,21 @@ fun GroupRequestList(nav: NavHostController) {
 }
 
 @Composable
-fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController, requestsViewModel: RequestViewModel = RequestViewModel()) {
+fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
+                        requestsViewModel: RequestViewModel = RequestViewModel(),
+                        taskViewModel: TaskViewModel = TaskViewModel(),
+                        memberViewModel: MemberViewModel = MemberViewModel()) {
     val requests by requestsViewModel.requests.collectAsState()
     val hasRequests = requests.isNotEmpty()
+
+    fun getStatusColor(status: String?): Color {
+        return when (status) {
+            "COMPLETED" -> Color(0xFF4CAF50) // Green
+            "EXPIRED" -> Color(0xFFF44336)   // Red
+            "IN_PROGRESS" -> Color(0xFFFFC107)   // Amber
+            else -> Color(0xFF2196F3)        // Blue (default)
+        }
+    }
 
     LaunchedEffect(Unit) {
         requestsViewModel.fetchGroupRequests()
@@ -130,6 +144,11 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController, requestsView
                 ) {
                     items(requests) {
                         request ->
+                        // Fetch task details for the request
+                        LaunchedEffect(request.taskId) {
+                            taskViewModel.fetchTaskById(request.taskId)
+                        }
+                        val task by taskViewModel.task.collectAsState()
                         Card(
                             modifier = Modifier
                                 .padding(vertical = 15.dp)
@@ -158,7 +177,7 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController, requestsView
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = request.memberId.toString(),
+                                        text = task?.member?.name + " " + task?.member?.surname,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp,
                                         color = Color.White
@@ -178,17 +197,11 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController, requestsView
                                             modifier = Modifier
                                                 .padding(16.dp),
                                         ) {
-                                            // If request is a submission, text is "Solicitud de entrega"
-                                            // If request is a modification, text is "Solicitud de modificación"
-                                            if (request.requestType.toString() == "SUBMISSION") {
-                                                Text(text = "Solicitud de entrega", color = Color.Black)
-                                            } else {
-                                                Text(text = "Solicitud de modificación", color = Color.Black)
-                                            }
+                                            Text(text = task?.title.toString(), color = Color.Black)
                                             Spacer(modifier = Modifier.height(10.dp))
                                             HorizontalDivider(thickness = 2.dp)
                                             Spacer(modifier = Modifier.height(10.dp))
-                                            Text(text = "Descripción de la solicitud: " + request.description, color = Color.Black)
+                                            Text(text = task?.description.toString(), color = Color.Black)
                                         }
                                     }
                                     Box(
@@ -197,7 +210,7 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController, requestsView
                                             .height(160.dp)
                                             .width(30.dp)
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(Color(0xFF4CAF50))
+                                            .background(getStatusColor(task?.status.toString()))
 
                                     ) {
                                         val icon = when (request.requestStatus) {
