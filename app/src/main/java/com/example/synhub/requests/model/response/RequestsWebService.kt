@@ -27,7 +27,7 @@ interface RequestsWebService {
     // Update request status
     @PUT("tasks/{taskId}/request/status/{status}")
     suspend fun updateRequestStatus(
-        @Path("taskId") taskId: Long,
+        @Path("taskId") taskId: Long?,
         @Path("status") status: String
     ): Response<RequestResponse>
 
