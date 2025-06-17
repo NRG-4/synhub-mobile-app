@@ -18,7 +18,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -99,13 +100,13 @@ fun ValidationDetails(
     nav: NavHostController,
     request: RequestResponse?,
     task: TaskResponse?,
-    requestViewModel: RequestViewModel = RequestViewModel(),
-    taskViewModel: TaskViewModel = TaskViewModel()) {
+    requestViewModel: RequestViewModel = viewModel(),
+    taskViewModel: TaskViewModel = viewModel()) {
 
-    val statusColor = when (task?.status) {
-        "COMPLETED" -> Color(0xFF4CAF50) // Green
+    val statusColor = when (request?.requestType) {
+        "SUBMISSION" -> Color(0xFF4CAF50) // Green
+        "MODIFICATION" -> Color(0xFFFF832A)   // Amber
         "EXPIRED" -> Color(0xFFFF5252)   // Red
-        "IN_PROGRESS" -> Color(0xFFFFC107)   // Amber
         else -> Color(0xFFE0E0E0)        // Default gray
     }
 
@@ -217,7 +218,8 @@ fun ValidationDetails(
 
         Button(
             onClick = {
-                // TODO: When pressed, edit due date of task and set task to "PENDING"
+                nav.navigate("Tasks/Edit/${task?.id}")
+                taskViewModel.updateTaskStatus(task?.id?.toLong(), "PENDING")
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFFF832A)
@@ -236,12 +238,12 @@ fun ValidationDetails(
                 .width(8.dp))
             Text("Reprogramar")
         }
-        if (task?.status != "EXPIRED" && request?.requestStatus == "COMPLETED") {
+        if (request?.requestType == "SUBMISSION") {
             Button(
                 onClick = {
                     task?.id?.let { taskId ->
                         requestViewModel.updateRequestStatus(taskId, "APPROVED")
-                        // taskViewModel.updateTaskStatus(taskId, "DONE")
+                        taskViewModel.updateTaskStatus(taskId, "DONE")
                         nav.popBackStack()
                     }
                 },
@@ -255,12 +257,39 @@ fun ValidationDetails(
                     .padding(vertical = 4.dp)
             ) {
                 Icon(
-                    Icons.Default.CheckCircle,
+                    Icons.Default.Check,
                     contentDescription = null)
                 Spacer(
                     modifier = Modifier
                         .width(8.dp))
                 Text("Marcar como completado")
+            }
+        }
+        if (request?.requestType == "MODIFICATION") {
+            Button(
+                onClick = {
+                    task?.id?.let { taskId ->
+                        requestViewModel.updateRequestStatus(taskId, "REJECTED")
+                        taskViewModel.updateTaskStatus(taskId, "IN_PROGRESS")
+                        nav.popBackStack()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFFF5252)
+                ),
+                elevation = ButtonDefaults
+                    .buttonElevation(5.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
+                Icon(
+                    Icons.Default.Clear,
+                    contentDescription = null)
+                Spacer(
+                    modifier = Modifier
+                        .width(8.dp))
+                Text("Denegar")
             }
         }
 
