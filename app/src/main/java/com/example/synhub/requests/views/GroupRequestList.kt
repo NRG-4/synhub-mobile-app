@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.synhub.R
 import com.example.synhub.groups.viewmodel.MemberViewModel
@@ -53,6 +54,7 @@ import com.example.synhub.tasks.viewmodel.TaskViewModel
 
 @Composable
 fun GroupRequestList(nav: NavHostController) {
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -73,18 +75,19 @@ fun GroupRequestList(nav: NavHostController) {
 
 @Composable
 fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
-                        requestsViewModel: RequestViewModel = RequestViewModel(),
-                        taskViewModel: TaskViewModel = TaskViewModel(),
-                        memberViewModel: MemberViewModel = MemberViewModel()) {
+    requestsViewModel: RequestViewModel = viewModel(),
+    taskViewModel: TaskViewModel = viewModel(),
+    ) {
     val requests by requestsViewModel.requests.collectAsState()
-    val hasRequests = requests.isNotEmpty()
+    val tasksMap by taskViewModel.tasksMap.collectAsState()
+    val visibleRequests = requests.filter { it.requestStatus == "PENDING" }
 
-    fun getStatusColor(status: String?): Color {
-        return when (status) {
-            "COMPLETED" -> Color(0xFF4CAF50) // Green
-            "EXPIRED" -> Color(0xFFF44336)   // Red
-            "IN_PROGRESS" -> Color(0xFFFFC107)   // Amber
-            else -> Color(0xFF2196F3)        // Blue (default)
+    fun setTypeColor(type: String?): Color {
+        return when (type) {
+            "SUBMISSION" -> Color(0xFF4CAF50)
+            "MODIFICATION" -> Color(0xFFFF832A)
+            "EXPIRED" -> Color(0xFFF44336)
+            else -> Color(0xFF2196F3)
         }
     }
 
@@ -95,7 +98,7 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
     Box(modifier = Modifier
         .fillMaxSize()
     ) {
-        if(!hasRequests) {
+        if(visibleRequests.isEmpty()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -142,13 +145,12 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(20.dp),
                 ) {
-                    items(requests) {
+                    items(visibleRequests) {
                         request ->
-                        // Fetch task details for the request
                         LaunchedEffect(request.taskId) {
-                            taskViewModel.fetchTaskById(request.taskId)
+                            taskViewModel.fetchTaskByIdToMap(request.taskId)
                         }
-                        val task by taskViewModel.task.collectAsState()
+                        val task = tasksMap[request.taskId]
                         Card(
                             modifier = Modifier
                                 .padding(vertical = 15.dp)
@@ -183,7 +185,7 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                                         color = Color.White
                                     )
                                 }
-                                Row() {
+                                Row {
                                     Card(
                                         modifier = Modifier
                                             .padding(10.dp)
@@ -210,13 +212,13 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                                             .height(160.dp)
                                             .width(30.dp)
                                             .clip(RoundedCornerShape(4.dp))
-                                            .background(getStatusColor(task?.status.toString()))
+                                            .background(setTypeColor(request.requestType))
 
                                     ) {
-                                        val icon = when (request.requestStatus) {
-                                            "COMPLETED" -> Icons.Default.CheckCircle
+                                        val icon = when (request.requestType) {
+                                            "SUBMISSION" -> Icons.Default.CheckCircle
+                                            "MODIFICATION" -> Icons.Default.Email
                                             "EXPIRED" -> Icons.Default.Warning
-                                            "PENDING" -> Icons.Default.Email
                                             else -> Icons.Default.Info
                                         }
                                         Icon(
