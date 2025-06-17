@@ -47,7 +47,7 @@ class RequestViewModel: ViewModel() {
         }
     }
 
-    fun updateRequestStatus(taskId: Long, status: String) {
+    fun updateRequestStatus(taskId: Long?, status: String) {
         viewModelScope.launch {
             try {
                 val response = RetrofitClient.requestsWebService.updateRequestStatus(taskId, status)
