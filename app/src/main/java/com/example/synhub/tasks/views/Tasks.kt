@@ -1,5 +1,8 @@
 package com.example.synhub.tasks.views
 
+import android.os.Build
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,42 +13,53 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.synhub.groups.views.GroupScreen
-import com.example.synhub.groups.views.integrantes
+import coil.compose.AsyncImage
 import com.example.synhub.shared.components.TopBar
-import com.example.synhub.shared.icons.abcSVG
 import com.example.synhub.shared.icons.editSVG
-import com.example.synhub.shared.icons.logoutSVG
 import com.example.synhub.shared.icons.trashSVG
+import com.example.synhub.tasks.viewmodel.TaskViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
-
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Tasks(nav: NavHostController) {
     Scaffold (
@@ -54,7 +68,7 @@ fun Tasks(nav: NavHostController) {
         topBar = {
             TopBar(
                 function = {
-                    nav.popBackStack()
+                    nav.navigate("Home")
                 },
                 "Tareas",
                 Icons.AutoMirrored.Filled.ArrowBack
@@ -66,62 +80,114 @@ fun Tasks(nav: NavHostController) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun TaskScreen(modifier: Modifier, nav: NavHostController) {
+    val tasksViewModel: TaskViewModel = viewModel()
 
-    var tareas = true
+    val tasks by tasksViewModel.tasks.collectAsState()
 
-    Column (
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(top = 90.dp)
-            .padding(horizontal = 20.dp)
-    ){
-        if(!tareas)
+    val haveTasks = tasks.isNotEmpty()
+
+    LaunchedEffect(Unit) {
+        tasksViewModel.fetchGroupTasks()
+    }
+
+    Log.d("Tasks.kt", "Tareas obtenias: ${tasks.size}")
+
+    Box(modifier = Modifier.fillMaxSize()){
+        if(!haveTasks)
         {
-            NoTasks(nav)
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 120.dp)
+                    .padding(horizontal = 20.dp)
+            ) {
+                NoTasks()
+            }
+
         }else{
-            Text(
-                text = "Integrantes",
-                fontSize = 25.sp,
-                color = Color(0xFF1A4E85),
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            LazyColumn (
-                verticalArrangement = Arrangement.spacedBy(15.dp)
-            ){
-                items(integrantes){
-                        integrante ->(
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 120.dp)
+                    .padding(horizontal = 20.dp)
+            ) {
+                LazyColumn (
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                ){
+                    items(tasks){ task ->
                         Card(
                             modifier = Modifier
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .shadow(
+                                    elevation = 5.dp,
+                                    shape = RoundedCornerShape(10.dp),
+                                    clip = true
+                                ),
                             shape = RoundedCornerShape(10.dp),
                             colors = cardColors(
                                 containerColor = Color(0xFFF5F5F5)
                             ),
+                            onClick = {
+                                nav.navigate("Tasks/Detail/${task.id}")
+                            }
                         ){
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                                 modifier = Modifier.padding(10.dp)
                                     .background(Color(0xFFF5F5F5))
                             ) {
-                                Text(
-                                    text = integrante.nombre,
-                                    fontSize = 15.sp,
-                                    color = Color.Black
-                                )
+                                Row (
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ){
+                                    Box(
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = CircleShape,
+                                                clip = true
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AsyncImage(
+                                            model = task.member.urlImage,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .matchParentSize()
+                                                .clip(CircleShape)
+                                        )
+                                    }
+                                    Text(
+                                        text = task.member.name + " " + task.member.surname,
+                                        fontSize = 20.sp,
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
 
                                 Text(
-                                    text="${integrante.tarea.titulo}",
+                                    text=task.title,
                                     fontSize = 15.sp,
                                     color = Color.Black
                                 )
                                 HorizontalDivider(color = Color.Black)
-                                Box(
+                                Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .background(Color.White,
-                                            shape = RoundedCornerShape(10.dp)),
+                                        .shadow(
+                                            elevation = 5.dp,
+                                            shape = RoundedCornerShape(10.dp),
+                                            clip = true
+                                        ),
+                                    shape = RoundedCornerShape(10.dp),
+                                    colors = cardColors(
+                                        containerColor = Color(0xFFFFFFFF)
+                                    ),
                                 ){
                                     Column (
                                         modifier = Modifier
@@ -129,18 +195,29 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                         verticalArrangement = Arrangement.spacedBy(10.dp),
                                     ){
                                         Text(
-                                            text="${integrante.tarea.descripcion}",
+                                            text=task.description,
                                             fontSize = 15.sp,
                                             color = Color.Black
                                         )
                                     }
                                 }
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(10.dp)
+                                        .background(
+                                            color = getDividerColor(task.createdAt, task.dueDate),
+                                            shape = RoundedCornerShape(10.dp)
+                                        )
+                                )
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ){
+                                    val createdDate = task.createdAt.substring(0, 10)
+                                    val dueDate = task.dueDate.substring(0, 10)
                                     Text(
-                                        text = "${integrante.tarea.fechaCreacion} - ${integrante.tarea.fechaFinal}",
+                                        text = "$createdDate - $dueDate",
                                         fontSize = 15.sp,
                                         color = Color.Black
                                     )
@@ -157,7 +234,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-                                                nav.navigate("Tasks/Edit")
+                                                nav.navigate("Tasks/Edit/${task.id}")
                                             }
                                         ) {
                                             Icon(
@@ -177,7 +254,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-
+                                                tasksViewModel.deleteTask(task.id)
                                             }
                                         ) {
                                             Icon(
@@ -195,45 +272,74 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                 }
                             }
                         }
-                        )
-                }
-
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Column (
-                horizontalAlignment = Alignment.CenterHorizontally
-            ){
-                ElevatedButton(
-                    colors = ButtonDefaults.buttonColors(Color(0xFF1A4E85)),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier,
-                    onClick = {
-                        nav.navigate("Tasks/Create")
                     }
-                ) {
-                    Text(
-                        text = "Crear Tarea", fontSize = 20.sp,
-                        color = Color.White, fontWeight = FontWeight.Bold
-                    )
-
                 }
             }
+        }
+        FloatingActionButton(
+            onClick = { nav.navigate("Tasks/Create") },
+            containerColor = Color(0xFF1A4E85),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(20.dp)
+        ) {
+            Icon(
+                Icons.Default.Add,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .size(40.dp)
+            )
         }
     }
 }
 
+
+
+@RequiresApi(Build.VERSION_CODES.O)
+fun getDividerColor(
+    createdAt: String,
+    dueDate: String,
+    nowDate: String = LocalDate.now().toString()
+): Color {
+    val formatters = listOf(
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"),
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    )
+    fun parseDate(dateStr: String): LocalDate {
+        for (formatter in formatters) {
+            try {
+                return LocalDate.parse(dateStr, formatter)
+            } catch (_: Exception) {}
+        }
+        throw IllegalArgumentException("Formato de fecha no soportado: $dateStr")
+    }
+    val created = parseDate(createdAt)
+    val due = parseDate(dueDate)
+    val now = LocalDate.parse(nowDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+
+    val totalDays = ChronoUnit.DAYS.between(created, due).toFloat().coerceAtLeast(1f)
+    val daysPassed = ChronoUnit.DAYS.between(created, now).toFloat()
+    val progress = (daysPassed / totalDays).coerceIn(0f, 1f)
+
+    return when {
+        now.isAfter(due) -> Color(0xFFF44336)
+        progress < 0.7f -> Color(0xFF4CAF50)
+        else -> Color(0xFFFDD634)
+    }
+}
+
 @Composable
-fun NoTasks(nav: NavHostController){
+fun NoTasks(){
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(20.dp))
     {
         Box(modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 25.dp)
-            .padding(top = 10.dp)
+            .padding(20.dp)
             .background(Color(0xFF1A4E85),
                 shape = RoundedCornerShape(10.dp)
             ),
@@ -246,7 +352,7 @@ fun NoTasks(nav: NavHostController){
             ) {
                 Text(
                     text = "No hay tareas programadas",
-                    fontSize = 25.sp,
+                    fontSize = 20.sp,
                     color = Color(0xFFFFFFFF)
                 )
             }
