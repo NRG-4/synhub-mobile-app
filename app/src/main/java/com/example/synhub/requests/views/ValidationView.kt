@@ -236,7 +236,7 @@ fun ValidationDetails(
                 .width(8.dp))
             Text("Reprogramar")
         }
-        if (task?.status != "EXPIRED" && request?.requestStatus != "PENDING") {
+        if (task?.status != "EXPIRED" && request?.requestStatus == "COMPLETED") {
             Button(
                 onClick = {
                     task?.id?.let { taskId ->
