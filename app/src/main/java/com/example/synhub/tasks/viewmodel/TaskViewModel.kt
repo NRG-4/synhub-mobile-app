@@ -17,6 +17,9 @@ class TaskViewModel : ViewModel() {
     private val _task = MutableStateFlow<TaskResponse?>(null)
     val task: StateFlow<TaskResponse?> = _task
 
+    private val _tasksMap = MutableStateFlow<Map<Long, TaskResponse>>(emptyMap())
+    val tasksMap: StateFlow<Map<Long, TaskResponse>> = _tasksMap
+
     //TO-DO: Borrar los logs de depuración antes de la entrega final
     fun fetchGroupTasks() {
         viewModelScope.launch {
@@ -112,6 +115,35 @@ class TaskViewModel : ViewModel() {
             } catch (e: Exception) {
                 android.util.Log.e("TaskViewModel", "Error al actualizar tarea", e)
             }
+        }
+    }
+    
+    fun updateTaskStatus(taskId: Long?, status: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.tasksWebService.updateTaskStatus(taskId, status)
+                android.util.Log.d("TaskViewModel", "Respuesta actualización estado tarea: ${response.code()} - body: ${response.body()}")
+                if (response.isSuccessful && response.body() != null) {
+                    _task.value = response.body()
+                    android.util.Log.d("TaskViewModel", "Estado de tarea actualizado exitosamente: ${response.body()!!.title} a $status")
+                } else {
+                    android.util.Log.e("TaskViewModel", "Fallo al actualizar estado de tarea: ${response.code()} - ${response.errorBody()?.string()}")
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("TaskViewModel", "Error al actualizar estado de tarea", e)
+            }
+        }
+    }
+
+    // Temporary function, delete when a better Request is implemented in next sprint
+    fun fetchTaskByIdToMap(taskId: Long) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.tasksWebService.getTaskById(taskId)
+                if (response.isSuccessful && response.body() != null) {
+                    _tasksMap.value = _tasksMap.value + (taskId to response.body()!!)
+                }
+            } catch (_: Exception) {}
         }
     }
 }
