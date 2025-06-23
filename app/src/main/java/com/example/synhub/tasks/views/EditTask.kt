@@ -60,6 +60,7 @@ import com.example.synhub.shared.icons.saveSVG
 import com.example.synhub.tasks.application.dto.EditTaskRequest
 import com.example.synhub.tasks.application.dto.TaskResponse
 import com.example.synhub.tasks.viewmodel.TaskViewModel
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -264,17 +265,20 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                             TimePickerDialog(
                                 context,
                                 { _, hour, minute ->
-                                    // Crear LocalDateTime sumando 1 día como medida provisional
-                                    val localDateTime = java.time.LocalDateTime.of(year, month, day + 1, hour, minute)
-                                    // Mostrar en formato local
-                                    txtDueDate = localDateTime.format(formatterLocal)
-                                    // Convertir a UTC para enviar
+                                    // No sumes días, usa el día seleccionado
+                                    val localDateTime = LocalDateTime.of(year, month, day, hour, minute)
+                                    // Convierte a la zona local del dispositivo
                                     val zonedLocal = localDateTime.atZone(ZoneId.systemDefault())
-                                    dueDateUtc = zonedLocal.withZoneSameInstant(ZoneId.of("UTC")).format(formatterUtc)
+                                    // Convierte a UTC
+                                    val zonedUtc = zonedLocal.withZoneSameInstant(ZoneId.of("UTC"))
+                                    // Formatea para enviar a la base de datos
+                                    dueDateUtc = zonedUtc.format(formatterUtc)
+                                    // Muestra la fecha en formato local si lo deseas
+                                    txtDueDate = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
                                     showModal = false
                                 },
-                                12, // Sugerir la hora seleccionada
-                                0,
+                                calendar.get(Calendar.HOUR_OF_DAY),
+                                calendar.get(Calendar.MINUTE),
                                 true
                             ).show()
                         } else {
