@@ -58,6 +58,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import kotlin.text.toFloat
+import kotlin.toString
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -303,16 +305,19 @@ fun getDividerColor(
     nowDate: String = LocalDate.now().toString()
 ): Color {
     val formatters = listOf(
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SS"),
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.S"),
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        DateTimeFormatter.ISO_OFFSET_DATE_TIME, // Soporta "2025-06-23T21:53:51.241Z"
     )
     fun parseDate(dateStr: String): LocalDate {
         for (formatter in formatters) {
             try {
-                return LocalDate.parse(dateStr, formatter)
-            } catch (_: Exception) {}
+                // Intenta parsear como ZonedDateTime
+                return java.time.ZonedDateTime.parse(dateStr, formatter).toLocalDate()
+            } catch (_: Exception) {
+                try {
+                    // Intenta parsear como LocalDateTime
+                    return java.time.LocalDateTime.parse(dateStr, formatter).toLocalDate()
+                } catch (_: Exception) {}
+            }
         }
         throw IllegalArgumentException("Formato de fecha no soportado: $dateStr")
     }

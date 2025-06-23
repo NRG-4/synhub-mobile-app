@@ -246,30 +246,23 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
             DatePickerModal(
                 onDateSelected = { millis ->
                     if (millis != null) {
-                        selectedDateMillis = millis
-                        calendar.timeInMillis = millis
-                        // Obtener la fecha seleccionada directamente del calendar (no convertir a LocalDate desde millis)
-                        val year = calendar.get(Calendar.YEAR)
-                        val month = calendar.get(Calendar.MONTH) + 1 // Calendar.MONTH es base 0
-                        val day = calendar.get(Calendar.DAY_OF_MONTH)
-                        // Mostrar TimePickerDialog después de seleccionar fecha
+                        // Interpretar millis como UTC para evitar desfase de día
+                        val zonedDateTime = java.time.Instant.ofEpochMilli(millis).atZone(ZoneId.of("UTC"))
+                        val year = zonedDateTime.year
+                        val month = zonedDateTime.monthValue
+                        val day = zonedDateTime.dayOfMonth
                         TimePickerDialog(
                             context,
                             { _, hour, minute ->
-                                // No sumes días, usa el día seleccionado
                                 val localDateTime = LocalDateTime.of(year, month, day, hour, minute)
-                                // Convierte a la zona local del dispositivo
                                 val zonedLocal = localDateTime.atZone(ZoneId.systemDefault())
-                                // Convierte a UTC
                                 val zonedUtc = zonedLocal.withZoneSameInstant(ZoneId.of("UTC"))
-                                // Formatea para enviar a la base de datos
                                 dueDateUtc = zonedUtc.format(formatterUtc)
-                                // Muestra la fecha en formato local si lo deseas
                                 txtDueDate = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
                                 showModal = false
                             },
-                            calendar.get(Calendar.HOUR_OF_DAY),
-                            calendar.get(Calendar.MINUTE),
+                            0,
+                            0,
                             true
                         ).show()
                     } else {
@@ -359,6 +352,3 @@ fun DatePickerModal(
         DatePicker(state = datePickerState)
     }
 }
-
-
-
