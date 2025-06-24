@@ -57,6 +57,7 @@ import com.example.synhub.tasks.viewmodel.TaskViewModel
 import com.example.synhub.tasks.views.getDividerColor
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -192,8 +193,18 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ){
-                                    val createdDate = task.createdAt.substring(0, 10)
-                                    val dueDate = task.dueDate.substring(0, 10)
+                                    val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                    val createdDate = try {
+                                        java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                            .format(localFormatter)
+                                    } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                    val dueDate = try {
+                                        java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                            .format(localFormatter)
+                                    } catch (e: Exception) { task.dueDate.substring(0, 10) }
                                     Text(
                                         text = "$createdDate - $dueDate",
                                         fontSize = 15.sp,

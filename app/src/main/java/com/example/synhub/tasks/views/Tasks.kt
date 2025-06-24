@@ -216,8 +216,19 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ){
-                                    val createdDate = task.createdAt.substring(0, 10)
-                                    val dueDate = task.dueDate.substring(0, 10)
+                                    // Conversión de UTC a zona local
+                                    val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                    val createdDate = try {
+                                        java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                            .format(localFormatter)
+                                    } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                    val dueDate = try {
+                                        java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                            .format(localFormatter)
+                                    } catch (e: Exception) { task.dueDate.substring(0, 10) }
                                     Text(
                                         text = "$createdDate - $dueDate",
                                         fontSize = 15.sp,

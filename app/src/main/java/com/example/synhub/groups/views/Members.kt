@@ -45,6 +45,7 @@ import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.tasks.views.getDividerColor
 import androidx.lifecycle.viewmodel.compose.viewModel
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -215,8 +216,18 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
                                 ) {
-                                    val createdDate = nextTask?.createdAt?.substring(0, 10) ?: ""
-                                    val dueDate = nextTask?.dueDate?.substring(0, 10) ?: ""
+                                    val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                    val createdDate = try {
+                                        java.time.ZonedDateTime.parse(nextTask?.createdAt, utcFormatter)
+                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                            .format(localFormatter)
+                                    } catch (e: Exception) { nextTask?.createdAt?.substring(0, 10) }
+                                    val dueDate = try {
+                                        java.time.ZonedDateTime.parse(nextTask?.dueDate, utcFormatter)
+                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                            .format(localFormatter)
+                                    } catch (e: Exception) { nextTask?.dueDate?.substring(0, 10) }
                                     Text(
                                         text = "$createdDate - $dueDate",
                                         fontSize = 15.sp,
