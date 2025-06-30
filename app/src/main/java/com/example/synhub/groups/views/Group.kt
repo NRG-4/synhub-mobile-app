@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
@@ -30,6 +31,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.example.synhub.groups.viewmodel.GroupViewModel
+import com.example.synhub.groups.application.dto.GroupMember
 import com.example.synhub.shared.components.TopBar
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -84,6 +88,8 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
     val members by groupViewModel.members.collectAsState()
 
     val coroutineScope = rememberCoroutineScope()
+    val showDialog = remember { mutableStateOf(false) }
+    val memberToDelete = remember { mutableStateOf<GroupMember?>(null) } // Reemplaza 'membersType' por el tipo real de tus miembros
 
     LaunchedEffect(Unit) {
         groupViewModel.fetchLeaderGroup()
@@ -223,11 +229,8 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                                         }
                                         IconButton(
                                             onClick = {
-                                                coroutineScope.launch{
-                                                    groupViewModel.deleteGroupMember(member.id)
-                                                    delay(200)
-                                                    groupViewModel.fetchGroupMembers()
-                                                }
+                                                memberToDelete.value = member
+                                                showDialog.value = true
                                             }
                                         ) {
                                             Icon(Icons.Default.Delete, contentDescription = null)
@@ -239,6 +242,38 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                     }
                 }
             }
+        }
+        if (showDialog.value && memberToDelete.value != null) {
+            AlertDialog(
+                onDismissRequest = { showDialog.value = false },
+                title = { Text("Confirmar eliminación") },
+                text = { Text("¿Estás seguro de que deseas eliminar a ${memberToDelete.value!!.name} ${memberToDelete.value!!.surname} (${memberToDelete.value!!.username}) del grupo?") },
+                confirmButton = {
+                    ElevatedButton(
+                        colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                        onClick = {
+                        coroutineScope.launch {
+                            groupViewModel.deleteGroupMember(memberToDelete.value!!.id)
+                            delay(200)
+                            groupViewModel.fetchGroupMembers()
+                            showDialog.value = false
+                            memberToDelete.value = null
+                        }
+                    }) {
+                        Text("Eliminar", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    ElevatedButton(
+                        colors = ButtonDefaults.buttonColors(Color(0xFF1A4E85)),
+                        onClick = {
+                        showDialog.value = false
+                        memberToDelete.value = null
+                    }) {
+                        Text("Cancelar", color = Color.White)
+                    }
+                }
+            )
         }
     }
 }
