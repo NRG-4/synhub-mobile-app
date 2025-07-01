@@ -4,6 +4,7 @@ import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -30,6 +32,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,12 +50,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.synhub.groups.application.dto.MemberResponse
-import com.example.synhub.groups.application.dto.TaskResponse
 import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.shared.components.TopBar
@@ -70,6 +72,8 @@ fun MemberDetails(nav: NavHostController, memberId: String?) {
     val memberViewModel: MemberViewModel = viewModel()
     val member by memberViewModel.member.collectAsState()
 
+    var showHelpDialog by remember { mutableStateOf(false) }
+
     LaunchedEffect(memberId) {
         Log.d("MemberDetails", "Fetching member details for ID: $memberId")
         memberId?.toLongOrNull()?.let {
@@ -85,14 +89,60 @@ fun MemberDetails(nav: NavHostController, memberId: String?) {
                 function = {
                     nav.popBackStack()
                 },
-                "${member?.name} ${member?.surname}",
-                Icons.AutoMirrored.Filled.ArrowBack
+                title = "${member?.name} ${member?.surname}",
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                actions = {
+                    IconButton(onClick = { showHelpDialog = true }) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Ayuda",
+                                tint = Color(0xFF2C2C2C),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
             )
         }
     ){
-            innerPadding -> MemberDetailScreen(
-        modifier = Modifier.padding(innerPadding),
-        nav, memberId)
+        innerPadding -> MemberDetailScreen(modifier = Modifier.padding(innerPadding), nav, memberId)
+        if (showHelpDialog) {
+            AlertDialog(
+                onDismissRequest = { showHelpDialog = false },
+                title = { Text("Ayuda", color = Color(0xFF1A4E85), fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text("Aquí puedes ver todas las tareas asignadas a un miembro. Toca una tarea para ver los detalles, editar o eliminar la tarea.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Dentro de cada tarea, podrás ver una barra de color que indica el tiempo restante para completarla.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Los colores de la barra indican lo siguiente:", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFF4CAF50), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Verde: Tarea en progreso con un tiempo de progreso menor al 70%.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFFDD634), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Amarillo: Tarea en progreso con un tiempo de progreso mayor o igual al 70%.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFF44336), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Rojo: Tarea vencida", textAlign = TextAlign.Justify)
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showHelpDialog = false }) {
+                        Text("Cerrar", color = Color(0xFF1A4E85))
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -111,7 +161,6 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
     var showDeleteDialog by remember { mutableStateOf(false) }
     var taskIdToDelete by remember { mutableStateOf<Long?>(null) }
     var showDeleteMemberDialog by remember { mutableStateOf(false) }
-
 
     LaunchedEffect(Unit) {
         memberId?.toLongOrNull()?.let {

@@ -14,7 +14,10 @@ import androidx.compose.ui.text.font.FontWeight
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TopBar(
-    function: () -> Unit, title: String, icon: ImageVector
+    function: () -> Unit,
+    title: String,
+    icon: ImageVector,
+    actions: (@Composable () -> Unit)? = null
 ){
     TopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
@@ -36,6 +39,9 @@ fun TopBar(
                     tint = Color.Black
                 )
             }
+        },
+        actions = {
+            actions?.invoke()
         }
     )
 }

@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
@@ -39,6 +40,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -65,6 +68,7 @@ import java.time.temporal.ChronoUnit
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun Tasks(nav: NavHostController) {
+    var showHelpDialog by remember { mutableStateOf(false) }
     Scaffold (
         modifier = Modifier.fillMaxSize(),
         containerColor = Color(0xFFFFFFFF),
@@ -74,12 +78,59 @@ fun Tasks(nav: NavHostController) {
                     nav.navigate("Home")
                 },
                 "Tareas",
-                Icons.AutoMirrored.Filled.ArrowBack
+                Icons.AutoMirrored.Filled.ArrowBack,
+                actions = {
+                    IconButton(onClick = { showHelpDialog = true }) {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = "Ayuda",
+                                tint = Color(0xFF2C2C2C),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
             )
         }
     ){
-            innerPadding -> TaskScreen(modifier = Modifier.padding(innerPadding),
-        nav)
+        innerPadding -> TaskScreen(modifier = Modifier.padding(innerPadding), nav)
+        if (showHelpDialog) {
+            AlertDialog(
+                onDismissRequest = { showHelpDialog = false },
+                title = { Text("Ayuda", color = Color(0xFF1A4E85), fontWeight = FontWeight.Bold) },
+                text = {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text("Aquí puedes ver todas las tareas asignadas a un miembro. Toca una tarea para ver los detalles, editar o eliminar la tarea.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Dentro de cada tarea, podrás ver una barra de color que indica el tiempo restante para completarla.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Los colores de la barra indican lo siguiente:", fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFF4CAF50), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Verde: Tarea en progreso con un tiempo de progreso menor al 70%.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFFDD634), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Amarillo: Tarea en progreso con un tiempo de progreso mayor o igual al 70%.", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFF44336), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Rojo: Tarea vencida", textAlign = TextAlign.Justify)
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showHelpDialog = false }) {
+                        Text("Cerrar", color = Color(0xFF1A4E85))
+                    }
+                }
+            )
+        }
     }
 }
 
