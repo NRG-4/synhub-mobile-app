@@ -453,6 +453,9 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
                         }
                     }
                 }
+                item {
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
             }
         } else {
             NoGroup(nav)

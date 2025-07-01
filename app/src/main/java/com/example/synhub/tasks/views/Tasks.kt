@@ -342,6 +342,9 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                             }
                         }
                     }
+                    item {
+                        Spacer(modifier = Modifier.height(50.dp))
+                    }
                 }
             }
         }

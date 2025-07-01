@@ -263,37 +263,34 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
                                                 shape = RoundedCornerShape(10.dp)
                                             )
                                     )
-                                }
-
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(10.dp)
-                                )
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ) {
-                                    val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-                                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                    val createdDate = try {
-                                        java.time.ZonedDateTime.parse(nextTask?.createdAt, utcFormatter)
-                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
-                                            .format(localFormatter)
-                                    } catch (e: Exception) { nextTask?.createdAt?.substring(0, 10) }
-                                    val dueDate = try {
-                                        java.time.ZonedDateTime.parse(nextTask?.dueDate, utcFormatter)
-                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
-                                            .format(localFormatter)
-                                    } catch (e: Exception) { nextTask?.dueDate?.substring(0, 10) }
-                                    Text(
-                                        text = "$createdDate - $dueDate",
-                                        fontSize = 15.sp,
-                                        color = Color.Black
-                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                        val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val createdDate = try {
+                                            java.time.ZonedDateTime.parse(nextTask?.createdAt, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter)
+                                        } catch (e: Exception) { nextTask?.createdAt?.substring(0, 10) }
+                                        val dueDate = try {
+                                            java.time.ZonedDateTime.parse(nextTask?.dueDate, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter)
+                                        } catch (e: Exception) { nextTask?.dueDate?.substring(0, 10) }
+                                        Text(
+                                            text = "$createdDate - $dueDate",
+                                            fontSize = 15.sp,
+                                            color = Color.Black
+                                        )
+                                    }
                                 }
                             }
                         }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(50.dp))
                     }
                 }
             }

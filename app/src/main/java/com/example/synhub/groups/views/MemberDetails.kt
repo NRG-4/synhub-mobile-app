@@ -200,7 +200,7 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                             onClick = {
                                 nav.navigate("Tasks/Detail/${task.id}")
                             }
-                        ){
+                        ) {
                             Column(
                                 verticalArrangement = Arrangement.spacedBy(10.dp),
                                 modifier = Modifier
@@ -208,7 +208,7 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                                     .background(Color(0xFFF5F5F5))
                             ) {
                                 Text(
-                                    text=task.title,
+                                    text = task.title,
                                     fontSize = 15.sp,
                                     color = Color.Black
                                 )
@@ -225,14 +225,14 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                                     colors = cardColors(
                                         containerColor = Color(0xFFFFFFFF)
                                     ),
-                                ){
-                                    Column (
+                                ) {
+                                    Column(
                                         modifier = Modifier
                                             .padding(10.dp),
                                         verticalArrangement = Arrangement.spacedBy(10.dp),
-                                    ){
+                                    ) {
                                         Text(
-                                            text=task.description,
+                                            text = task.description,
                                             fontSize = 15.sp,
                                             color = Color.Black
                                         )
@@ -250,32 +250,36 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                                 Column(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally
-                                ){
+                                ) {
                                     val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
                                     val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                                     val createdDate = try {
                                         java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
                                             .withZoneSameInstant(java.time.ZoneId.systemDefault())
                                             .format(localFormatter)
-                                    } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                    } catch (e: Exception) {
+                                        task.createdAt.substring(0, 10)
+                                    }
                                     val dueDate = try {
                                         java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
                                             .withZoneSameInstant(java.time.ZoneId.systemDefault())
                                             .format(localFormatter)
-                                    } catch (e: Exception) { task.dueDate.substring(0, 10) }
+                                    } catch (e: Exception) {
+                                        task.dueDate.substring(0, 10)
+                                    }
                                     Text(
                                         text = "$createdDate - $dueDate",
                                         fontSize = 15.sp,
                                         color = Color.Black
                                     )
                                 }
-                                Column (
+                                Column(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalAlignment = Alignment.CenterHorizontally,
-                                ){
-                                    Row (
+                                ) {
+                                    Row(
                                         horizontalArrangement = Arrangement.spacedBy(20.dp)
-                                    ){
+                                    ) {
                                         ElevatedButton(
                                             colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
                                             shape = RoundedCornerShape(10.dp),
@@ -320,6 +324,9 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                                 }
                             }
                         }
+                    }
+                    item {
+                        Spacer(modifier = Modifier.height(50.dp))
                     }
                 }
             } else {
