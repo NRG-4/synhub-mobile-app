@@ -31,11 +31,15 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.material3.AlertDialog
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,13 +57,10 @@ import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.editSVG
 import com.example.synhub.shared.icons.trashSVG
 import com.example.synhub.tasks.viewmodel.TaskViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
-import kotlin.text.toFloat
-import kotlin.toString
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -90,6 +91,9 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
     val tasks by tasksViewModel.tasks.collectAsState()
 
     val haveTasks = tasks.isNotEmpty()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var taskIdToDelete by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
         tasksViewModel.fetchGroupTasks()
@@ -267,7 +271,8 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-                                                tasksViewModel.deleteTask(task.id)
+                                                taskIdToDelete = task.id.toString()
+                                                showDeleteDialog = true
                                             }
                                         ) {
                                             Icon(
@@ -304,6 +309,35 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                     .size(40.dp)
             )
         }
+
+        if (showDeleteDialog && taskIdToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDeleteDialog = false },
+                title = { Text("Confirmar eliminación", fontWeight = FontWeight.Bold, ) },
+                text = { Text("¿Estás seguro de que deseas borrar esta tarea?") },
+                confirmButton = {
+                    TextButton(
+                        colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                        onClick = {
+                        tasksViewModel.deleteTask(taskIdToDelete!!.toLong())
+                        showDeleteDialog = false
+                        taskIdToDelete = null
+                    }) {
+                        Text("Borrar", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        colors = ButtonDefaults.buttonColors(Color(0xFF1A4E85)),
+                        onClick = {
+                        showDeleteDialog = false
+                        taskIdToDelete = null
+                    }) {
+                        Text("Cancelar", color = Color.White)
+                    }
+                }
+            )
+        }
     }
 }
 
@@ -313,7 +347,7 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
 fun getDividerColor(
     createdAt: String,
     dueDate: String,
-    nowDate: String = LocalDate.now().toString()
+    nowDate: String = ZonedDateTime.now(java.time.ZoneOffset.UTC).toLocalDate().toString()
 ): Color {
     val formatters = listOf(
         DateTimeFormatter.ISO_OFFSET_DATE_TIME, // Soporta "2025-06-23T21:53:51.241Z"

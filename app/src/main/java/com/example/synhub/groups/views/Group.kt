@@ -246,7 +246,7 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
         if (showDialog.value && memberToDelete.value != null) {
             AlertDialog(
                 onDismissRequest = { showDialog.value = false },
-                title = { Text("Confirmar eliminación") },
+                title = { Text("Confirmar eliminación", fontWeight = FontWeight.Bold) },
                 text = { Text("¿Estás seguro de que deseas eliminar a ${memberToDelete.value!!.name} ${memberToDelete.value!!.surname} (${memberToDelete.value!!.username}) del grupo?") },
                 confirmButton = {
                     ElevatedButton(

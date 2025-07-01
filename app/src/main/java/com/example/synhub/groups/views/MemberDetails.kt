@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.cardColors
@@ -31,13 +32,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -102,6 +107,9 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
 
     val tasks by memberViewModel.memberTasks.collectAsState()
     val member by memberViewModel.member.collectAsState()
+
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var taskIdToDelete by remember { mutableStateOf<Long?>(null) }
 
 
     LaunchedEffect(Unit) {
@@ -243,13 +251,8 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                                             shape = RoundedCornerShape(10.dp),
                                             modifier = Modifier,
                                             onClick = {
-                                                coroutineScope.launch {
-                                                    tasksViewModel.deleteTask(task.id)
-                                                    delay(200)
-                                                    memberId?.toLongOrNull()?.let {
-                                                        memberViewModel.fetchMemberTasks(it)
-                                                    }
-                                                }
+                                                taskIdToDelete = task.id
+                                                showDeleteDialog = true
                                             }
                                         ) {
                                             Icon(
@@ -335,6 +338,45 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                 tint = Color.White,
                 modifier = Modifier
                     .size(40.dp)
+            )
+        }
+
+        if (showDeleteDialog && taskIdToDelete != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteDialog = false
+                    taskIdToDelete = null
+                },
+                title = { Text("Confirmar eliminación") },
+                text = { Text("¿Estás seguro de que deseas borrar esta tarea?") },
+                confirmButton = {
+                    TextButton(
+                        colors = ButtonDefaults.textButtonColors(Color(0xFFF44336)),
+                        onClick = {
+                        if (taskIdToDelete != null) {
+                            coroutineScope.launch {
+                                tasksViewModel.deleteTask(taskIdToDelete!!)
+                                delay(200)
+                                memberId?.toLongOrNull()?.let {
+                                    memberViewModel.fetchMemberTasks(it)
+                                }
+                            }
+                        }
+                        showDeleteDialog = false
+                    }) {
+                        Text("Borrar", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        colors = ButtonDefaults.buttonColors(Color(0xFF1A4E85)),
+                        onClick = {
+                        showDeleteDialog = false
+                        taskIdToDelete = null
+                    }) {
+                        Text("Cancelar", color = Color.White)
+                    }
+                }
             )
         }
     }
