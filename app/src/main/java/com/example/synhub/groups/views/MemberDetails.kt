@@ -110,6 +110,7 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var taskIdToDelete by remember { mutableStateOf<Long?>(null) }
+    var showDeleteMemberDialog by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(Unit) {
@@ -320,12 +321,7 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
 
         FloatingActionButton(
             onClick = {
-                coroutineScope.launch {
-                    memberId?.toLongOrNull()?.let {
-                        groupViewModel.deleteGroupMember(it)
-                    }
-                    nav.popBackStack()
-                }
+                showDeleteMemberDialog = true
             },
             containerColor = Color(0xFFF44336),
             modifier = Modifier
@@ -374,6 +370,40 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                         showDeleteDialog = false
                         taskIdToDelete = null
                     }) {
+                        Text("Cancelar", color = Color.White)
+                    }
+                }
+            )
+        }
+
+        if (showDeleteMemberDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteMemberDialog = false
+                },
+                title = { Text("Confirmar eliminación") },
+                text = { Text("¿Estás seguro de que deseas eliminar a ${member?.name} ${member?.surname} (${member?.username}) del grupo?") },
+                confirmButton = {
+                    TextButton(
+                        colors = ButtonDefaults.textButtonColors(Color(0xFFF44336)),
+                        onClick = {
+                            showDeleteMemberDialog = false
+                            coroutineScope.launch {
+                                memberId?.toLongOrNull()?.let {
+                                    groupViewModel.deleteGroupMember(it)
+                                }
+                                nav.popBackStack()
+                            }
+                        }) {
+                        Text("Eliminar", color = Color.White)
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        colors = ButtonDefaults.buttonColors(Color(0xFF1A4E85)),
+                        onClick = {
+                            showDeleteMemberDialog = false
+                        }) {
                         Text("Cancelar", color = Color.White)
                     }
                 }
