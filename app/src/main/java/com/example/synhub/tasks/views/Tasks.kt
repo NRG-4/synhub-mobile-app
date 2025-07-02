@@ -122,6 +122,14 @@ fun Tasks(nav: NavHostController) {
                         Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFF44336), shape = RoundedCornerShape(4.dp)))
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("Rojo: Tarea vencida", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFF4A90E2), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Azul: Tarea completada", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFFF832A), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Naranja: Tareas pendientes de alguna validación o comentario", textAlign = TextAlign.Justify)
                     }
                 },
                 confirmButton = {
@@ -145,6 +153,12 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     var taskIdToDelete by remember { mutableStateOf<String?>(null) }
+
+    val completedTasks = tasks.filter { it.status == "COMPLETED" }
+    val expiredTasks = tasks.filter { it.status == "EXPIRED" }
+    val doneTasks = tasks.filter { it.status == "DONE" }
+    val inProgressTasks = tasks.filter { it.status == "IN_PROGRESS" }
+    val onHoldTasks = tasks.filter { it.status == "ON_HOLD" }
 
     LaunchedEffect(Unit) {
         tasksViewModel.fetchGroupTasks()
@@ -174,150 +188,849 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
                 LazyColumn (
                     verticalArrangement = Arrangement.spacedBy(20.dp)
                 ){
-                    items(tasks){ task ->
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .shadow(
-                                    elevation = 5.dp,
-                                    shape = RoundedCornerShape(10.dp),
-                                    clip = true
-                                ),
-                            shape = RoundedCornerShape(10.dp),
-                            colors = cardColors(
-                                containerColor = Color(0xFFF5F5F5)
-                            ),
-                            onClick = {
-                                nav.navigate("Tasks/Detail/${task.id}")
+                    item {
+                        Text("Tareas Pendientes", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A4E85))
+                    }
+                    if(inProgressTasks.isEmpty()){
+                        item {
+                            Card (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFF1A4E85)
+                                )
+                            ){
+                                Text(
+                                    text = "No hay tareas pendientes",
+                                    fontSize = 15.sp,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(16.dp),
+                                    textAlign = TextAlign.Center
+                                )
                             }
-                        ){
-                            Column(
-                                verticalArrangement = Arrangement.spacedBy(10.dp),
-                                modifier = Modifier.padding(10.dp)
-                                    .background(Color(0xFFF5F5F5))
-                            ) {
-                                Row (
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ){
-                                    Box(
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .shadow(
-                                                elevation = 5.dp,
-                                                shape = CircleShape,
-                                                clip = true
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        AsyncImage(
-                                            model = task.member.urlImage,
-                                            contentDescription = null,
-                                            contentScale = ContentScale.Crop,
+                        }
+                    }else{
+                        items(inProgressTasks){ task ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFFF5F5F5)
+                                ),
+                                onClick = {
+                                    nav.navigate("Tasks/Detail/${task.id}")
+                                }
+                            ){
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.padding(10.dp)
+                                        .background(Color(0xFFF5F5F5))
+                                ) {
+                                    Row (
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ){
+                                        Box(
                                             modifier = Modifier
-                                                .matchParentSize()
-                                                .clip(CircleShape)
+                                                .size(40.dp)
+                                                .shadow(
+                                                    elevation = 5.dp,
+                                                    shape = CircleShape,
+                                                    clip = true
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = task.member.urlImage,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .matchParentSize()
+                                                    .clip(CircleShape)
+                                            )
+                                        }
+                                        Text(
+                                            text = task.member.name + " " + task.member.surname,
+                                            fontSize = 20.sp,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
                                         )
                                     }
-                                    Text(
-                                        text = task.member.name + " " + task.member.surname,
-                                        fontSize = 20.sp,
-                                        color = Color.Black,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
 
-                                Text(
-                                    text=task.title,
-                                    fontSize = 15.sp,
-                                    color = Color.Black
-                                )
-                                HorizontalDivider(color = Color.Black)
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .shadow(
-                                            elevation = 5.dp,
-                                            shape = RoundedCornerShape(10.dp),
-                                            clip = true
-                                        ),
-                                    shape = RoundedCornerShape(10.dp),
-                                    colors = cardColors(
-                                        containerColor = Color(0xFFFFFFFF)
-                                    ),
-                                ){
-                                    Column (
+                                    Text(
+                                        text=task.title,
+                                        fontSize = 15.sp,
+                                        color = Color.Black
+                                    )
+                                    HorizontalDivider(color = Color.Black)
+                                    Card(
                                         modifier = Modifier
-                                            .padding(10.dp),
-                                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                                            .fillMaxWidth()
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = RoundedCornerShape(10.dp),
+                                                clip = true
+                                            ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = cardColors(
+                                            containerColor = Color(0xFFFFFFFF)
+                                        ),
                                     ){
+                                        Column (
+                                            modifier = Modifier
+                                                .padding(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        ){
+                                            Text(
+                                                text=task.description,
+                                                fontSize = 15.sp,
+                                                color = Color.Black
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(10.dp)
+                                            .background(
+                                                color = getDividerColor(task.createdAt, task.dueDate, task.status),
+                                                shape = RoundedCornerShape(10.dp)
+                                            )
+                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ){
+                                        // Conversión de UTC a zona local
+                                        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                        val localFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val localFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                                        val createdDate = try {
+                                            java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter1)
+                                        } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                        val dueDate = try {
+                                            java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter2)
+                                        } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
                                         Text(
-                                            text=task.description,
+                                            text = "$createdDate - $dueDate",
+                                            fontSize = 15.sp,
+                                            color = Color.Black
+                                        )
+                                    }
+                                    Column (
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ){
+                                        Row (
+                                            horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                        ){
+                                            ElevatedButton(
+                                                colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
+                                                shape = RoundedCornerShape(10.dp),
+                                                modifier = Modifier,
+                                                onClick = {
+                                                    nav.navigate("Tasks/Edit/${task.id}")
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = rememberVectorPainter(image = editSVG),
+                                                    contentDescription = null,
+                                                    tint = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Editar", fontSize = 15.sp,
+                                                    color = Color.White, fontWeight = FontWeight.Bold
+                                                )
+
+                                            }
+                                            ElevatedButton(
+                                                colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                                                shape = RoundedCornerShape(10.dp),
+                                                modifier = Modifier,
+                                                onClick = {
+                                                    taskIdToDelete = task.id.toString()
+                                                    showDeleteDialog = true
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = rememberVectorPainter(image = trashSVG),
+                                                    contentDescription = null,
+                                                    tint = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Borrar", fontSize = 15.sp,
+                                                    color = Color.White, fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    item{
+                        Text("Tareas Vencidas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A4E85))
+                    }
+                    if(expiredTasks.isEmpty()){
+                        item {
+                            Card (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFF1A4E85)
+                                )
+                            ){
+                                Text(
+                                    text = "No hay tareas vencidas",
+                                    fontSize = 15.sp,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(16.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }else{
+                        items(expiredTasks){ task ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFFF5F5F5)
+                                ),
+                                onClick = {
+                                    nav.navigate("Tasks/Detail/${task.id}")
+                                }
+                            ){
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.padding(10.dp)
+                                        .background(Color(0xFFF5F5F5))
+                                ) {
+                                    Row (
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ){
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .shadow(
+                                                    elevation = 5.dp,
+                                                    shape = CircleShape,
+                                                    clip = true
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = task.member.urlImage,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .matchParentSize()
+                                                    .clip(CircleShape)
+                                            )
+                                        }
+                                        Text(
+                                            text = task.member.name + " " + task.member.surname,
+                                            fontSize = 20.sp,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    Text(
+                                        text=task.title,
+                                        fontSize = 15.sp,
+                                        color = Color.Black
+                                    )
+                                    HorizontalDivider(color = Color.Black)
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = RoundedCornerShape(10.dp),
+                                                clip = true
+                                            ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = cardColors(
+                                            containerColor = Color(0xFFFFFFFF)
+                                        ),
+                                    ){
+                                        Column (
+                                            modifier = Modifier
+                                                .padding(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        ){
+                                            Text(
+                                                text=task.description,
+                                                fontSize = 15.sp,
+                                                color = Color.Black
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(10.dp)
+                                            .background(
+                                                color = getDividerColor(task.createdAt, task.dueDate, task.status),
+                                                shape = RoundedCornerShape(10.dp)
+                                            )
+                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ){
+                                        // Conversión de UTC a zona local
+                                        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                        val localFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val localFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                                        val createdDate = try {
+                                            java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter1)
+                                        } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                        val dueDate = try {
+                                            java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter2)
+                                        } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
+                                        Text(
+                                            text = "$createdDate - $dueDate",
+                                            fontSize = 15.sp,
+                                            color = Color.Black
+                                        )
+                                    }
+                                    Column (
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ){
+                                        Row (
+                                            horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                        ){
+                                            ElevatedButton(
+                                                colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
+                                                shape = RoundedCornerShape(10.dp),
+                                                modifier = Modifier,
+                                                onClick = {
+                                                    nav.navigate("Tasks/Edit/${task.id}")
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = rememberVectorPainter(image = editSVG),
+                                                    contentDescription = null,
+                                                    tint = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Editar", fontSize = 15.sp,
+                                                    color = Color.White, fontWeight = FontWeight.Bold
+                                                )
+
+                                            }
+                                            ElevatedButton(
+                                                colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
+                                                shape = RoundedCornerShape(10.dp),
+                                                modifier = Modifier,
+                                                onClick = {
+                                                    taskIdToDelete = task.id.toString()
+                                                    showDeleteDialog = true
+                                                }
+                                            ) {
+                                                Icon(
+                                                    painter = rememberVectorPainter(image = trashSVG),
+                                                    contentDescription = null,
+                                                    tint = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.width(8.dp))
+                                                Text(
+                                                    text = "Borrar", fontSize = 15.sp,
+                                                    color = Color.White, fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    item {
+                        Text("Tareas pendientes de validación", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A4E85))
+                    }
+                    if(onHoldTasks.isEmpty()){
+                        item {
+                            Card (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFF1A4E85)
+                                )
+                            ){
+                                Text(
+                                    text = "No hay tareas pendientes de validación",
+                                    fontSize = 15.sp,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(16.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }else{
+                        items(onHoldTasks){ task ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFFF5F5F5)
+                                ),
+                                onClick = {
+                                    nav.navigate("Tasks/Detail/${task.id}")
+                                }
+                            ){
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.padding(10.dp)
+                                        .background(Color(0xFFF5F5F5))
+                                ) {
+                                    Row (
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ){
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .shadow(
+                                                    elevation = 5.dp,
+                                                    shape = CircleShape,
+                                                    clip = true
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = task.member.urlImage,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .matchParentSize()
+                                                    .clip(CircleShape)
+                                            )
+                                        }
+                                        Text(
+                                            text = task.member.name + " " + task.member.surname,
+                                            fontSize = 20.sp,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    Text(
+                                        text=task.title,
+                                        fontSize = 15.sp,
+                                        color = Color.Black
+                                    )
+                                    HorizontalDivider(color = Color.Black)
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = RoundedCornerShape(10.dp),
+                                                clip = true
+                                            ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = cardColors(
+                                            containerColor = Color(0xFFFFFFFF)
+                                        ),
+                                    ){
+                                        Column (
+                                            modifier = Modifier
+                                                .padding(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        ){
+                                            Text(
+                                                text=task.description,
+                                                fontSize = 15.sp,
+                                                color = Color.Black
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(10.dp)
+                                            .background(
+                                                color = getDividerColor(task.createdAt, task.dueDate, task.status),
+                                                shape = RoundedCornerShape(10.dp)
+                                            )
+                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ){
+                                        // Conversión de UTC a zona local
+                                        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                        val localFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val localFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                                        val createdDate = try {
+                                            java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter1)
+                                        } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                        val dueDate = try {
+                                            java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter2)
+                                        } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
+                                        Text(
+                                            text = "$createdDate - $dueDate",
                                             fontSize = 15.sp,
                                             color = Color.Black
                                         )
                                     }
                                 }
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(10.dp)
-                                        .background(
-                                            color = getDividerColor(task.createdAt, task.dueDate),
-                                            shape = RoundedCornerShape(10.dp)
-                                        )
+                            }
+                        }
+                    }
+                    item {
+                        Text("Tareas marcadas como Completadas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A4E85))
+                    }
+                    if(completedTasks.isEmpty()){
+                        item {
+                            Card (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFF1A4E85)
                                 )
+                            ){
+                                Text(
+                                    text = "No hay tareas marcadas como completadas",
+                                    fontSize = 15.sp,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(16.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }else{
+                        items(completedTasks){ task ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFFF5F5F5)
+                                ),
+                                onClick = {
+                                    nav.navigate("Tasks/Detail/${task.id}")
+                                }
+                            ){
                                 Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally
-                                ){
-                                    // Conversión de UTC a zona local
-                                    val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-                                    val localFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-                                    val localFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-                                    val createdDate = try {
-                                        java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
-                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
-                                            .format(localFormatter1)
-                                    } catch (e: Exception) { task.createdAt.substring(0, 10) }
-                                    val dueDate = try {
-                                        java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
-                                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
-                                            .format(localFormatter2)
-                                    } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.padding(10.dp)
+                                        .background(Color(0xFFF5F5F5))
+                                ) {
+                                    Row (
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ){
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .shadow(
+                                                    elevation = 5.dp,
+                                                    shape = CircleShape,
+                                                    clip = true
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = task.member.urlImage,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .matchParentSize()
+                                                    .clip(CircleShape)
+                                            )
+                                        }
+                                        Text(
+                                            text = task.member.name + " " + task.member.surname,
+                                            fontSize = 20.sp,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
                                     Text(
-                                        text = "$createdDate - $dueDate",
+                                        text=task.title,
                                         fontSize = 15.sp,
                                         color = Color.Black
                                     )
-                                }
-                                Column (
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                ){
-                                    Row (
-                                        horizontalArrangement = Arrangement.spacedBy(20.dp)
+                                    HorizontalDivider(color = Color.Black)
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = RoundedCornerShape(10.dp),
+                                                clip = true
+                                            ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = cardColors(
+                                            containerColor = Color(0xFFFFFFFF)
+                                        ),
                                     ){
-                                        ElevatedButton(
-                                            colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
-                                            shape = RoundedCornerShape(10.dp),
-                                            modifier = Modifier,
-                                            onClick = {
-                                                nav.navigate("Tasks/Edit/${task.id}")
-                                            }
-                                        ) {
-                                            Icon(
-                                                painter = rememberVectorPainter(image = editSVG),
-                                                contentDescription = null,
-                                                tint = Color.White
-                                            )
-                                            Spacer(modifier = Modifier.width(8.dp))
+                                        Column (
+                                            modifier = Modifier
+                                                .padding(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        ){
                                             Text(
-                                                text = "Editar", fontSize = 15.sp,
-                                                color = Color.White, fontWeight = FontWeight.Bold
+                                                text=task.description,
+                                                fontSize = 15.sp,
+                                                color = Color.Black
                                             )
-
                                         }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(10.dp)
+                                            .background(
+                                                color = getDividerColor(task.createdAt, task.dueDate, task.status),
+                                                shape = RoundedCornerShape(10.dp)
+                                            )
+                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ){
+                                        // Conversión de UTC a zona local
+                                        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                        val localFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val localFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                                        val createdDate = try {
+                                            java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter1)
+                                        } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                        val dueDate = try {
+                                            java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter2)
+                                        } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
+                                        Text(
+                                            text = "$createdDate - $dueDate",
+                                            fontSize = 15.sp,
+                                            color = Color.Black
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    item {
+                        Text("Tareas Completadas", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1A4E85))
+                    }
+                    if(doneTasks.isEmpty()){
+                        item {
+                            Card (
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFF1A4E85)
+                                )
+                            ){
+                                Text(
+                                    text = "No hay tareas completadas",
+                                    fontSize = 15.sp,
+                                    color = Color.White,
+                                    modifier = Modifier.padding(16.dp),
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }else{
+                        items(doneTasks){ task ->
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(
+                                    containerColor = Color(0xFFF5F5F5)
+                                ),
+                                onClick = {
+                                    nav.navigate("Tasks/Detail/${task.id}")
+                                }
+                            ){
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.padding(10.dp)
+                                        .background(Color(0xFFF5F5F5))
+                                ) {
+                                    Row (
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ){
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .shadow(
+                                                    elevation = 5.dp,
+                                                    shape = CircleShape,
+                                                    clip = true
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AsyncImage(
+                                                model = task.member.urlImage,
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .matchParentSize()
+                                                    .clip(CircleShape)
+                                            )
+                                        }
+                                        Text(
+                                            text = task.member.name + " " + task.member.surname,
+                                            fontSize = 20.sp,
+                                            color = Color.Black,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+
+                                    Text(
+                                        text=task.title,
+                                        fontSize = 15.sp,
+                                        color = Color.Black
+                                    )
+                                    HorizontalDivider(color = Color.Black)
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = RoundedCornerShape(10.dp),
+                                                clip = true
+                                            ),
+                                        shape = RoundedCornerShape(10.dp),
+                                        colors = cardColors(
+                                            containerColor = Color(0xFFFFFFFF)
+                                        ),
+                                    ){
+                                        Column (
+                                            modifier = Modifier
+                                                .padding(10.dp),
+                                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                                        ){
+                                            Text(
+                                                text=task.description,
+                                                fontSize = 15.sp,
+                                                color = Color.Black
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(10.dp)
+                                            .background(
+                                                color = getDividerColor(task.createdAt, task.dueDate, task.status),
+                                                shape = RoundedCornerShape(10.dp)
+                                            )
+                                    )
+                                    Column(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ){
+                                        // Conversión de UTC a zona local
+                                        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                        val localFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val localFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                                        val createdDate = try {
+                                            java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter1)
+                                        } catch (e: Exception) { task.createdAt.substring(0, 10) }
+                                        val dueDate = try {
+                                            java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                                                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                                                .format(localFormatter2)
+                                        } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
+                                        Text(
+                                            text = "$createdDate - $dueDate",
+                                            fontSize = 15.sp,
+                                            color = Color.Black
+                                        )
+                                    }
+                                    Column (
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                    ){
                                         ElevatedButton(
                                             colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
                                             shape = RoundedCornerShape(10.dp),
@@ -402,8 +1115,12 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
 fun getDividerColor(
     createdAt: String,
     dueDate: String,
-    nowDate: String = ZonedDateTime.now(java.time.ZoneOffset.UTC).toString()
+    status: String
 ): Color {
+    if (status == "COMPLETED") return Color(0xFF4CAF50) // Verde para tareas completadas
+    if (status == "ON_HOLD") return Color(0xFFFF832A) // Naranja para tareas en espera
+    if (status == "DONE") return Color(0xFF4A90E2) // Azul para tareas hechas
+
     val formatters = listOf(
         DateTimeFormatter.ISO_OFFSET_DATE_TIME,
         DateTimeFormatter.ISO_LOCAL_DATE_TIME
@@ -425,10 +1142,6 @@ fun getDividerColor(
     val created = parseDateTime(createdAt)
     val due = parseDateTime(dueDate)
     val now = ZonedDateTime.now(java.time.ZoneOffset.UTC)
-
-    System.out.println("Fecha de creación: $created")
-    System.out.println("Fecha de vencimiento: $due")
-    System.out.println("Fecha actual: $now")
 
     val totalSeconds = java.time.Duration.between(created, due).seconds.toFloat().coerceAtLeast(1f)
     val secondsPassed = java.time.Duration.between(created, now).seconds.toFloat()

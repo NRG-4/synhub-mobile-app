@@ -114,6 +114,14 @@ fun Members(nav: NavHostController){
                         Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFF44336), shape = RoundedCornerShape(4.dp)))
                         Spacer(modifier = Modifier.height(8.dp))
                         Text("Rojo: Tarea vencida", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFF4A90E2), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Azul: Tarea completada", textAlign = TextAlign.Justify)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Box(modifier = Modifier.height(4.dp).fillMaxWidth().background(Color(0xFFFF832A), shape = RoundedCornerShape(4.dp)))
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Naranja: Tareas pendientes de alguna validación o comentario", textAlign = TextAlign.Justify)
                     }
                 },
                 confirmButton = {
@@ -258,7 +266,8 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
                                             .background(
                                                 color = getDividerColor(
                                                     nextTask!!.createdAt.toString(),
-                                                    nextTask!!.dueDate.toString()
+                                                    nextTask!!.dueDate.toString(),
+                                                    nextTask!!.status.toString()
                                                 ),
                                                 shape = RoundedCornerShape(10.dp)
                                             )

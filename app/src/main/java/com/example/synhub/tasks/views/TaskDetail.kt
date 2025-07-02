@@ -253,7 +253,9 @@ fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: TaskRespo
                             .fillMaxWidth()
                             .height(10.dp)
                             .background(
-                                color = getDividerColor(task.createdAt, task.dueDate),
+                                color =
+
+                                    getDividerColor(task.createdAt, task.dueDate, task.status),
                                 shape = RoundedCornerShape(10.dp)
                             )
                     )
