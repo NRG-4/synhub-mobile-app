@@ -401,32 +401,37 @@ fun TaskScreen(modifier: Modifier, nav: NavHostController) {
 fun getDividerColor(
     createdAt: String,
     dueDate: String,
-    nowDate: String = ZonedDateTime.now(java.time.ZoneOffset.UTC).toLocalDate().toString()
+    nowDate: String = ZonedDateTime.now(java.time.ZoneOffset.UTC).toString()
 ): Color {
     val formatters = listOf(
-        DateTimeFormatter.ISO_OFFSET_DATE_TIME, // Soporta "2025-06-23T21:53:51.241Z"
+        DateTimeFormatter.ISO_OFFSET_DATE_TIME,
+        DateTimeFormatter.ISO_LOCAL_DATE_TIME
     )
-    fun parseDate(dateStr: String): LocalDate {
+    fun parseDateTime(dateStr: String): ZonedDateTime {
         for (formatter in formatters) {
             try {
                 // Intenta parsear como ZonedDateTime
-                return java.time.ZonedDateTime.parse(dateStr, formatter).toLocalDate()
+                return ZonedDateTime.parse(dateStr, formatter)
             } catch (_: Exception) {
                 try {
-                    // Intenta parsear como LocalDateTime
-                    return java.time.LocalDateTime.parse(dateStr, formatter).toLocalDate()
+                    // Intenta parsear como LocalDateTime y asumir UTC
+                    return java.time.LocalDateTime.parse(dateStr, formatter).atZone(java.time.ZoneOffset.UTC)
                 } catch (_: Exception) {}
             }
         }
         throw IllegalArgumentException("Formato de fecha no soportado: $dateStr")
     }
-    val created = parseDate(createdAt)
-    val due = parseDate(dueDate)
-    val now = LocalDate.parse(nowDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    val created = parseDateTime(createdAt)
+    val due = parseDateTime(dueDate)
+    val now = ZonedDateTime.now(java.time.ZoneOffset.UTC)
 
-    val totalDays = ChronoUnit.DAYS.between(created, due).toFloat().coerceAtLeast(1f)
-    val daysPassed = ChronoUnit.DAYS.between(created, now).toFloat()
-    val progress = (daysPassed / totalDays).coerceIn(0f, 1f)
+    System.out.println("Fecha de creación: $created")
+    System.out.println("Fecha de vencimiento: $due")
+    System.out.println("Fecha actual: $now")
+
+    val totalSeconds = java.time.Duration.between(created, due).seconds.toFloat().coerceAtLeast(1f)
+    val secondsPassed = java.time.Duration.between(created, now).seconds.toFloat()
+    val progress = (secondsPassed / totalSeconds).coerceIn(0f, 1f)
 
     return when {
         now.isAfter(due) -> Color(0xFFF44336)
