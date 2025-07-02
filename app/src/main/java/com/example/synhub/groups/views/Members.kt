@@ -268,17 +268,18 @@ fun MembersScreen(modifier: Modifier, nav: NavHostController,
                                         horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
                                         val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-                                        val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val localFormatter1 = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                                        val localFormatter2 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                                         val createdDate = try {
-                                            java.time.ZonedDateTime.parse(nextTask?.createdAt, utcFormatter)
+                                            java.time.ZonedDateTime.parse(nextTask.createdAt, utcFormatter)
                                                 .withZoneSameInstant(java.time.ZoneId.systemDefault())
-                                                .format(localFormatter)
-                                        } catch (e: Exception) { nextTask?.createdAt?.substring(0, 10) }
+                                                .format(localFormatter1)
+                                        } catch (e: Exception) { nextTask.createdAt.substring(0, 10) }
                                         val dueDate = try {
-                                            java.time.ZonedDateTime.parse(nextTask?.dueDate, utcFormatter)
+                                            java.time.ZonedDateTime.parse(nextTask.dueDate, utcFormatter)
                                                 .withZoneSameInstant(java.time.ZoneId.systemDefault())
-                                                .format(localFormatter)
-                                        } catch (e: Exception) { nextTask?.dueDate?.substring(0, 10) }
+                                                .format(localFormatter2)
+                                        } catch (e: Exception) { nextTask.dueDate.replace("T", " ").substring(0, 16) }
                                         Text(
                                             text = "$createdDate - $dueDate",
                                             fontSize = 15.sp,

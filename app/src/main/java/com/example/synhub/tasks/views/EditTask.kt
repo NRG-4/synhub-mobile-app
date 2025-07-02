@@ -233,7 +233,7 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
             var dueDateUtc by remember { mutableStateOf("") }
 
             OutlinedTextField(
-                value = txtDueDate,
+                value = txtDueDate.format(formatterLocal),
                 onValueChange = {},
                 label = { Text("Fecha de entrega") },
                 placeholder = { Text("Fecha") },

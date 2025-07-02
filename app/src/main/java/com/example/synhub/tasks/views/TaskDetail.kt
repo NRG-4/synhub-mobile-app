@@ -259,12 +259,12 @@ fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: TaskRespo
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                     val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     val dueDate = try {
                         java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
                             .withZoneSameInstant(java.time.ZoneId.systemDefault())
                             .format(localFormatter)
-                    } catch (e: Exception) { task.dueDate.substring(0, 10) }
+                    } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
                     Text(
                         text = dueDate,
                         style = TextStyle(fontSize = 18.sp, color = Color.Black)
