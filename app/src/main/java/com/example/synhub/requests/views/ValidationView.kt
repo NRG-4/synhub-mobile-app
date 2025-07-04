@@ -48,7 +48,6 @@ import com.example.synhub.R
 import com.example.synhub.requests.application.dto.RequestResponse
 import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
-import com.example.synhub.tasks.application.dto.TaskResponse
 import com.example.synhub.tasks.viewmodel.TaskViewModel
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -61,18 +60,9 @@ fun ValidationView(nav: NavHostController, taskId: String?) {
     val requestViewModel: RequestViewModel = viewModel()
     val request by requestViewModel.request.collectAsState()
 
-    val taskViewModel: TaskViewModel = viewModel()
-    val task by taskViewModel.task.collectAsState()
-
     LaunchedEffect(taskId) {
         taskId?.toLongOrNull()?.let {
             requestViewModel.fetchRequestByTaskId(it)
-        }
-    }
-
-    LaunchedEffect(request?.taskId) {
-        request?.taskId?.let {
-            taskViewModel.fetchTaskById(it)
         }
     }
 
@@ -89,7 +79,8 @@ fun ValidationView(nav: NavHostController, taskId: String?) {
             )
         }
     ) {
-            innerPadding -> ValidationDetails(modifier = Modifier.padding(innerPadding),nav, request, task)
+        innerPadding -> ValidationDetails(
+            modifier = Modifier.padding(innerPadding),nav, request)
     }
 }
 
@@ -99,7 +90,7 @@ fun ValidationDetails(
     modifier: Modifier,
     nav: NavHostController,
     request: RequestResponse?,
-    task: TaskResponse?,
+    // The models are used to update info
     requestViewModel: RequestViewModel = viewModel(),
     taskViewModel: TaskViewModel = viewModel()) {
 
@@ -140,7 +131,7 @@ fun ValidationDetails(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = task?.member?.name + " " + task?.member?.surname,
+                text = request?.task?.member?.name + " " + request?.task?.member?.surname,
                 fontWeight = FontWeight.Bold,
                 fontSize = 30.sp)
         }
@@ -170,11 +161,11 @@ fun ValidationDetails(
                             .fillMaxSize()
                             .padding(16.dp),
                     ) {
-                        Text(text = task?.title.toString(), color = Color.White)
+                        Text(text = request?.task?.title.toString(), color = Color.White)
                         Spacer(modifier = Modifier.height(10.dp))
                         HorizontalDivider(thickness = 2.dp)
                         Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = task?.description.toString(), color = Color.White)
+                        Text(text = request?.task?.description.toString(), color = Color.White)
                     }
                 }
                 Column(
@@ -183,7 +174,7 @@ fun ValidationDetails(
                         .padding(8.dp)
                 ) {
                     Text(
-                        text = when (task?.status) {
+                        text = when (request?.task?.status) {
                             "COMPLETED" -> "Tiempo de desarrollo"
                             else -> "Tiempo de desarrollo asignado"
                         },
@@ -193,9 +184,9 @@ fun ValidationDetails(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = when (task?.status) {
-                            "COMPLETED" -> formatDate(task.createdAt)
-                            else -> formatDate(task?.createdAt) + " - " + formatDate(task?.dueDate)
+                        text = when (request?.task?.status) {
+                            "COMPLETED" -> formatDate(request.task.createdAt)
+                            else -> formatDate(request?.task?.createdAt) + " - " + formatDate(request?.task?.dueDate)
                         },
                         textAlign = TextAlign.Center,
                         fontSize = 12.sp,
@@ -218,9 +209,10 @@ fun ValidationDetails(
 
         Button(
             onClick = {
-                taskViewModel.updateTaskStatus(task?.id?.toLong(), "PENDING")
-                requestViewModel.updateRequestStatus(task?.id, "APPROVED")
-                nav.navigate("Tasks/Edit/${task?.id}")
+                taskViewModel.updateTaskStatus(request?.task?.id, "PENDING")
+                requestViewModel.updateRequestStatus(request?.task?.id, "APPROVED")
+                // TODO: Make a new edit screen for requests to edit task
+                nav.navigate("Tasks/Edit/${request?.task?.id}")
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFFF832A)
@@ -242,7 +234,7 @@ fun ValidationDetails(
         if (request?.requestType == "SUBMISSION") {
             Button(
                 onClick = {
-                    task?.id?.let { taskId ->
+                    request.task.id.let { taskId ->
                         requestViewModel.updateRequestStatus(taskId, "APPROVED")
                         taskViewModel.updateTaskStatus(taskId, "DONE")
                         nav.popBackStack()
@@ -269,7 +261,7 @@ fun ValidationDetails(
         if (request?.requestType == "MODIFICATION") {
             Button(
                 onClick = {
-                    task?.id?.let { taskId ->
+                    request.task.id.let { taskId ->
                         requestViewModel.updateRequestStatus(taskId, "REJECTED")
                         taskViewModel.updateTaskStatus(taskId, "IN_PROGRESS")
                         nav.popBackStack()
