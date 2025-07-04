@@ -46,10 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.synhub.R
-import com.example.synhub.groups.viewmodel.MemberViewModel
 import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
-import com.example.synhub.tasks.viewmodel.TaskViewModel
 
 
 @Composable
@@ -74,12 +72,12 @@ fun GroupRequestList(nav: NavHostController) {
 }
 
 @Composable
-fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
-                        requestsViewModel: RequestViewModel = viewModel(),
-                        taskViewModel: TaskViewModel = viewModel(),
+fun GroupRequestsScreen(
+    modifier: Modifier,
+    nav: NavHostController,
+    requestsViewModel: RequestViewModel = viewModel()
 ) {
     val requests by requestsViewModel.requests.collectAsState()
-    val tasksMap by taskViewModel.tasksMap.collectAsState()
     val visibleRequests = requests.filter { it.requestStatus == "PENDING" }
 
     fun setTypeColor(type: String?): Color {
@@ -147,10 +145,6 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                 ) {
                     items(visibleRequests) {
                             request ->
-                        LaunchedEffect(request.taskId) {
-                            taskViewModel.fetchTaskByIdToMap(request.taskId)
-                        }
-                        val task = tasksMap[request.taskId]
                         Card(
                             modifier = Modifier
                                 .padding(vertical = 15.dp)
@@ -161,7 +155,7 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                                 containerColor = Color(0xFF1A4E85)
                             ),
                             onClick = {
-                                nav.navigate("Validation/${request.taskId}")
+                                nav.navigate("Validation/${request.task.id}")
                             }
                         ) {
                             Column(
@@ -179,7 +173,7 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                                     )
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = task?.member?.name + " " + task?.member?.surname,
+                                        text = request.task.member.name + " " + request.task.member.surname,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp,
                                         color = Color.White
@@ -199,11 +193,11 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                                             modifier = Modifier
                                                 .padding(16.dp),
                                         ) {
-                                            Text(text = task?.title.toString(), color = Color.Black)
+                                            Text(text = request.task.title, color = Color.Black)
                                             Spacer(modifier = Modifier.height(10.dp))
                                             HorizontalDivider(thickness = 2.dp)
                                             Spacer(modifier = Modifier.height(10.dp))
-                                            Text(text = task?.description.toString(), color = Color.Black)
+                                            Text(text = request.task.description, color = Color.Black)
                                         }
                                     }
                                     Box(
