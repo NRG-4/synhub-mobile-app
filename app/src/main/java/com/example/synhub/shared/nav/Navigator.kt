@@ -13,6 +13,7 @@ import com.example.synhub.groups.views.MemberDetails
 import com.example.synhub.groups.views.Members
 import com.example.synhub.requests.views.GroupRequestList
 import com.example.synhub.invitations.views.Invitations
+import com.example.synhub.requests.views.EditRequestTask
 import com.example.synhub.requests.views.ValidationView
 import com.example.synhub.shared.model.client.RetrofitClient
 import com.example.synhub.shared.views.Home
@@ -51,6 +52,10 @@ fun Navigator(){
         composable("Validation/{taskId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId")
             ValidationView(rememberScreen, taskId) }
+        composable("Validation/Edit/{taskId}") { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getString("taskId")
+            EditRequestTask(rememberScreen, taskId)
+        }
 
         // Tareas
         composable("Tasks") { Tasks(rememberScreen) }

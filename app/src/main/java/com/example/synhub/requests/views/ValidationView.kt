@@ -209,10 +209,7 @@ fun ValidationDetails(
 
         Button(
             onClick = {
-                taskViewModel.updateTaskStatus(request?.task?.id, "PENDING")
-                requestViewModel.updateRequestStatus(request?.task?.id, "APPROVED")
-                // TODO: Make a new edit screen for requests to edit task
-                nav.navigate("Tasks/Edit/${request?.task?.id}")
+                nav.navigate("Validation/Edit/${request?.task?.id}")
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFFF832A)
