@@ -16,21 +16,6 @@ class RequestViewModel: ViewModel() {
     private val _requests = MutableStateFlow<List<RequestResponse>>(emptyList())
     val requests: StateFlow<List<RequestResponse>> = _requests
 
-    fun createRequest(taskId: Long, createRequest: CreateRequest) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitClient.requestsWebService.createRequest(taskId, createRequest)
-                if (response.isSuccessful && response.body() != null) {
-                    _request.value = response.body()
-                } else {
-                    _request.value = null
-                }
-            } catch (e: Exception) {
-                _request.value = null
-            }
-        }
-    }
-
     fun fetchRequestByTaskId(taskId: Long) {
         viewModelScope.launch {
             try {
@@ -92,21 +77,4 @@ class RequestViewModel: ViewModel() {
             }
         }
     }
-
-    fun fetchMemberRequests() {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitClient.requestsWebService.getMemberRequests()
-                if (response.isSuccessful && response.body() != null) {
-                    _requests.value = response.body()!!
-                } else {
-                    _requests.value = emptyList()
-                }
-            } catch (e: Exception) {
-                _requests.value = emptyList()
-            }
-        }
-    }
-
-    // Fuse group and member requests in a single function maybe? (has to check if its leader or not)
 }
