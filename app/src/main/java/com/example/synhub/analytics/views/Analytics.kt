@@ -54,12 +54,19 @@ import com.example.synhub.tasks.application.dto.TaskResponse
 import kotlinx.coroutines.launch
 import com.example.synhub.analytics.model.response.AnalyticsWebService
 
+// Colores adaptados de Tasks
 private val BluePrimary = Color(0xFF1A4E85)
-private val BlueLight = Color(0xFFE3F2FD)
-private val BlueLighter = Color(0xFFF0F6FF)
-private val BlueAccent = Color(0xFF1976D2)
-private val BlueCard = Color(0xFFF5F9FF)
-private val BlueDivider = Color(0xFFB3D1F7)
+private val CardBackground = Color(0xFFF5F5F5)
+private val CardHeaderBackground = Color(0xFF1A4E85)
+private val CardHeaderText = Color.White
+private val AccentOrange = Color(0xFFFF9800)
+private val AccentRed = Color(0xFFF44336)
+private val AccentBlue = Color(0xFF4A90E2)
+private val AccentGreen = Color(0xFF4CAF50)
+private val AccentYellow = Color(0xFFFDD634)
+private val AccentPending = Color(0xFFFF832A)
+private val CardBorder = Color(0xFFE0E0E0)
+private val CardLight = Color(0xFFFFFFFF)
 
 private val friendlyNames = mapOf(
     "IN_PROGRESS" to "En progreso",
@@ -117,7 +124,7 @@ fun MetricCard(
             .padding(2.dp),
         shape = RoundedCornerShape(18.dp),
         shadowElevation = 6.dp,
-        color = Color.White
+        color = CardBackground
     ) {
         Column(
             modifier = Modifier
@@ -125,7 +132,7 @@ fun MetricCard(
         ) {
             Text(
                 text = title,
-                color = MaterialTheme.colorScheme.primary,
+                color = BluePrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp
             )
@@ -133,7 +140,7 @@ fun MetricCard(
                 modifier = Modifier
                     .padding(vertical = 8.dp)
                     .fillMaxWidth(),
-                color = Color(0xFFEEEEEE),
+                color = CardBorder,
                 thickness = 1.dp
             )
             Text(
@@ -191,19 +198,19 @@ fun EnhancedBarChart(distribution: Map<String, Any>?) {
                     modifier = Modifier
                         .height(18.dp)
                         .weight(1f)
-                        .background(BlueLight, RoundedCornerShape(4.dp))
+                        .background(AccentYellow, RoundedCornerShape(4.dp))
                 ) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth(fraction = count / max.toFloat())
                             .height(18.dp)
-                            .background(BlueAccent, RoundedCornerShape(4.dp))
+                            .background(AccentBlue, RoundedCornerShape(4.dp))
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = "$count tareas",
-                    color = BlueAccent,
+                    color = AccentBlue,
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp
                 )
@@ -268,7 +275,7 @@ fun TaskTimesList(memberId: Long?) {
                 )
                 Text(
                     text = formatDuration(timePassed),
-                    color = BlueAccent,
+                    color = AccentBlue,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(start = 8.dp)
@@ -347,12 +354,12 @@ fun AnalyticsOverviewSection(analyticsState: AnalyticsState) {
             .padding(horizontal = 2.dp, vertical = 2.dp),
         shape = RoundedCornerShape(18.dp),
         elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
-        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = CardBackground)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(BlueLight, RoundedCornerShape(12.dp))
+                .background(CardLight, RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
             SectionTitle("Resumen General", icon = {
@@ -379,12 +386,12 @@ fun AnalyticsDistributionSection(
             .padding(horizontal = 2.dp, vertical = 2.dp),
         shape = RoundedCornerShape(18.dp),
         elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
-        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = CardBackground)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(BlueLighter, RoundedCornerShape(12.dp))
+                .background(CardLight, RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
             SectionTitle("Distribución de Tareas", icon = {
@@ -407,7 +414,7 @@ fun AnalyticsDistributionSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(top = 8.dp)
-                        .background(Color(0xFFF7F7F7), RoundedCornerShape(8.dp))
+                        .background(CardLight, RoundedCornerShape(8.dp))
                         .padding(12.dp)
                 ) {
                     parsed.forEach { (memberName, count) ->
@@ -439,19 +446,19 @@ fun AnalyticsDistributionSection(
                                 modifier = Modifier
                                     .height(18.dp)
                                     .weight(1f)
-                                    .background(BlueLight, RoundedCornerShape(4.dp))
+                                    .background(AccentYellow, RoundedCornerShape(4.dp))
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth(fraction = count / max.toFloat())
                                         .height(18.dp)
-                                        .background(BlueAccent, RoundedCornerShape(4.dp))
+                                        .background(AccentBlue, RoundedCornerShape(4.dp))
                                 )
                             }
                             Spacer(modifier = Modifier.width(12.dp))
                             Text(
                                 text = "$count tareas",
-                                color = BlueAccent,
+                                color = AccentBlue,
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp
                             )
@@ -500,12 +507,12 @@ fun AnalyticsCompletionTimeSection(
             .padding(horizontal = 2.dp, vertical = 2.dp),
         shape = RoundedCornerShape(18.dp),
         elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
-        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = CardBackground)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFEAF6FF), RoundedCornerShape(12.dp))
+                .background(CardLight, RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
             SectionTitle("Tiempo promedio de finalización", icon = {
@@ -547,7 +554,7 @@ fun AnalyticsCompletionTimeSection(
                             Text(
                                 text = formatDuration(time),
                                 fontWeight = FontWeight.Medium,
-                                color = BlueAccent,
+                                color = AccentBlue,
                                 fontSize = 15.sp
                             )
                         }
@@ -578,12 +585,12 @@ fun AnalyticsRescheduledSection(
             .padding(horizontal = 2.dp, vertical = 2.dp),
         shape = RoundedCornerShape(18.dp),
         elevation = androidx.compose.material3.CardDefaults.cardElevation(8.dp),
-        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = BlueCard)
+        colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = CardBackground)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFEAF6FF), RoundedCornerShape(12.dp))
+                .background(CardLight, RoundedCornerShape(12.dp))
                 .padding(16.dp)
         ) {
             SectionTitle("Tareas reprogramadas", icon = {
@@ -624,14 +631,14 @@ fun AnalyticsRescheduledSection(
                             Text(
                                 text = "$count",
                                 fontWeight = FontWeight.Medium,
-                                color = BlueAccent,
+                                color = AccentOrange,
                                 fontSize = 15.sp,
                                 modifier = Modifier.padding(end = 4.dp)
                             )
                             Icon(
                                 imageVector = Icons.Filled.Build,
                                 contentDescription = "Reprogramó tarea",
-                                tint = BlueAccent,
+                                tint = AccentOrange,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
