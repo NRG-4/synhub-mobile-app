@@ -134,16 +134,4 @@ class TaskViewModel : ViewModel() {
             }
         }
     }
-
-    // Temporary function, delete when a better Request is implemented in next sprint
-    fun fetchTaskByIdToMap(taskId: Long) {
-        viewModelScope.launch {
-            try {
-                val response = RetrofitClient.tasksWebService.getTaskById(taskId)
-                if (response.isSuccessful && response.body() != null) {
-                    _tasksMap.value = _tasksMap.value + (taskId to response.body()!!)
-                }
-            } catch (_: Exception) {}
-        }
-    }
 }
