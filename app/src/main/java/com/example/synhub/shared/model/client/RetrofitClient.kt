@@ -37,9 +37,9 @@ object RetrofitClient {
             }
             .build()
 
-    //https://synhub-backend.onrender.com o http://10.0.2.2:8080
+    //https://synhub-backend.onrender.com o http://10.0.2.2:8080/api/v1/
     private val retrofit: Retrofit = Retrofit.Builder()
-        .baseUrl("https://synhub-backend.onrender.com/api/v1/")
+        .baseUrl("http://10.0.2.2:8080/api/v1/")
         .client(client)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
