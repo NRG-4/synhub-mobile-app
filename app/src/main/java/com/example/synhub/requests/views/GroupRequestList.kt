@@ -1,6 +1,5 @@
 package com.example.synhub.requests.views
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,15 +36,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.synhub.R
+import coil.compose.AsyncImage
 import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
 
@@ -68,7 +68,6 @@ fun GroupRequestList(nav: NavHostController) {
     ) {
         innerPadding -> GroupRequestsScreen(modifier = Modifier.padding(innerPadding), nav)
     }
-
 }
 
 @Composable
@@ -101,35 +100,8 @@ fun GroupRequestsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 120.dp)
-                    .padding(horizontal = 30.dp)
             ) {
-                Card(
-                    modifier = Modifier
-                        .padding(vertical = 15.dp)
-                        .height(170.dp),
-                    elevation = CardDefaults
-                        .cardElevation(10.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF1A4E85)
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 60.dp, vertical = 40.dp)
-                            .fillMaxWidth(),
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("No hay ninguna solicitud o validación por el momento.",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                color = Color.White,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-
-                    }
-
-                }
+                NoRequests()
             }
         } else {
             Column(
@@ -148,7 +120,7 @@ fun GroupRequestsScreen(
                         Card(
                             modifier = Modifier
                                 .padding(vertical = 15.dp)
-                                .height(260.dp),
+                                .height(240.dp),
                             elevation = CardDefaults
                                 .cardElevation(10.dp),
                             colors = CardDefaults.cardColors(
@@ -164,13 +136,25 @@ fun GroupRequestsScreen(
                                     .fillMaxWidth(),
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.becker), // Replace with actual image
-                                        contentDescription = null,
+                                    Box(
                                         modifier = Modifier
-                                            .size(42.dp)
-                                            .clip(CircleShape)
-                                    )
+                                            .size(40.dp)
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = CircleShape,
+                                                clip = true
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AsyncImage(
+                                            model = request.task.member.urlImage,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(42.dp)
+                                                .clip(CircleShape)
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
                                         text = request.task.member.name + " " + request.task.member.surname,
@@ -231,6 +215,40 @@ fun GroupRequestsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun NoRequests() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1A4E85)
+            ),
+
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("No hay solicitudes a validar",
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+
+            }
+
         }
     }
 }
