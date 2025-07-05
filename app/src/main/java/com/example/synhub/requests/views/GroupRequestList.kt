@@ -181,7 +181,7 @@ fun GroupRequestsScreen(
                                             Spacer(modifier = Modifier.height(10.dp))
                                             HorizontalDivider(thickness = 2.dp)
                                             Spacer(modifier = Modifier.height(10.dp))
-                                            Text(text = request.task.description, color = Color.Black)
+                                            Text(text = "Comentario: ${request.description}", color = Color.Black)
                                         }
                                     }
                                     Box(
