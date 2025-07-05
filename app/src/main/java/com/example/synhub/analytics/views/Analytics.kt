@@ -693,8 +693,8 @@ fun AnalyticsAndReports(
         Scaffold(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFFF0F2F5)),
-            containerColor = Color(0xFFF0F2F5),
+                .background(Color.White), // Cambiado a fondo blanco
+            containerColor = Color.White, // Cambiado a fondo blanco
             topBar = {
                 TopBar(
                     function = {
