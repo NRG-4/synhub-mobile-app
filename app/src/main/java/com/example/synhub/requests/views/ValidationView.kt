@@ -101,19 +101,31 @@ fun ValidationDetails(
         else -> Color(0xFFE0E0E0)        // Default gray
     }
 
-    fun formatDate(timestamp: String?): String {
-        return try {
-            val inputFormatter = DateTimeFormatterBuilder()
-                .appendPattern("yyyy-MM-dd HH:mm:ss")
-                .appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true)
-                .toFormatter()
-            val outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-            timestamp?.let {
-                LocalDateTime.parse(it, inputFormatter).format(outputFormatter)
-            } ?: ""
+    fun createdDate(timestamp: String?): String? {
+        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val createdDate = try {
+            java.time.ZonedDateTime.parse(timestamp, utcFormatter)
+                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                .format(localFormatter)
         } catch (e: Exception) {
-            ""
+            timestamp?.substring(0, 10)
         }
+        return createdDate;
+    }
+
+    fun dueDate(timestamp: String?): String? {
+        val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+        val dueDate = try {
+            java.time.ZonedDateTime.parse(timestamp, utcFormatter)
+                .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                .format(localFormatter)
+        } catch (e: Exception) {
+            timestamp?.replace("T", " ")?.substring(0, 16)
+
+        }
+        return dueDate;
     }
 
     Column(
@@ -183,15 +195,17 @@ fun ValidationDetails(
                         modifier = Modifier.fillMaxWidth()
                     )
                     Spacer(modifier = Modifier.height(10.dp))
-                    Text(
-                        text = when (request?.task?.status) {
-                            "COMPLETED" -> formatDate(request.task.createdAt)
-                            else -> formatDate(request?.task?.createdAt) + " - " + formatDate(request?.task?.dueDate)
-                        },
-                        textAlign = TextAlign.Center,
-                        fontSize = 12.sp,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                    when (request?.task?.status) {
+                        "COMPLETED" -> createdDate(request.task.createdAt)
+                        else -> createdDate(request?.task?.createdAt) + " - " + dueDate(request?.task?.dueDate)
+                    }?.let {
+                        Text(
+                            text = it,
+                            textAlign = TextAlign.Center,
+                            fontSize = 12.sp,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                     Spacer(modifier = Modifier.height(10.dp))
                     Box(
                         modifier = Modifier
