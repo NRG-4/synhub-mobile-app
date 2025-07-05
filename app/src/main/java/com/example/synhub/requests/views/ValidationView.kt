@@ -177,7 +177,7 @@ fun ValidationDetails(
                         Spacer(modifier = Modifier.height(10.dp))
                         HorizontalDivider(thickness = 2.dp)
                         Spacer(modifier = Modifier.height(10.dp))
-                        Text(text = request?.task?.description.toString(), color = Color.White)
+                        Text(text = "Comentario: ${request?.task?.description}", color = Color.White)
                     }
                 }
                 Column(
