@@ -163,12 +163,14 @@ fun GroupRequestsScreen(
                                         color = Color.White
                                     )
                                 }
-                                Row {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
                                     Card(
                                         modifier = Modifier
                                             .padding(10.dp)
                                             .height(160.dp)
-                                            .width(280.dp),
+                                            .weight(0.8f),
                                         colors = CardDefaults.cardColors(
                                             containerColor = Color.White
                                         )
@@ -186,9 +188,9 @@ fun GroupRequestsScreen(
                                     }
                                     Box(
                                         modifier = Modifier
-                                            .padding(vertical = 10.dp)
+                                            .padding(10.dp)
                                             .height(160.dp)
-                                            .width(30.dp)
+                                            .weight(0.2f)
                                             .clip(RoundedCornerShape(4.dp))
                                             .background(setTypeColor(request.requestType))
 
