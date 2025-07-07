@@ -487,55 +487,6 @@ fun MemberDetailScreen(modifier: Modifier, nav: NavHostController, memberId: Str
                                             color = Color.Black
                                         )
                                     }
-                                    Column(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                    ) {
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(20.dp)
-                                        ) {
-                                            ElevatedButton(
-                                                colors = ButtonDefaults.buttonColors(Color(0xFFFF9800)),
-                                                shape = RoundedCornerShape(10.dp),
-                                                modifier = Modifier,
-                                                onClick = {
-                                                    nav.navigate("Tasks/Edit/${task.id}")
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = rememberVectorPainter(image = editSVG),
-                                                    contentDescription = null,
-                                                    tint = Color.White
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(
-                                                    text = "Editar", fontSize = 15.sp,
-                                                    color = Color.White, fontWeight = FontWeight.Bold
-                                                )
-
-                                            }
-                                            ElevatedButton(
-                                                colors = ButtonDefaults.buttonColors(Color(0xFFF44336)),
-                                                shape = RoundedCornerShape(10.dp),
-                                                modifier = Modifier,
-                                                onClick = {
-                                                    taskIdToDelete = task.id
-                                                    showDeleteDialog = true
-                                                }
-                                            ) {
-                                                Icon(
-                                                    painter = rememberVectorPainter(image = trashSVG),
-                                                    contentDescription = null,
-                                                    tint = Color.White
-                                                )
-                                                Spacer(modifier = Modifier.width(8.dp))
-                                                Text(
-                                                    text = "Borrar", fontSize = 15.sp,
-                                                    color = Color.White, fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
-                                    }
                                 }
                             }
                         }
