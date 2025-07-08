@@ -164,7 +164,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),

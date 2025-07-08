@@ -142,7 +142,7 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     )
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email
+                    keyboardType = KeyboardType.Text
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFFF3F3F3),
@@ -165,7 +165,7 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     )
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email
+                    keyboardType = KeyboardType.Text
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFFF3F3F3),
@@ -225,11 +225,9 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
             }
 
             var showModal by remember { mutableStateOf(false) }
-            var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
             val context = LocalContext.current
             val formatterUtc = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             val formatterLocal = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
-            val calendar = remember { Calendar.getInstance() }
             var dueDateUtc by remember { mutableStateOf("") }
 
             OutlinedTextField(
