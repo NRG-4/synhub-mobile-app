@@ -49,12 +49,14 @@ fun Navigator(){
 
         // Solicitudes/Solicitudes de grupo
         composable("GroupRequests") { GroupRequestList(rememberScreen) }
-        composable("Validation/{taskId}") { backStackEntry ->
+        composable("Validation/{taskId}/{requestId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId")
-            ValidationView(rememberScreen, taskId) }
-        composable("Validation/Edit/{taskId}") { backStackEntry ->
+            val requestId = backStackEntry.arguments?.getString("requestId")
+            ValidationView(rememberScreen, taskId, requestId) }
+        composable("Validation/Edit/{taskId}/{requestId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId")
-            EditRequestTask(rememberScreen, taskId)
+            val requestId = backStackEntry.arguments?.getString("requestId")
+            EditRequestTask(rememberScreen, taskId, requestId)
         }
 
         // Tareas
