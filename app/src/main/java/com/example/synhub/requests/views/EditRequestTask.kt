@@ -2,6 +2,7 @@ package com.example.synhub.requests.views
 
 import android.app.TimePickerDialog
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -69,11 +70,11 @@ import java.util.Calendar
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun EditRequestTask(nav: NavHostController, taskId: String?) {
+fun EditRequestTask(nav: NavHostController, taskId: String?, requestId: String?) {
     val taskViewModel: TaskViewModel = viewModel()
     val task by taskViewModel.task.collectAsState()
 
-    LaunchedEffect(taskId) {
+    LaunchedEffect(taskId, requestId) {
         taskId?.toLongOrNull()?.let { taskViewModel.fetchTaskById(it) }
     }
 
@@ -91,14 +92,14 @@ fun EditRequestTask(nav: NavHostController, taskId: String?) {
         }
     ){
             innerPadding -> EditRequestTaskScreen(modifier = Modifier.padding(innerPadding),
-        nav, task)
+        nav, task, requestId)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditRequestTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: TaskResponse?)
+fun EditRequestTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: TaskResponse?, requestId: String?)
 {
     val groupViewModel:GroupViewModel = viewModel()
     val taskViewModel:TaskViewModel = viewModel()
@@ -293,20 +294,28 @@ fun EditRequestTaskScreen(modifier: Modifier = Modifier, nav: NavHostController,
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier,
                     onClick = {
-                        taskViewModel.updateTask(
-                            task.id,
-                            EditTaskRequest(
-                                txtTitle,
-                                txtDescription,
-                                dueDateUtc, // Usar la fecha en formato UTC para enviar
-                                txtMemberId ?: 0L
+
+                        if (requestId != null) {
+                            taskViewModel.updateTask(
+                                task.id,
+                                EditTaskRequest(
+                                    txtTitle,
+                                    txtDescription,
+                                    dueDateUtc, // Usar la fecha en formato UTC para enviar
+                                    txtMemberId ?: 0L
+                                )
                             )
-                        )
+                            taskViewModel.updateTaskStatus(task.id, "IN_PROGRESS")
+                            requestViewModel.deleteRequest(task.id, requestId.toLong())
+                            nav.navigate("GroupRequests") {
+                                popUpTo("Home") { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        } else {
+                            Log.d("EditRequestTask", "RequestId is null, not calling deleteRequest")
+                        }
 
-                        taskViewModel.updateTaskStatus(task.id, "IN_PROGRESS")
-                        requestViewModel.updateRequestStatus(task.id, "APPROVED")
 
-                        nav.popBackStack()
                     }
                 ) {
                     Icon(

@@ -127,7 +127,7 @@ fun GroupRequestsScreen(
                                 containerColor = Color(0xFF1A4E85)
                             ),
                             onClick = {
-                                nav.navigate("Validation/${request.task.id}")
+                                nav.navigate("Validation/${request.task.id}/${request.id}")
                             }
                         ) {
                             Column(

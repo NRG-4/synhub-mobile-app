@@ -2,7 +2,6 @@ package com.example.synhub.requests.views
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,33 +35,33 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.synhub.R
+import coil.compose.AsyncImage
 import com.example.synhub.requests.application.dto.RequestResponse
 import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.tasks.viewmodel.TaskViewModel
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatterBuilder
-import java.time.temporal.ChronoField
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun ValidationView(nav: NavHostController, taskId: String?) {
+fun ValidationView(nav: NavHostController, taskId: String?, requestId: String?) {
     val requestViewModel: RequestViewModel = viewModel()
     val request by requestViewModel.request.collectAsState()
 
-    LaunchedEffect(taskId) {
-        taskId?.toLongOrNull()?.let {
-            requestViewModel.fetchRequestByTaskId(it)
+    LaunchedEffect(taskId, requestId) {
+        val tId = taskId?.toLongOrNull()
+        val rId = requestId?.toLongOrNull()
+        if (tId != null && rId != null) {
+            requestViewModel.fetchRequestById(tId, rId)
         }
     }
 
@@ -134,13 +133,25 @@ fun ValidationDetails(
             .padding(top = 90.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Image(
-                painter = painterResource(id = R.drawable.becker), // Replace with actual image
-                contentDescription = null,
+            Box(
                 modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-            )
+                    .size(40.dp)
+                    .shadow(
+                        elevation = 5.dp,
+                        shape = CircleShape,
+                        clip = true
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                AsyncImage(
+                    model = request?.task?.member?.urlImage,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(42.dp)
+                        .clip(CircleShape)
+                )
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = request?.task?.member?.name + " " + request?.task?.member?.surname,
@@ -223,7 +234,7 @@ fun ValidationDetails(
 
         Button(
             onClick = {
-                nav.navigate("Validation/Edit/${request?.task?.id}")
+                nav.navigate("Validation/Edit/${request?.task?.id}/${request?.id}")
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFFFF832A)
@@ -246,7 +257,7 @@ fun ValidationDetails(
             Button(
                 onClick = {
                     request.task.id.let { taskId ->
-                        requestViewModel.updateRequestStatus(taskId, "APPROVED")
+                        requestViewModel.updateRequestStatus(taskId, request.id, "APPROVED")
                         taskViewModel.updateTaskStatus(taskId, "DONE")
                         nav.popBackStack()
                     }
@@ -273,7 +284,7 @@ fun ValidationDetails(
             Button(
                 onClick = {
                     request.task.id.let { taskId ->
-                        requestViewModel.updateRequestStatus(taskId, "REJECTED")
+                        requestViewModel.updateRequestStatus(taskId, request.id, "REJECTED")
                         taskViewModel.updateTaskStatus(taskId, "IN_PROGRESS")
                         nav.popBackStack()
                     }
