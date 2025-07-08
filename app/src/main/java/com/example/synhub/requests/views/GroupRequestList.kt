@@ -1,6 +1,5 @@
 package com.example.synhub.requests.views
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,19 +36,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.example.synhub.R
-import com.example.synhub.groups.viewmodel.MemberViewModel
+import coil.compose.AsyncImage
 import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
-import com.example.synhub.tasks.viewmodel.TaskViewModel
 
 
 @Composable
@@ -70,16 +68,15 @@ fun GroupRequestList(nav: NavHostController) {
     ) {
         innerPadding -> GroupRequestsScreen(modifier = Modifier.padding(innerPadding), nav)
     }
-
 }
 
 @Composable
-fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
-                        requestsViewModel: RequestViewModel = viewModel(),
-                        taskViewModel: TaskViewModel = viewModel(),
+fun GroupRequestsScreen(
+    modifier: Modifier,
+    nav: NavHostController,
+    requestsViewModel: RequestViewModel = viewModel()
 ) {
     val requests by requestsViewModel.requests.collectAsState()
-    val tasksMap by taskViewModel.tasksMap.collectAsState()
     val visibleRequests = requests.filter { it.requestStatus == "PENDING" }
 
     fun setTypeColor(type: String?): Color {
@@ -103,35 +100,8 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(top = 120.dp)
-                    .padding(horizontal = 30.dp)
             ) {
-                Card(
-                    modifier = Modifier
-                        .padding(vertical = 15.dp)
-                        .height(170.dp),
-                    elevation = CardDefaults
-                        .cardElevation(10.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF1A4E85)
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 60.dp, vertical = 40.dp)
-                            .fillMaxWidth(),
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("No hay ninguna solicitud o validación por el momento.",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                color = Color.White,
-                                textAlign = TextAlign.Center
-                            )
-                        }
-
-                    }
-
-                }
+                NoRequests()
             }
         } else {
             Column(
@@ -147,21 +117,17 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                 ) {
                     items(visibleRequests) {
                             request ->
-                        LaunchedEffect(request.taskId) {
-                            taskViewModel.fetchTaskByIdToMap(request.taskId)
-                        }
-                        val task = tasksMap[request.taskId]
                         Card(
                             modifier = Modifier
                                 .padding(vertical = 15.dp)
-                                .height(260.dp),
+                                .height(240.dp),
                             elevation = CardDefaults
                                 .cardElevation(10.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = Color(0xFF1A4E85)
                             ),
                             onClick = {
-                                nav.navigate("Validation/${request.taskId}")
+                                nav.navigate("Validation/${request.task.id}/${request.id}")
                             }
                         ) {
                             Column(
@@ -170,27 +136,41 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                                     .fillMaxWidth(),
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.becker), // Replace with actual image
-                                        contentDescription = null,
+                                    Box(
                                         modifier = Modifier
-                                            .size(42.dp)
-                                            .clip(CircleShape)
-                                    )
+                                            .size(40.dp)
+                                            .shadow(
+                                                elevation = 5.dp,
+                                                shape = CircleShape,
+                                                clip = true
+                                            ),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        AsyncImage(
+                                            model = request.task.member.urlImage,
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier
+                                                .size(42.dp)
+                                                .clip(CircleShape)
+                                        )
+                                    }
                                     Spacer(modifier = Modifier.width(8.dp))
                                     Text(
-                                        text = task?.member?.name + " " + task?.member?.surname,
+                                        text = request.task.member.name + " " + request.task.member.surname,
                                         fontWeight = FontWeight.Bold,
                                         fontSize = 20.sp,
                                         color = Color.White
                                     )
                                 }
-                                Row {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
                                     Card(
                                         modifier = Modifier
                                             .padding(10.dp)
                                             .height(160.dp)
-                                            .width(280.dp),
+                                            .weight(0.8f),
                                         colors = CardDefaults.cardColors(
                                             containerColor = Color.White
                                         )
@@ -199,18 +179,18 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                                             modifier = Modifier
                                                 .padding(16.dp),
                                         ) {
-                                            Text(text = task?.title.toString(), color = Color.Black)
+                                            Text(text = request.task.title, color = Color.Black)
                                             Spacer(modifier = Modifier.height(10.dp))
                                             HorizontalDivider(thickness = 2.dp)
                                             Spacer(modifier = Modifier.height(10.dp))
-                                            Text(text = task?.description.toString(), color = Color.Black)
+                                            Text(text = "Comentario: ${request.description}", color = Color.Black)
                                         }
                                     }
                                     Box(
                                         modifier = Modifier
-                                            .padding(vertical = 10.dp)
+                                            .padding(10.dp)
                                             .height(160.dp)
-                                            .width(30.dp)
+                                            .weight(0.2f)
                                             .clip(RoundedCornerShape(4.dp))
                                             .background(setTypeColor(request.requestType))
 
@@ -237,6 +217,40 @@ fun GroupRequestsScreen(modifier: Modifier, nav: NavHostController,
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun NoRequests() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        Card(
+            modifier = Modifier
+                .padding(20.dp)
+                .fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF1A4E85)
+            ),
+
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("No hay solicitudes a validar",
+                    fontSize = 20.sp,
+                    color = Color.White,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+
+            }
+
         }
     }
 }
