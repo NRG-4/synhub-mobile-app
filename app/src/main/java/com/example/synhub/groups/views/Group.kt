@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -17,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -49,6 +51,8 @@ import com.example.synhub.groups.viewmodel.GroupViewModel
 import com.example.synhub.groups.application.dto.GroupMember
 import com.example.synhub.shared.components.TopBar
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -110,27 +114,52 @@ fun GroupScreen(modifier: Modifier, nav: NavHostController) {
                     verticalArrangement = Arrangement.spacedBy(15.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Card(
-                        shape = RoundedCornerShape(10.dp),
-                        colors = cardColors(containerColor = Color(0xFF4A90E2)),
-                        modifier = Modifier
-                            .shadow(
-                                elevation = 5.dp,
-                                shape = RoundedCornerShape(10.dp),
-                                clip = true
-                            ),
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text(
-                            text = ("#" + group?.code),
-                            style = TextStyle(
-                                fontSize = 20.sp,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            modifier = Modifier.padding(16.dp)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Card(
+                                shape = RoundedCornerShape(10.dp),
+                                colors = cardColors(containerColor = Color(0xFF4A90E2)),
+                                modifier = Modifier
+                                    .shadow(
+                                        elevation = 5.dp,
+                                        shape = RoundedCornerShape(10.dp),
+                                        clip = true
+                                    ),
+                            ) {
+                                Text(
+                                    text = ("#" + group?.code),
+                                    style = TextStyle(
+                                        fontSize = 20.sp,
+                                        color = Color.White,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    modifier = Modifier.padding(16.dp)
+                                )
+                            }
+                            Box(
+                                modifier = Modifier.width(10.dp)
+                            )
+                            val clipboardManager = LocalClipboardManager.current
+                            IconButton(
+                                onClick = {
+                                    clipboardManager.setText(AnnotatedString(group?.code ?: ""))
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Share,
+                                    contentDescription = "Copiar código",
+                                    tint = Color(0xFF4A90E2)
+                                )
+                            }
+                        }
                     }
-
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
