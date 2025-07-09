@@ -102,7 +102,7 @@ fun RegisterScreen(modifier: Modifier, nav: NavHostController){
                     )
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email
+                    keyboardType = KeyboardType.Text
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFFF3F3F3),
@@ -126,7 +126,7 @@ fun RegisterScreen(modifier: Modifier, nav: NavHostController){
                     )
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email
+                    keyboardType = KeyboardType.Text
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFFF3F3F3),
@@ -151,7 +151,7 @@ fun RegisterScreen(modifier: Modifier, nav: NavHostController){
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
@@ -197,7 +197,7 @@ fun RegisterScreen(modifier: Modifier, nav: NavHostController){
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),

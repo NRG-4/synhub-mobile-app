@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.LaunchedEffect
 import com.example.synhub.tasks.application.dto.TaskResponse
+import java.time.format.DateTimeFormatter
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -212,7 +213,13 @@ fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: TaskRespo
                     )
                     HorizontalDivider(color = Color.Black)
                     Spacer(modifier = Modifier.size(15.dp))
-                    val createdDate = task.createdAt.substring(0, 10)
+                    val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+                    val createdDate = try {
+                        java.time.ZonedDateTime.parse(task.createdAt, utcFormatter)
+                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                            .format(localFormatter)
+                    } catch (e: Exception) { task.createdAt.substring(0, 10) }
                     Text(
                         text = createdDate,
                         style = TextStyle(fontSize = 18.sp, color = Color.Black)
@@ -246,12 +253,20 @@ fun TaskDetailScreen(modifier: Modifier, nav: NavHostController, task: TaskRespo
                             .fillMaxWidth()
                             .height(10.dp)
                             .background(
-                                color = getDividerColor(task.createdAt, task.dueDate),
+                                color =
+
+                                    getDividerColor(task.createdAt, task.dueDate, task.status),
                                 shape = RoundedCornerShape(10.dp)
                             )
                     )
                     Spacer(modifier = Modifier.size(8.dp))
-                    val dueDate = task.dueDate.substring(0, 10)
+                    val utcFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                    val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+                    val dueDate = try {
+                        java.time.ZonedDateTime.parse(task.dueDate, utcFormatter)
+                            .withZoneSameInstant(java.time.ZoneId.systemDefault())
+                            .format(localFormatter)
+                    } catch (e: Exception) { task.dueDate.replace("T", " ").substring(0, 16) }
                     Text(
                         text = dueDate,
                         style = TextStyle(fontSize = 18.sp, color = Color.Black)

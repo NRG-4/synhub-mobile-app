@@ -5,6 +5,7 @@ data class TaskResponse(
     val title: String,
     val description: String,
     val dueDate: String,
-    val createdAt: String
+    val createdAt: String,
+    val status: String
 )
 

@@ -1,7 +1,8 @@
-package com.example.synhub.tasks.views
+package com.example.synhub.requests.views
 
 import android.app.TimePickerDialog
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -43,36 +45,36 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.synhub.groups.viewmodel.GroupViewModel
+import com.example.synhub.requests.viewModel.RequestViewModel
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.icons.abcSVG
 import com.example.synhub.shared.icons.calendarSVG
 import com.example.synhub.shared.icons.keyboardSVG
-import com.example.synhub.shared.icons.linkSVG
 import com.example.synhub.shared.icons.logoutSVG
 import com.example.synhub.shared.icons.personSVG
 import com.example.synhub.shared.icons.saveSVG
 import com.example.synhub.tasks.application.dto.EditTaskRequest
 import com.example.synhub.tasks.application.dto.TaskResponse
 import com.example.synhub.tasks.viewmodel.TaskViewModel
+import com.example.synhub.tasks.views.DatePickerModal
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun EditTask(nav: NavHostController, taskId: String?) {
+fun EditRequestTask(nav: NavHostController, taskId: String?, requestId: String?) {
     val taskViewModel: TaskViewModel = viewModel()
     val task by taskViewModel.task.collectAsState()
 
-    LaunchedEffect(taskId) {
+    LaunchedEffect(taskId, requestId) {
         taskId?.toLongOrNull()?.let { taskViewModel.fetchTaskById(it) }
     }
 
@@ -89,18 +91,19 @@ fun EditTask(nav: NavHostController, taskId: String?) {
             )
         }
     ){
-            innerPadding -> EditTaskScreen(modifier = Modifier.padding(innerPadding),
-        nav, task)
+            innerPadding -> EditRequestTaskScreen(modifier = Modifier.padding(innerPadding),
+        nav, task, requestId)
     }
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: TaskResponse?)
+fun EditRequestTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: TaskResponse?, requestId: String?)
 {
     val groupViewModel:GroupViewModel = viewModel()
     val taskViewModel:TaskViewModel = viewModel()
+    val requestViewModel: RequestViewModel = viewModel()
 
     val members by groupViewModel.members.collectAsState()
 
@@ -142,7 +145,7 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     )
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text
+                    keyboardType = KeyboardType.Email
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFFF3F3F3),
@@ -165,7 +168,7 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     )
                 },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Text
+                    keyboardType = KeyboardType.Email
                 ),
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color(0xFFF3F3F3),
@@ -213,7 +216,7 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     onDismissRequest = { expanded = false }
                 ) {
                     members.forEach { member ->
-                        androidx.compose.material3.DropdownMenuItem(
+                        DropdownMenuItem(
                             text = { Text(text = member.name + " " + member.surname) },
                             onClick = {
                                 txtMemberId = member.id
@@ -225,9 +228,11 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
             }
 
             var showModal by remember { mutableStateOf(false) }
+            var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
             val context = LocalContext.current
             val formatterUtc = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             val formatterLocal = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+            val calendar = remember { Calendar.getInstance() }
             var dueDateUtc by remember { mutableStateOf("") }
 
             OutlinedTextField(
@@ -254,18 +259,21 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     onDateSelected = { millis ->
                         if (millis != null) {
                             // Interpretar millis como UTC para evitar desfase de día
-                            val zonedDateTime = java.time.Instant.ofEpochMilli(millis).atZone(ZoneId.of("UTC"))
+                            val zonedDateTime =
+                                Instant.ofEpochMilli(millis).atZone(ZoneId.of("UTC"))
                             val year = zonedDateTime.year
                             val month = zonedDateTime.monthValue
                             val day = zonedDateTime.dayOfMonth
                             TimePickerDialog(
                                 context,
                                 { _, hour, minute ->
-                                    val localDateTime = LocalDateTime.of(year, month, day, hour, minute)
+                                    val localDateTime =
+                                        LocalDateTime.of(year, month, day, hour, minute)
                                     val zonedLocal = localDateTime.atZone(ZoneId.systemDefault())
                                     val zonedUtc = zonedLocal.withZoneSameInstant(ZoneId.of("UTC"))
                                     dueDateUtc = zonedUtc.format(formatterUtc)
-                                    txtDueDate = localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
+                                    txtDueDate =
+                                        localDateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
                                     showModal = false
                                 },
                                 0,
@@ -286,17 +294,28 @@ fun EditTaskScreen(modifier: Modifier = Modifier, nav: NavHostController, task: 
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier,
                     onClick = {
-                        taskViewModel.updateTask(
-                            task.id,
-                            EditTaskRequest(
-                                txtTitle,
-                                txtDescription,
-                                dueDateUtc, // Usar la fecha en formato UTC para enviar
-                                txtMemberId ?: 0L
-                            )
-                        )
 
-                        nav.popBackStack()
+                        if (requestId != null) {
+                            taskViewModel.updateTask(
+                                task.id,
+                                EditTaskRequest(
+                                    txtTitle,
+                                    txtDescription,
+                                    dueDateUtc, // Usar la fecha en formato UTC para enviar
+                                    txtMemberId ?: 0L
+                                )
+                            )
+                            taskViewModel.updateTaskStatus(task.id, "IN_PROGRESS")
+                            requestViewModel.deleteRequest(task.id, requestId.toLong())
+                            nav.navigate("GroupRequests") {
+                                popUpTo("Home") { inclusive = false }
+                                launchSingleTop = true
+                            }
+                        } else {
+                            Log.d("EditRequestTask", "RequestId is null, not calling deleteRequest")
+                        }
+
+
                     }
                 ) {
                     Icon(

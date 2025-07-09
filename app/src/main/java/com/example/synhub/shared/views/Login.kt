@@ -9,12 +9,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -61,6 +63,8 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
     var shouldNavigate by remember { mutableStateOf(false) }
     var isLeader by remember { mutableStateOf(false) }
     val loginSuccess by loginViewModel.loginSuccess.collectAsState()
+    var showErrorDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf("") }
 
     //TO-DO: eliminar prints cuando esté listo
     LaunchedEffect(loginSuccess) {
@@ -85,6 +89,8 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
                 loginViewModel.resetLoginState()
                 println("LoginScreen: Usuario no es líder, estados reiniciados")
                 // TO-DO: Mostrar dialog de error o mensaje al usuario
+                errorMessage = "Tu usuario no es un líder."
+                showErrorDialog = true
             }
             // Reinicia el estado de loginSuccess para permitir nuevos intentos
             loginViewModel.resetLoginState()
@@ -93,9 +99,25 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
             isLeader = false
             loginViewModel.resetLoginState()
             println("LoginScreen: Estados reiniciados tras fallo de login")
+            // Mostrar dialog de error o mensaje al usuario
+            errorMessage = "Usuario o contraseña incorrectos."
+            showErrorDialog = true
             // Reinicia el estado de loginSuccess para permitir nuevos intentos
             // TO-DO: Mostrar dialog de error o mensaje al usuario
         }
+    }
+
+    if (showErrorDialog) {
+        AlertDialog(
+            onDismissRequest = { showErrorDialog = false },
+            title = { Text(text = "Error de inicio de sesión", textAlign = TextAlign.Center, color = Color(0xFF1A4E85), fontWeight = FontWeight.Bold) },
+            text = { Text(text = errorMessage, textAlign = TextAlign.Center, fontSize = 16.sp)},
+            confirmButton = {
+                TextButton(onClick = { showErrorDialog = false }) {
+                    Text("Aceptar", color = Color(0xFF1A4E85))
+                }
+            }
+        )
     }
 
     Column (
@@ -142,7 +164,7 @@ fun LoginScreen(modifier: Modifier, nav: NavHostController , loginViewModel: Log
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),

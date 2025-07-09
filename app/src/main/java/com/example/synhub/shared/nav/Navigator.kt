@@ -12,9 +12,8 @@ import com.example.synhub.groups.views.Group
 import com.example.synhub.groups.views.MemberDetails
 import com.example.synhub.groups.views.Members
 import com.example.synhub.requests.views.GroupRequestList
-import com.example.synhub.requests.views.MemberRequestList
 import com.example.synhub.invitations.views.Invitations
-import com.example.synhub.requests.views.RequestView
+import com.example.synhub.requests.views.EditRequestTask
 import com.example.synhub.requests.views.ValidationView
 import com.example.synhub.shared.model.client.RetrofitClient
 import com.example.synhub.shared.views.Home
@@ -48,16 +47,17 @@ fun Navigator(){
         }
         composable("Group/Invitations") { Invitations(rememberScreen) }
 
+        // Solicitudes/Solicitudes de grupo
         composable("GroupRequests") { GroupRequestList(rememberScreen) }
-        composable("Validation/{requestId}") { backStackEntry ->
+        composable("Validation/{taskId}/{requestId}") { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getString("taskId")
             val requestId = backStackEntry.arguments?.getString("requestId")
-            ValidationView(rememberScreen, requestId) }
-        composable("MemberRequests") { MemberRequestList(rememberScreen) }
-        composable("Request/{requestId}") { backStackEntry ->
+            ValidationView(rememberScreen, taskId, requestId) }
+        composable("Validation/Edit/{taskId}/{requestId}") { backStackEntry ->
+            val taskId = backStackEntry.arguments?.getString("taskId")
             val requestId = backStackEntry.arguments?.getString("requestId")
-            RequestView(rememberScreen, requestId) }
-
-
+            EditRequestTask(rememberScreen, taskId, requestId)
+        }
 
         // Tareas
         composable("Tasks") { Tasks(rememberScreen) }

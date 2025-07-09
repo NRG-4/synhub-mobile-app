@@ -132,7 +132,7 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
@@ -155,7 +155,7 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
@@ -217,14 +217,13 @@ fun CreateTaskScreen(modifier: Modifier = Modifier, nav: NavHostController
 
         // Selector de fecha tipo modal usando DatePickerModal y TimePickerDialog
         var showModal by remember { mutableStateOf(false) }
-        var selectedDateMillis by remember { mutableStateOf<Long?>(null) }
         val context = LocalContext.current
         val formatterUtc = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-        val calendar = remember { Calendar.getInstance() }
+        val formatterLocal = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
         var dueDateUtc by remember { mutableStateOf("") }
 
         OutlinedTextField(
-            value = txtDueDate,
+            value = txtDueDate.format(formatterLocal),
             onValueChange = {},
             label = { Text("Fecha de entrega") },
             placeholder = { Text("Fecha") },

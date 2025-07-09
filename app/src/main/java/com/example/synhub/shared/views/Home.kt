@@ -49,6 +49,8 @@ import com.example.synhub.groups.views.NoGroup
 import com.example.synhub.groups.views.NoMembers
 import com.example.synhub.invitations.viewmodel.InvitationViewModel
 import com.example.synhub.invitations.views.NoInvitations
+import com.example.synhub.requests.viewModel.RequestViewModel
+import com.example.synhub.requests.views.NoRequests
 import com.example.synhub.shared.components.SlideMenu
 import com.example.synhub.shared.components.TopBar
 import com.example.synhub.shared.viewmodel.HomeViewModel
@@ -110,12 +112,14 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
     val groupViewModel: GroupViewModel = viewModel()
     val taskViewModel: TaskViewModel = viewModel()
     val invitationViewModel: InvitationViewModel = viewModel()
+    val requestViewModel: RequestViewModel = viewModel()
 
     LaunchedEffect(Unit) {
         groupViewModel.fetchLeaderGroup()
         groupViewModel.fetchGroupMembers()
         taskViewModel.fetchGroupTasks()
         invitationViewModel.fetchGroupInvitations()
+        requestViewModel.fetchGroupRequests()
     }
 
     val group by groupViewModel.group.collectAsState()
@@ -123,6 +127,8 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
     val members by groupViewModel.members.collectAsState()
     val tasks by taskViewModel.tasks.collectAsState()
     val invitations by invitationViewModel.groupInvitations.collectAsState()
+    val requests by requestViewModel.requests.collectAsState()
+    val visibleRequests = requests.filter { it.requestStatus == "PENDING" }
 
     Column (
         modifier = Modifier
@@ -336,16 +342,65 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
                             ),
                             elevation = CardDefaults.cardElevation(5.dp),
                             onClick = {
-                                nav.navigate("RequestsAndValidations")
+                                nav.navigate("GroupRequests")
                             }
                         ){
-                            LazyColumn (
-                                verticalArrangement = Arrangement.spacedBy(20.dp),
-                                modifier = Modifier
-                                    .padding(20.dp)
-                                    .heightIn(max = 200.dp)
-                            ){
+                            if (visibleRequests.isEmpty()) {
+                                NoRequests()
+                            } else {
+                                LazyColumn (
+                                    verticalArrangement = Arrangement.spacedBy(20.dp),
+                                    modifier = Modifier
+                                        .padding(20.dp)
+                                        .heightIn(max = 200.dp)
+                                ){
+                                    items(requests) { request ->
+                                        Card(
+                                            colors = cardColors(
+                                                containerColor = Color(0xFF1A4E85)
+                                            ),
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                        ) {
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(10.dp)
+                                            ) {
+                                                Text("${request.task.member.name} ${request.task.member.surname}",
+                                                    fontSize = 18.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.height(10.dp))
+                                                Card(
+                                                    colors = cardColors(
+                                                        containerColor = Color.White
+                                                    ),
+                                                ) {
+                                                    Column(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .padding(10.dp)
+                                                    ){
+                                                        Text(
+                                                            text = request.task.title,
+                                                            fontSize = 18.sp,
+                                                            fontWeight = FontWeight.Bold,
+                                                        )
+                                                        HorizontalDivider(color = Color.Black, thickness = 1.dp)
+                                                        Spacer(modifier = Modifier.height(10.dp))
+                                                        Text(
+                                                            text = "  ${request.description}",
+                                                            fontSize = 16.sp,
+                                                        )
+                                                    }
+                                                }
 
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -452,6 +507,9 @@ fun HomeScreen(modifier: Modifier, nav: NavHostController) {
                             }
                         }
                     }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(40.dp))
                 }
             }
         } else {

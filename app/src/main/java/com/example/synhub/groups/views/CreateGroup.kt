@@ -3,6 +3,7 @@ package com.example.synhub.groups.views
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -78,14 +79,15 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
     Column (
         modifier = Modifier
             .fillMaxSize()
-            .padding(top = 120.dp),
+            .padding(top = 120.dp)
+            .padding(horizontal = 20.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         OutlinedTextField(
             value = txtNameGroup,
             singleLine = true,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Nombre de grupo")},
             placeholder = { Text(text = "Nombre de grupo")},
             leadingIcon = {
@@ -96,7 +98,7 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
                 )
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
+                keyboardType = KeyboardType.Text
             ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
@@ -108,7 +110,7 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
 
         OutlinedTextField(
             value = txtDescriptionGroup,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Descripción del grupo")},
             placeholder = { Text(text = "Descripción")},
             leadingIcon = {
@@ -118,6 +120,9 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
                     contentDescription = ""
                 )
             },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text
+            ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
                 unfocusedContainerColor = Color.White,
@@ -129,7 +134,7 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
         OutlinedTextField(
             value = txtUrlPfp,
             singleLine = true,
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             label = { Text(text = "Url de la foto de perfil")},
             placeholder = { Text(text = "Url de la foto de perfil")},
             leadingIcon = {
@@ -139,6 +144,9 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
                     contentDescription = ""
                 )
             },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Uri
+            ),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color(0xFFF3F3F3),
                 unfocusedContainerColor = Color.White,
@@ -150,7 +158,7 @@ fun CreateGroupScreen(modifier: Modifier, nav: NavHostController) {
         ElevatedButton(
             colors = ButtonDefaults.buttonColors(Color(0xFF4A90E2)),
             shape = RoundedCornerShape(10.dp),
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             onClick = {
                 groupViewModel.createGroup(
                     groupRequest = GroupRequest(
